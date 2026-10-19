@@ -4,15 +4,15 @@ import {
   CircleCheck, CircleX, Clock, Database, Download, Keyboard, Link2, Loader, Minus, Play, Plus, RefreshCw, RotateCcw, Server, Square, Trash2, Zap,
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { RUN_EVENT } from '@/components/editor-events'
-import { LangBadge } from '@/components/lang-badge'
+import { LangIcon } from '@/components/lang-icon'
 import { useToast } from '@/components/toast'
 import { Button, cx, Kbd } from '@/components/ui'
-import { LANGUAGES, LANGUAGES_BY_ID } from '@/data/languages'
+import { LANGUAGES_BY_ID } from '@/data/languages'
 import type { RunSummary, SqlItem, SqlSchemaTable, Stream } from '@/lib/run/protocol'
 import { decodeShare, encodeShare } from '@/lib/share'
+import { LangRail } from './lang-rail'
 
 const CodeEditor = dynamic(() => import('@/components/code-editor'), {
   ssr: false,
@@ -253,14 +253,7 @@ export function Workspace({ langId }: { langId: string }) {
 
   return (
     <div className="flex h-[calc(100dvh-3.5rem-4.25rem)] flex-col md:h-[calc(100dvh-3.5rem)] md:flex-row">
-      {/* language rail */}
-      <nav aria-label="Languages" className="flex shrink-0 gap-1.5 overflow-x-auto border-b border-line bg-surface px-3 py-2 md:w-[60px] md:flex-col md:overflow-y-auto md:border-b-0 md:border-r md:px-2 md:py-3">
-        {LANGUAGES.map((l) => (
-          <Link key={l.id} href={`/compiler/${l.id}`} title={`${l.name} compiler`} aria-label={`${l.name} compiler`} aria-current={l.id === lang.id ? 'page' : undefined} className="rounded-lg p-0.5 transition hover:scale-105">
-            <LangBadge lang={l} size={38} active={l.id === lang.id} />
-          </Link>
-        ))}
-      </nav>
+      <LangRail current={lang} />
 
       {/* mobile pane switch */}
       <div className="flex gap-1 border-b border-line bg-surface p-2 md:hidden" role="tablist" aria-label="Panes">
@@ -276,7 +269,7 @@ export function Workspace({ langId }: { langId: string }) {
         <section aria-label="Editor" className={cx('min-h-0 min-w-0 flex-col border-line md:flex md:border-r', pane === 'code' ? 'flex flex-1' : 'hidden')} style={{ flexBasis: `${split}%` }}>
           <div className="flex items-center gap-2 border-b border-line bg-surface px-3 py-2">
             <h1 className="flex min-w-0 items-center gap-2 text-sm font-semibold">
-              <span className="hidden md:inline"><LangBadge lang={lang} size={22} active /></span>
+              <span className="hidden md:inline"><LangIcon lang={lang} size={28} /></span>
               <span className="truncate">{lang.name} Online Compiler</span>
             </h1>
             <span className={cx('hidden items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] lg:inline-flex', lang.engine === 'browser' ? 'border-good/40 text-good' : 'border-violet/40 text-violet')} title={lang.engine === 'browser' ? 'Runs entirely in your browser — nothing is sent to a server' : 'Compiled and run on the server'}>

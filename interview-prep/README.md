@@ -8,7 +8,7 @@ It started as a redesign of [Bug Hunter](https://game.myhastech.com/), with a cl
 
 | Area | What it does |
 | --- | --- |
-| **Online compiler** | Programiz-style editor for **18 languages**: Python, R, SQL, HTML/CSS, Java, Kotlin, C, C++, C#, JavaScript, TypeScript, Go, Rust, Scala, Dart, Ruby, PHP, Swift. Six of them run **inside the browser** on self-hosted WebAssembly runtimes (Pyodide, webR, sql.js); the rest are compiled on the server through a pluggable runner. It has a stdin box, Run/Stop, time limits, share links, auto-saved drafts, download, a resizable split, R plots, SQL result tables with a sample database, and a live HTML preview with its console. |
+| **Online compiler** | Programiz-style editor for **18 languages**, picked by their logos (from [Devicon](https://devicon.dev), MIT): Python, R, SQL, HTML/CSS, Java, Kotlin, C, C++, C#, JavaScript, TypeScript, Go, Rust, Scala, Dart, Ruby, PHP, Swift. Six of them run **inside the browser** on self-hosted WebAssembly runtimes (Pyodide, webR, sql.js); the rest are compiled on the server through a pluggable runner. It has a stdin box, Run/Stop, time limits, share links, auto-saved drafts, download, a resizable split, R plots, SQL result tables with a sample database, and a live HTML preview with its console. |
 | **Bug Hunt campaign** | 12 hand-written levels in teaching order (off-by-one → two pointers → sliding window → recursion → sorting → a two-bug boss). Each has a story, test cases, three hints that go from a nudge to the exact fix, an explanation and a diff of the fix. |
 | **Endless mode** | 147 bugs injected into 20 classic algorithms by 21 mutation operators (comparison, off-by-one, logic, initial value, arithmetic, wrong function, return value). Every bug is **verified**: it compiles and fails at least one test. Level numbers are stable, so links can be shared. Streaks give bonus XP. |
 | **Code runner** | User code runs in a Web Worker (no DOM access) with a 2-second cut-off for infinite loops. Per-test expected/received output, a console tab for `console.log`, and drafts auto-saved per level. |
@@ -92,7 +92,7 @@ src/
   lib/board/      whiteboard: notes → Excalidraw concept boards, PDF import/export, teaching library, IndexedDB store
 public/runners/   Python worker (static module worker that loads Pyodide)
 public/notes/     PDF volumes, one handwritten PDF per notes topic, boards/ concept-board PDFs
-scripts/          build-bank.ts, vendor-runtimes.mjs, export-notes-pdf.mjs
+scripts/          build-bank.ts, vendor-runtimes.mjs, export-notes-pdf.mjs, build-lang-icons.mjs
 tests/            vitest suites
 ```
 

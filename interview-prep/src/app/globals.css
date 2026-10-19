@@ -2,7 +2,7 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-[data-theme="dark"] {
+:root[data-theme="dark"] {
   --bg: #0b0f17;
   --bg-glow: rgba(34, 211, 238, 0.07);
   --surface: #111725;
@@ -136,3 +136,19 @@ body {
     transition-duration: 1ms !important;
   }
 }
+
+/* Language logos (src/components/lang-icon.tsx) */
+.lang-tile svg { display: block; width: 100%; height: 100%; }
+:root[data-theme="dark"] .lang-ink { filter: invert(1); }
+.lang-card { position: relative; overflow: hidden; }
+.lang-card::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 200ms;
+  background: radial-gradient(160px 110px at 40px 50%, color-mix(in srgb, var(--lang) 16%, transparent), transparent 75%);
+}
+.lang-card:hover::before, .lang-card:focus-visible::before { opacity: 1; }
+.lang-card:hover, .lang-card:focus-visible {
+  border-color: color-mix(in srgb, var(--lang) 45%, var(--line));
+  box-shadow: 0 14px 32px -18px var(--lang);
+}
+@keyframes lang-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.lang-float > * { animation: lang-float 4s ease-in-out infinite; animation-delay: inherit; }
