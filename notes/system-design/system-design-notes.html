@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Design Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fffcf3; --dot:#e9e2cf; --ink:#1f2a44; --red:#d62f4b; --orange:#e8762b;
+  --purple:#7b4fd6; --purple-bg:#f3eefe; --green:#1f8a5b; --green-bg:#eaf7ef;
+  --red-bg:#fdecee; --orange-bg:#fff4e8; --yellow:#fff1a6; --navy:#1d3a5f; --code:#1e2233;
+}
+@page{ size:A4; margin:12mm 11mm; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{
+  font-family:'Patrick Hand',cursive; color:var(--ink); font-size:15.5px; line-height:1.55;
+  background-color:var(--paper);
+  background-image:radial-gradient(var(--dot) 1.1px, transparent 1.2px);
+  background-size:22px 22px;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+}
+.page{ padding:4px 6px; }
+.chap{ break-before:page; }
+h1.ct{ font-family:'Caveat',cursive; font-weight:700; color:var(--red); font-size:48px; margin:6px 0 0; display:flex; align-items:center; gap:14px; line-height:1.1; }
+h1.ct .n{ flex:none; width:52px; height:52px; border-radius:50%; background:var(--red); color:#fff; font-family:'Patrick Hand'; font-size:26px; display:grid; place-items:center; }
+.rule{ height:5px; border-radius:3px; margin:6px 0 16px; background:linear-gradient(90deg,var(--red),var(--orange) 45%,rgba(232,118,43,.15)); }
+h2{ font-family:'Caveat',cursive; font-weight:700; color:var(--purple); font-size:31px; margin:20px 0 8px; display:block; width:fit-content;
+    text-decoration:underline wavy #f5d33d; text-decoration-thickness:2px; text-underline-offset:7px; break-after:avoid; }
+h3{ font-family:'Caveat',cursive; font-size:25px; margin:0 0 2px; font-weight:700; }
+p{ margin:6px 0; }
+.hl{ background:linear-gradient(transparent 45%, var(--yellow) 45%, var(--yellow) 92%, transparent 92%); padding:0 2px; }
+.strike{ text-decoration:line-through; text-decoration-color:var(--red); }
+code.k{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:#fde8eb; color:#b3203a; border:1px solid #f4b9c3; border-radius:5px; padding:0 5px; }
+.box{ border:2.5px solid; border-radius:16px; padding:10px 18px 12px; margin:12px 0; break-inside:avoid; }
+.def{ border-color:var(--purple); background:var(--purple-bg); } .def h3{ color:var(--purple); }
+.mis{ border-color:var(--red); background:var(--red-bg); } .mis h3{ color:var(--red); }
+.rev{ border-color:var(--orange); background:var(--orange-bg); } .rev h3{ color:var(--orange); }
+.gbox{ border-color:var(--green); background:var(--green-bg); } .gbox h3{ color:var(--green); }
+.mine{ border:2.5px dashed var(--green); background:var(--green-bg); } .mine h3{ color:var(--green); }
+.mine h3::before{ content:"\1F4C4  "; font-size:20px; }
+.tip{ background:#fff3b0; padding:12px 18px; margin:14px 0; transform:rotate(-.4deg); box-shadow:2px 3px 0 rgba(0,0,0,.06); break-inside:avoid; }
+ul.pen{ list-style:none; padding-left:4px; margin:6px 0; }
+ul.pen li{ padding-left:24px; position:relative; margin:4px 0; }
+ul.pen li::before{ content:"\270F\FE0F"; position:absolute; left:0; top:0; font-size:13px; }
+ol{ margin:6px 0; padding-left:24px; } ol li{ margin:3px 0; }
+.cw{ position:relative; margin:6px 0 12px; padding-top:18px; break-inside:avoid; }
+.cw .tag{ position:absolute; right:10px; top:5px; background:var(--orange); color:#fff; font-family:'Caveat',cursive; font-weight:700; font-size:19px; padding:0 12px; border-radius:10px; transform:rotate(-2deg); z-index:1; }
+pre{ margin:0; background:var(--code); color:#e8eaf2; border-left:6px solid var(--orange); border-radius:12px; padding:16px 18px 12px; font-family:'JetBrains Mono',monospace; font-size:11.8px; line-height:1.6; white-space:pre-wrap; }
+pre .c{ color:#7f88a8; font-style:italic; } pre .kw{ color:#f07fa7; } pre .s{ color:#a5dd8a; } pre .f{ color:#7fb4ff; } pre .nu{ color:#f6c56b; }
+.two{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+h2 + *{ break-before:avoid; }
+table.t{ width:100%; border-collapse:collapse; margin:10px 0; break-inside:avoid; font-size:14.5px; background:#fff; }
+table.t th{ background:var(--navy); color:#fff; font-family:'Caveat',cursive; font-size:21px; font-weight:700; padding:4px 10px; }
+table.t td{ border:2px solid var(--navy); padding:5px 10px; vertical-align:top; }
+table.t td:first-child{ background:#eef3fb; }
+.flow{ display:flex; align-items:center; justify-content:center; gap:0; margin:16px 0; flex-wrap:wrap; row-gap:12px; break-inside:avoid; }
+.nd{ border:2.5px solid var(--navy); border-radius:12px; padding:7px 12px; text-align:center; background:#fff; font-size:16px; line-height:1.25; min-width:84px; }
+.nd small{ display:block; font-size:13px; opacity:.8; }
+.nd.g{ border-color:var(--green); background:var(--green-bg); } .nd.p{ border-color:var(--purple); background:var(--purple-bg); }
+.nd.o{ border-color:var(--orange); background:var(--orange-bg); } .nd.r{ border-color:var(--red); background:var(--red-bg); }
+.ar{ color:var(--red); font-size:22px; padding:0 6px; font-family:'Patrick Hand'; }
+.ar small{ display:block; font-size:12px; color:var(--green); text-align:center; line-height:1; }
+.big{ text-align:center; color:var(--red); font-size:22px; margin:4px 0 10px; }
+.qa p{ margin:0; } .qa .q{ color:var(--red); font-weight:700; margin-top:10px; } .qa .a b{ color:var(--green); }
+svg text{ font-family:'Patrick Hand',cursive; }
+/* cover */
+.cover{ min-height:265mm; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.logo{ width:120px; height:120px; border-radius:24px; background:linear-gradient(160deg,#5aa2ff,#2b5fd6); display:grid; place-items:center; box-shadow:0 6px 0 #1f47a6; }
+.cover h1{ font-family:'Caveat',cursive; color:var(--red); font-size:84px; margin:22px 0 0; line-height:1; transform:rotate(-2deg); }
+.cover .sub{ font-family:'Caveat',cursive; font-size:30px; color:var(--navy); margin:12px 0; }
+.squig{ width:430px; height:16px; }
+.byline{ border:2.5px dashed var(--navy); border-radius:14px; padding:10px 24px; margin-top:26px; font-size:17px; transform:rotate(.6deg); }
+.end{ text-align:center; font-family:'Caveat',cursive; font-size:38px; color:var(--red); margin-top:20px; }
+.toc{ columns:2; column-gap:30px; font-size:17px; } .toc div{ margin:4px 0; break-inside:avoid; } .toc small{ color:#7a7f8f; }
+@media screen{ body{ max-width:900px; margin:0 auto; padding:24px 16px; } .chap{ margin-top:50px; } }
+@media screen and (max-width:640px){ .two{ grid-template-columns:1fr; } .toc{ columns:1; } .cover h1{ font-size:56px; } }
+</style>
+</head>
+<body>
+
+<!-- ================= COVER ================= -->
+<section class="page cover">
+  <div class="logo">
+    <svg width="74" height="74" viewBox="0 0 74 74" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="26" y="4" width="22" height="16" rx="4"/><rect x="4" y="54" width="22" height="16" rx="4"/><rect x="48" y="54" width="22" height="16" rx="4"/>
+      <path d="M37 20v14M15 54V40h44v14"/>
+    </svg>
+  </div>
+  <h1>System Design</h1>
+  <div class="sub">scalability · databases · caching · APIs · real case studies</div>
+  <svg class="squig" viewBox="0 0 430 16"><path d="M4 10 C 80 2, 150 16, 220 8 S 360 4, 426 9" stroke="#e8762b" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+  <div class="byline">Notes by <span class="hl">Sandeep Kumar Jha</span> · Senior Full Stack Developer<br>Revision notes · handwritten style · based on the Gate Smashers System Design playlist (36 lectures)</div>
+  <p style="margin-top:26px">Part of my interview-revision series</p>
+</section>
+
+<!-- ================= CONTENTS ================= -->
+<section class="page chap">
+  <h1 class="ct">Contents</h1><div class="rule"></div>
+  <div class="toc">
+    <div>1 · Syllabus, approach &amp; HLD vs LLD <small>(L1, L22)</small></div>
+    <div>2 · What happens when you open a website <small>(L2, L8)</small></div>
+    <div>3 · Load Balancer <small>(L3)</small></div>
+    <div>4 · CDN <small>(L4)</small></div>
+    <div>5 · Forward vs Reverse Proxy <small>(L5)</small></div>
+    <div>6 · SSL/TLS Certificates &amp; HTTPS <small>(L6)</small></div>
+    <div>7 · Caching + Write-through vs Write-back <small>(L7, L16)</small></div>
+    <div>8 · APIs, API types, SDK, FastAPI <small>(L9, L26, L28, L36)</small></div>
+    <div>9 · Horizontal vs Vertical Scaling <small>(L14)</small></div>
+    <div>10 · Partitioning, Sharding, Replication <small>(L10, L11, L24)</small></div>
+    <div>11 · CAP Theorem · ACID vs BASE <small>(L12, L23)</small></div>
+    <div>12 · SQL vs NoSQL + 4 NoSQL types <small>(L17–L20, L33)</small></div>
+    <div>13 · Message Queues <small>(L13)</small></div>
+    <div>14 · Microservices <small>(L15)</small></div>
+    <div>15 · HTTP vs WebSocket <small>(L25)</small></div>
+    <div>16 · Rate Limiting <small>(L27)</small></div>
+    <div>17 · Security layers · JWT · Session vs JWT <small>(L21, L31, L32)</small></div>
+    <div>18 · SOLID Principles <small>(L34)</small></div>
+    <div>19 · Case study — Instagram <small>(L29)</small></div>
+    <div>20 · Case study — IRCTC Tatkal <small>(L30)</small></div>
+    <div>21 · Case study — UPI <small>(L35)</small></div>
+    <div>22 · Rapid-fire Q&amp;A + cheat sheet</div>
+  </div>
+  <div class="box gbox">
+    <h3>How to use these notes</h3>
+    <ul class="pen">
+      <li>Read a chapter, cover it, then <b>draw the diagram from memory</b> — system design is drawn, not memorised.</li>
+      <li>Yellow = remember. Orange box = revision / interview. Red = common mistake. Green dashed = where it shows up in my own work.</li>
+      <li>Lecture numbers (L1…L36) map to the Gate Smashers playlist order so I can re-watch the exact video.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 1 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">1</span>Syllabus, approach &amp; HLD vs LLD</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3>
+    <span class="hl">System design</span> = deciding the <span class="hl">architecture, components, data flow and interfaces</span> of a system so it meets its requirements — and keeps meeting them when users grow from 100 to 100 million.
+  </div>
+
+  <h2>Functional vs Non-functional</h2>
+  <table class="t">
+    <tr><th style="width:26%">Type</th><th>Meaning</th><th style="width:34%">Instagram example</th></tr>
+    <tr><td>Functional</td><td>WHAT the system does — features.</td><td>Upload photo, follow, like, see feed.</td></tr>
+    <tr><td>Non-functional</td><td>HOW WELL it does it — scalability, availability, latency, consistency, reliability, security, cost.</td><td>Feed loads &lt; 200 ms, 99.99% uptime, photos never lost.</td></tr>
+  </table>
+
+  <h2>Roadmap of the course</h2>
+  <div class="flow">
+    <div class="nd g">Basics<small>client-server, DNS, HTTP</small></div><span class="ar">→</span>
+    <div class="nd p">Building blocks<small>LB, CDN, proxy, cache</small></div><span class="ar">→</span>
+    <div class="nd o">Data<small>SQL/NoSQL, sharding, CAP</small></div><span class="ar">→</span>
+    <div class="nd">Communication<small>APIs, MQ, WebSocket</small></div><span class="ar">→</span>
+    <div class="nd r">Case studies<small>Instagram, IRCTC, UPI</small></div>
+  </div>
+
+  <h2>HLD vs LLD (L22)</h2>
+  <table class="t">
+    <tr><th style="width:22%">Point</th><th>HLD — High Level Design</th><th>LLD — Low Level Design</th></tr>
+    <tr><td>View</td><td>Bird's-eye: <span class="hl">which boxes &amp; how they connect</span></td><td>Zoomed-in: <span class="hl">what's inside each box</span></td></tr>
+    <tr><td>Contains</td><td>Services, DBs, cache, LB, CDN, queues, data flow</td><td>Classes, interfaces, methods, DB schema, design patterns</td></tr>
+    <tr><td>Output</td><td>Architecture diagram</td><td>Class / sequence / ER diagrams</td></tr>
+    <tr><td>Made by</td><td>Architects, senior devs</td><td>Developers</td></tr>
+    <tr><td>Analogy</td><td>Building's floor plan</td><td>Wiring &amp; plumbing of each room</td></tr>
+  </table>
+
+  <h2>My 7-step interview approach</h2>
+  <ol>
+    <li><b>Clarify requirements</b> — functional + non-functional. Ask, don't assume.</li>
+    <li><b>Estimate</b> — users, QPS, storage, bandwidth (back-of-envelope).</li>
+    <li><b>API design</b> — main endpoints.</li>
+    <li><b>Data model</b> — entities, SQL or NoSQL.</li>
+    <li><b>HLD diagram</b> — client → LB → services → cache → DB.</li>
+    <li><b>Deep dive</b> — bottlenecks, scaling, single points of failure.</li>
+    <li><b>Trade-offs</b> — say what I gave up and why.</li>
+  </ol>
+  <div class="cw"><span class="tag">back-of-envelope</span><pre><span class="c">// 1 day = 86,400 s  ≈ 10^5 s  (easy mental maths)</span>
+10M DAU × 10 requests/day = 10^8 req/day
+avg QPS  = 10^8 / 10^5     ≈ <span class="nu">1,000</span> QPS
+peak QPS ≈ 2–3 × avg       ≈ <span class="nu">2,500</span> QPS
+storage  = 1M photos/day × 500 KB ≈ <span class="nu">500 GB/day</span> ≈ 180 TB/year</pre></div>
+  <div class="box rev"><h3>Revision</h3>Requirements first (functional + non-functional) → estimate → API → data → HLD → deep dive → trade-offs. HLD = boxes &amp; arrows; LLD = classes &amp; schema.</div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">2</span>What happens when you open a website?</h1><div class="rule"></div>
+  <div class="box def"><h3>Big picture</h3>
+    Typing <code class="k">www.example.com</code> triggers: <span class="hl">DNS lookup → TCP connect → TLS handshake → HTTP request → servers → response → browser renders</span>. This one flow touches almost every topic in this course.
+  </div>
+
+  <h2>Full stack request flow (L8)</h2>
+  <div class="flow">
+    <div class="nd g">Browser<small>/ mobile app</small></div><span class="ar">→</span>
+    <div class="nd p">DNS<small>name → IP</small></div><span class="ar">→</span>
+    <div class="nd o">CDN<small>static files</small></div><span class="ar">→</span>
+    <div class="nd">Load Balancer</div><span class="ar">→</span>
+    <div class="nd p">API / App server</div><span class="ar">→</span>
+    <div class="nd r">Cache<small>Redis</small></div><span class="ar">→</span>
+    <div class="nd g">Database</div>
+  </div>
+  <p class="big">→ response travels back the same way, browser paints the page</p>
+
+  <h2>Step by step</h2>
+  <ol>
+    <li><b>Browser cache check</b> — already have the page / IP? use it.</li>
+    <li><b>DNS resolution</b>: browser cache → OS cache (hosts file) → <span class="hl">recursive resolver</span> (ISP / 8.8.8.8) → <span class="hl">Root</span> server → <span class="hl">TLD</span> server (.com) → <span class="hl">Authoritative</span> server → returns IP. Cached for its TTL.</li>
+    <li><b>TCP 3-way handshake</b>: SYN → SYN-ACK → ACK.</li>
+    <li><b>TLS handshake</b> (HTTPS): verify certificate, agree a session key (Ch 6).</li>
+    <li><b>HTTP request</b>: <code class="k">GET / HTTP/1.1</code> + headers + cookies.</li>
+    <li>Static assets come from the <b>CDN</b>; dynamic request goes to <b>LB → app server</b>.</li>
+    <li>App server checks <b>cache</b>; on miss queries the <b>DB</b>, fills cache, builds response.</li>
+    <li><b>Browser renders</b>: parse HTML → DOM, CSS → CSSOM, run JS → layout → paint.</li>
+  </ol>
+
+  <h2>DNS records</h2>
+  <table class="t">
+    <tr><th style="width:18%">Record</th><th>Meaning</th></tr>
+    <tr><td>A / AAAA</td><td>Domain → IPv4 / IPv6 address</td></tr>
+    <tr><td>CNAME</td><td>Alias: one name → another name (www → example.com, or → CDN host)</td></tr>
+    <tr><td>MX</td><td>Mail server for the domain</td></tr>
+    <tr><td>NS</td><td>Which name servers are authoritative</td></tr>
+    <tr><td>TXT</td><td>Verification, SPF/DKIM for email</td></tr>
+  </table>
+  <div class="box gbox"><h3>Mobile app difference</h3>The app already has its UI installed, so it skips HTML rendering — it only calls <span class="hl">APIs that return JSON</span>, then draws native screens. DNS/TCP/TLS/LB/server/DB steps are the same.</div>
+  <div class="box mis"><h3>Mistake</h3>"DNS is queried on every request" — <b>no</b>, answers are cached at many levels until the <code class="k">TTL</code> expires. That's also why DNS changes take time to "propagate".</div>
+  <div class="box rev"><h3>Revision</h3>DNS (root → TLD → authoritative) → TCP → TLS → HTTP → CDN / LB → app → cache → DB → render. Be able to draw it in 30 seconds.</div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">3</span>Load Balancer</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3>A <span class="hl">load balancer</span> sits in front of a group of servers and <span class="hl">spreads incoming requests across them</span>, so no single server is overloaded and a dead server gets no traffic. Real life: a <b>traffic police officer</b> sending cars to free lanes / a bank token system sending you to a free counter.</div>
+  <svg viewBox="0 0 720 200" width="100%" style="max-width:720px;display:block;margin:6px auto">
+    <rect x="20" y="78" width="120" height="44" rx="12" fill="#eaf7ef" stroke="#1f8a5b" stroke-width="2.5"/><text x="80" y="106" text-anchor="middle" font-size="18" fill="#1f2a44">Users</text>
+    <rect x="250" y="70" width="160" height="60" rx="12" fill="#f3eefe" stroke="#7b4fd6" stroke-width="2.5"/><text x="330" y="98" text-anchor="middle" font-size="18" fill="#1f2a44">Load Balancer</text><text x="330" y="118" text-anchor="middle" font-size="13" fill="#555">health checks ✓</text>
+    <path d="M140 100 H245" stroke="#d62f4b" stroke-width="2.5" marker-end="url(#a)"/>
+    <rect x="530" y="10" width="160" height="44" rx="12" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="610" y="38" text-anchor="middle" font-size="17" fill="#1f2a44">Server 1 ✓</text>
+    <rect x="530" y="78" width="160" height="44" rx="12" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="610" y="106" text-anchor="middle" font-size="17" fill="#1f2a44">Server 2 ✓</text>
+    <rect x="530" y="146" width="160" height="44" rx="12" fill="#fdecee" stroke="#d62f4b" stroke-width="2.5" stroke-dasharray="6 4"/><text x="610" y="174" text-anchor="middle" font-size="17" fill="#d62f4b">Server 3 ✗ down</text>
+    <path d="M410 90 L525 34" stroke="#1f8a5b" stroke-width="2.5" marker-end="url(#g)"/><path d="M410 100 H525" stroke="#1f8a5b" stroke-width="2.5" marker-end="url(#g)"/>
+    <path d="M410 112 L525 166" stroke="#d62f4b" stroke-width="2" stroke-dasharray="5 5"/><text x="430" y="178" font-size="14" fill="#d62f4b">no traffic</text>
+    <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#d62f4b"/></marker><marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#1f8a5b"/></marker></defs>
+  </svg>
+
+  <h2>Why use one?</h2>
+  <ul class="pen">
+    <li><span class="hl">Scalability</span> — add servers behind it (horizontal scaling).</li>
+    <li><span class="hl">High availability</span> — health checks remove dead servers automatically.</li>
+    <li>No single server is a SPOF; zero-downtime deploys (drain one server at a time).</li>
+    <li>Can also do SSL termination, compression, caching (it's a reverse proxy — Ch 5).</li>
+  </ul>
+
+  <h2>Algorithms (interview favourite)</h2>
+  <table class="t">
+    <tr><th style="width:24%">Algorithm</th><th>How</th><th style="width:30%">Good for</th></tr>
+    <tr><td>Round Robin</td><td>1 → 2 → 3 → 1 → 2 … in turn</td><td>Equal servers, similar requests</td></tr>
+    <tr><td>Weighted RR</td><td>Bigger server gets more turns (weights 3:1)</td><td>Mixed server sizes</td></tr>
+    <tr><td>Least Connections</td><td>Send to server with fewest active connections</td><td>Long / uneven requests</td></tr>
+    <tr><td>Least Response Time</td><td>Fewest connections + fastest response</td><td>Latency-sensitive</td></tr>
+    <tr><td>IP Hash</td><td><code class="k">hash(client IP) % N</code> → same user, same server</td><td>Sticky sessions</td></tr>
+    <tr><td>Random</td><td>Pick any healthy server</td><td>Simple, large pools</td></tr>
+  </table>
+
+  <h2>L4 vs L7</h2>
+  <div class="two">
+    <div class="box gbox" style="margin:0"><h3>Layer 4 (transport)</h3>Looks only at <b>IP + port</b> (TCP/UDP). Very fast, can't read URLs. e.g. AWS NLB.</div>
+    <div class="box def" style="margin:0"><h3>Layer 7 (application)</h3>Reads <b>HTTP</b>: URL, headers, cookies. Can route <code class="k">/api</code> → API servers, <code class="k">/images</code> → media. e.g. Nginx, AWS ALB.</div>
+  </div>
+  <div class="cw"><span class="tag">nginx.conf</span><pre><span class="kw">upstream</span> app_servers {
+    least_conn;                          <span class="c"># algorithm</span>
+    <span class="kw">server</span> 10.0.0.1:3000 weight=<span class="nu">3</span>;
+    <span class="kw">server</span> 10.0.0.2:3000;
+    <span class="kw">server</span> 10.0.0.3:3000 backup;
+}
+<span class="kw">server</span> {
+    listen <span class="nu">80</span>;
+    location / { proxy_pass http://app_servers; }
+}</pre></div>
+  <div class="box mis"><h3>Mistake</h3>The load balancer itself can become the <span class="hl">single point of failure</span>. Fix: two LBs (active–passive with a floating IP) or a managed LB. Also: storing sessions in server memory breaks when the LB sends the user elsewhere → keep servers <b>stateless</b>, sessions in Redis.</div>
+  <div class="box rev"><h3>Revision</h3>LB = spread traffic + health checks. Algorithms: RR, weighted, least-conn, least-time, IP-hash. L4 = IP/port, L7 = HTTP-aware. Make the LB redundant too.</div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">4</span>CDN — Content Delivery Network</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3>A <span class="hl">CDN</span> is a network of <span class="hl">edge servers spread across the world</span> that keep copies of content (images, videos, JS, CSS) <b>close to users</b>. A user in Delhi gets files from a Delhi/Mumbai edge instead of the origin in the US. Real life: <b>Amazon warehouses in every city</b> instead of one big warehouse.</div>
+
+  <h2>How it works</h2>
+  <div class="flow">
+    <div class="nd g">User in India</div><span class="ar">→<small>DNS / anycast</small></span>
+    <div class="nd p">Nearest edge<small>Mumbai PoP</small></div><span class="ar">→<small>only on MISS</small></span>
+    <div class="nd o">Origin server<small>US</small></div>
+  </div>
+  <ol>
+    <li>DNS (often a CNAME to the CDN) sends the user to the <b>nearest edge</b> (PoP = Point of Presence).</li>
+    <li><b>Cache HIT</b> → edge serves the file instantly.</li>
+    <li><b>Cache MISS</b> → edge fetches from origin, stores it for the <code class="k">TTL</code>, then serves. Next user nearby gets a HIT.</li>
+  </ol>
+
+  <h2>Push vs Pull CDN</h2>
+  <table class="t">
+    <tr><th style="width:18%">Type</th><th>How</th><th style="width:34%">Use when</th></tr>
+    <tr><td>Pull</td><td>Edge pulls from origin on first request (lazy)</td><td>Most websites; frequently changing, high traffic</td></tr>
+    <tr><td>Push</td><td>I upload content to the CDN in advance</td><td>Large, rarely changing files (video library, game patches)</td></tr>
+  </table>
+
+  <h2>Benefits</h2>
+  <ul class="pen">
+    <li><span class="hl">Lower latency</span> — shorter physical distance.</li>
+    <li><span class="hl">Less load on origin</span> + lower bandwidth bill.</li>
+    <li>Absorbs traffic spikes and <b>DDoS</b> (huge distributed capacity).</li>
+    <li>Availability — if one edge fails, another serves.</li>
+  </ul>
+  <h2>Cache invalidation</h2>
+  <ul class="pen">
+    <li><b>TTL</b> via <code class="k">Cache-Control: public, max-age=31536000</code>.</li>
+    <li><b>Purge</b> API to delete a file from all edges.</li>
+    <li>Best: <span class="hl">versioned file names</span> — <code class="k">app.3f2a9c.js</code>. New deploy = new name = no stale file.</li>
+  </ul>
+  <div class="box mis"><h3>Mistake</h3>Caching <b>personalised</b> responses (my cart, my profile) on a public CDN → other users may see them! Use <code class="k">Cache-Control: private, no-store</code> for user-specific data.</div>
+  <div class="box rev"><h3>Revision</h3>CDN = edge copies near users. HIT → serve, MISS → fetch origin + cache for TTL. Pull (lazy) vs Push (upload). Examples: Cloudflare, Akamai, AWS CloudFront.</div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">5</span>Forward Proxy vs Reverse Proxy</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3>A <span class="hl">proxy</span> is a middleman server. <b>Forward proxy</b> acts on behalf of <span class="hl">clients</span>; <b>reverse proxy</b> acts on behalf of <span class="hl">servers</span>.</div>
+  <div class="two">
+    <div>
+      <div class="flow"><div class="nd g">Clients</div><span class="ar">→</span><div class="nd p">Forward proxy</div><span class="ar">→</span><div class="nd">Internet</div></div>
+      <p style="text-align:center">server sees the <span class="hl">proxy's IP</span>, not mine</p>
+    </div>
+    <div>
+      <div class="flow"><div class="nd">Internet</div><span class="ar">→</span><div class="nd o">Reverse proxy</div><span class="ar">→</span><div class="nd g">Servers</div></div>
+      <p style="text-align:center">client sees <span class="hl">only the proxy</span>, servers hidden</p>
+    </div>
+  </div>
+  <table class="t">
+    <tr><th style="width:20%">Point</th><th>Forward proxy</th><th>Reverse proxy</th></tr>
+    <tr><td>Protects</td><td>Client identity</td><td>Server identity</td></tr>
+    <tr><td>Set up by</td><td>Client side (office, college, user)</td><td>Server side (website owner)</td></tr>
+    <tr><td>Uses</td><td>Privacy / hide IP, content filtering (college blocks sites), caching for many users, bypass geo-blocks</td><td>Load balancing, SSL termination, caching, compression, WAF / security, hide internal servers</td></tr>
+    <tr><td>Examples</td><td>Squid, corporate proxy, VPN-like services</td><td>Nginx, HAProxy, Cloudflare, AWS ALB</td></tr>
+    <tr><td>Real life</td><td>Friend buys a movie ticket for me — cinema never sees me</td><td>Company receptionist — callers never reach employees directly</td></tr>
+  </table>
+  <div class="cw"><span class="tag">nginx as reverse proxy + SSL termination</span><pre><span class="kw">server</span> {
+    listen <span class="nu">443</span> ssl;
+    server_name api.example.com;
+    ssl_certificate     /etc/ssl/fullchain.pem;
+    ssl_certificate_key /etc/ssl/privkey.pem;
+    location / {
+        proxy_pass http://localhost:<span class="nu">3000</span>;         <span class="c"># app stays on plain HTTP inside</span>
+        proxy_set_header X-Forwarded-For $remote_addr;   <span class="c"># real client IP</span>
+    }
+}</pre></div>
+  <div class="tip">Every <b>load balancer is a reverse proxy</b>, but not every reverse proxy is a load balancer (a reverse proxy can sit in front of just one server for SSL + caching).</div>
+  <div class="box rev"><h3>Revision</h3>Forward = for clients (hide client, filter). Reverse = for servers (LB, SSL, cache, security, hide servers). Remember who is hidden.</div>
+</section>
+
+<!-- ================= 6 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">6</span>SSL/TLS Certificates &amp; HTTPS</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">HTTPS = HTTP + TLS</span> (SSL is the old name). TLS gives 3 things: <span class="hl">Encryption</span> (nobody can read), <span class="hl">Integrity</span> (nobody can modify), <span class="hl">Authentication</span> (I'm really talking to bank.com). An <b>SSL certificate</b> is the website's digital ID card, signed by a trusted <b>Certificate Authority (CA)</b>.</div>
+  <h2>What's inside a certificate</h2>
+  <ul class="pen"><li>Domain name(s) · organisation · <span class="hl">public key</span> · issuer (CA) · validity dates · CA's <span class="hl">digital signature</span>.</li></ul>
+  <h2>Chain of trust</h2>
+  <div class="flow"><div class="nd g">Root CA<small>pre-installed in OS / browser</small></div><span class="ar">signs →</span><div class="nd p">Intermediate CA</div><span class="ar">signs →</span><div class="nd o">Server cert<small>example.com</small></div></div>
+
+  <h2>TLS handshake (simplified)</h2>
+  <ol>
+    <li><b>ClientHello</b> — TLS versions, cipher suites, random number.</li>
+    <li><b>ServerHello + Certificate</b> — chosen cipher, server's certificate (public key).</li>
+    <li>Browser <b>verifies</b> the cert: signed by a trusted CA? domain matches? not expired?</li>
+    <li><b>Key exchange</b> (ECDHE / RSA) using <span class="hl">asymmetric</span> crypto → both sides derive the same <b>session key</b>.</li>
+    <li>All data now encrypted with fast <span class="hl">symmetric</span> encryption (AES) using that session key.</li>
+  </ol>
+  <table class="t">
+    <tr><th style="width:22%">Point</th><th>Asymmetric</th><th>Symmetric</th></tr>
+    <tr><td>Keys</td><td>Public + private pair</td><td>One shared secret key</td></tr>
+    <tr><td>Speed</td><td>Slow</td><td>Fast</td></tr>
+    <tr><td>Used for</td><td>Handshake: identity + agreeing a key</td><td>Bulk data after handshake</td></tr>
+    <tr><td>Examples</td><td>RSA, ECDHE</td><td>AES, ChaCha20</td></tr>
+  </table>
+  <h2>Certificate types</h2>
+  <ul class="pen">
+    <li><b>DV</b> (domain validated, e.g. Let's Encrypt — free, 90 days) · <b>OV</b> (organisation checked) · <b>EV</b> (extended checks).</li>
+    <li><b>Wildcard</b> <code class="k">*.example.com</code> · <b>SAN / multi-domain</b> — many names in one cert.</li>
+  </ul>
+  <div class="cw"><span class="tag">terminal</span><pre><span class="c"># free cert + auto nginx config + auto-renew</span>
+sudo certbot --nginx -d example.com -d www.example.com
+<span class="c"># inspect any site's certificate chain</span>
+openssl s_client -connect example.com:<span class="nu">443</span> -showcerts</pre></div>
+  <div class="box mis"><h3>Mistake</h3>"Padlock = safe website" — <b>no</b>. HTTPS only proves the connection is encrypted to <i>that</i> domain. A phishing site can have a valid certificate too. Also don't forget <b>renewal</b> — expired certs take sites down.</div>
+  <div class="box rev"><h3>Revision</h3>HTTPS = HTTP + TLS → encryption, integrity, authentication. Cert = domain + public key + CA signature. Handshake uses asymmetric to agree a key, then symmetric for data.</div>
+</section>
+
+<!-- ================= 7 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">7</span>Caching + Write-through vs Write-back</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Caching</span> = storing frequently used data in a <span class="hl">faster layer</span> (usually RAM) so we don't hit the slow source (DB / disk / network) every time. Real life: keeping a <b>water bottle on my desk</b> instead of walking to the kitchen each time.</div>
+  <h2>Where caching happens</h2>
+  <div class="flow"><div class="nd g">Browser cache</div><span class="ar">→</span><div class="nd p">DNS cache</div><span class="ar">→</span><div class="nd o">CDN</div><span class="ar">→</span><div class="nd">App memory</div><span class="ar">→</span><div class="nd r">Redis / Memcached</div><span class="ar">→</span><div class="nd g">DB buffer cache</div></div>
+  <ul class="pen">
+    <li><b>Cache hit</b> = found in cache. <b>Miss</b> = go to source. <span class="hl">Hit ratio = hits / total</span> — aim high (90%+).</li>
+    <li>Cache what is <b>read often, changes rarely</b>: product pages, user profile, config, sessions, results of heavy queries.</li>
+  </ul>
+  <h2>Read strategy — Cache-aside (most common)</h2>
+  <div class="cw"><span class="tag">cache-aside with Redis (Node)</span><pre><span class="kw">async function</span> <span class="f">getUser</span>(id) {
+  <span class="kw">const</span> key = <span class="s">`user:${id}`</span>;
+  <span class="kw">const</span> hit = <span class="kw">await</span> redis.<span class="f">get</span>(key);
+  <span class="kw">if</span> (hit) <span class="kw">return</span> JSON.<span class="f">parse</span>(hit);              <span class="c">// 1. HIT → fast path</span>
+
+  <span class="kw">const</span> user = <span class="kw">await</span> db.users.<span class="f">findById</span>(id);   <span class="c">// 2. MISS → DB</span>
+  <span class="kw">await</span> redis.<span class="f">set</span>(key, JSON.<span class="f">stringify</span>(user), <span class="s">'EX'</span>, <span class="nu">3600</span>); <span class="c">// 3. fill, TTL 1h</span>
+  <span class="kw">return</span> user;
+}
+<span class="c">// on update: write DB, then redis.del(key) so next read refreshes</span></pre></div>
+  <h2>Write strategies (L16)</h2>
+  <table class="t">
+    <tr><th style="width:18%">Strategy</th><th>How</th><th>Pros</th><th>Cons</th></tr>
+    <tr><td>Write-through</td><td>Write to <b>cache AND DB together</b>; ack after both</td><td>Cache always consistent, no data loss</td><td>Slower writes (2 writes every time)</td></tr>
+    <tr><td>Write-back<br>(write-behind)</td><td>Write to <b>cache only</b>, ack; flush to DB <b>later</b> in batches</td><td>Very fast writes, fewer DB hits</td><td><span class="hl">Data loss</span> if cache crashes before flush</td></tr>
+    <tr><td>Write-around</td><td>Write to <b>DB only</b>; cache filled on next read</td><td>Cache not polluted with write-once data</td><td>First read after write is a miss</td></tr>
+  </table>
+  <div class="tip">Choose: <b>bank balance → write-through</b> (can't lose data). <b>View counts / likes / analytics → write-back</b> (speed matters, tiny loss is OK). <b>Logs / bulk uploads → write-around</b>.</div>
+  <h2>Eviction policies (cache is small!)</h2>
+  <ul class="pen">
+    <li><span class="hl">LRU</span> — remove Least Recently Used (most common). <b>LFU</b> — Least Frequently Used. <b>FIFO</b> — oldest first. <b>TTL</b> — expire after time.</li>
+  </ul>
+  <h2>Cache problems</h2>
+  <table class="t">
+    <tr><th style="width:24%">Problem</th><th>What</th><th>Fix</th></tr>
+    <tr><td>Stale data</td><td>DB changed, cache still old</td><td>TTL + delete key on update</td></tr>
+    <tr><td>Stampede / thundering herd</td><td>Hot key expires → 1000s of requests hit DB at once</td><td>Lock / single-flight, random TTL jitter</td></tr>
+    <tr><td>Penetration</td><td>Requests for keys that don't exist always miss</td><td>Cache "null" briefly, Bloom filter</td></tr>
+    <tr><td>Avalanche</td><td>Many keys expire at the same moment</td><td>Spread TTLs, warm cache</td></tr>
+  </table>
+  <div class="box mine"><h3>From my work</h3>TanStack / React Query on the frontend is a client-side cache (stale-while-revalidate) — same ideas: cache key, stale time, invalidation after a mutation.</div>
+  <div class="box rev"><h3>Revision</h3>Cache = fast copy. Cache-aside for reads. Write-through = safe, write-back = fast but risky, write-around = skip cache. Evict with LRU. Watch stale data + stampede.</div>
+</section>
+
+<!-- ================= 8 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">8</span>APIs · API types · SDK · FastAPI</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3>An <span class="hl">API (Application Programming Interface)</span> is a <span class="hl">contract</span> that defines how one piece of software can ask another for data or actions — without knowing its internals. Real life: the <b>waiter in a restaurant</b>: I (client) order from the menu (API docs), the waiter takes it to the kitchen (server) and brings back food (response).</div>
+  <h2>REST — the common one</h2>
+  <div class="two">
+    <table class="t" style="margin:0">
+      <tr><th>Verb</th><th>Action</th></tr>
+      <tr><td>GET</td><td>Read <code class="k">/users/7</code></td></tr>
+      <tr><td>POST</td><td>Create <code class="k">/users</code></td></tr>
+      <tr><td>PUT / PATCH</td><td>Replace / partial update</td></tr>
+      <tr><td>DELETE</td><td>Remove</td></tr>
+    </table>
+    <table class="t" style="margin:0">
+      <tr><th>Code</th><th>Meaning</th></tr>
+      <tr><td>200 / 201</td><td>OK / Created</td></tr>
+      <tr><td>400 / 401 / 403 / 404</td><td>Bad request / not logged in / not allowed / not found</td></tr>
+      <tr><td>429</td><td>Too many requests</td></tr>
+      <tr><td>500 / 503</td><td>Server error / unavailable</td></tr>
+    </table>
+  </div>
+  <ul class="pen">
+    <li>REST = <span class="hl">resources as URLs + HTTP verbs + stateless</span> requests, usually JSON.</li>
+    <li><span class="hl">Idempotent</span> = calling it many times has the same effect as once: GET, PUT, DELETE ✓ · POST ✗ (use an idempotency key for payments).</li>
+    <li>Good API: versioning <code class="k">/v1/</code>, pagination, filtering, consistent error format, auth, rate limits, docs (OpenAPI/Swagger).</li>
+  </ul>
+  <h2>All API types in one table (L28)</h2>
+  <table class="t">
+    <tr><th style="width:15%">Type</th><th>Format / transport</th><th>Key idea</th><th style="width:26%">Use when</th></tr>
+    <tr><td>REST</td><td>JSON over HTTP</td><td>Resources + verbs, simple, cacheable</td><td>Public &amp; web/mobile APIs</td></tr>
+    <tr><td>SOAP</td><td>XML over HTTP (WSDL contract)</td><td>Strict, built-in standards (WS-Security)</td><td>Banks, legacy enterprise</td></tr>
+    <tr><td>GraphQL</td><td>Query language, one endpoint</td><td>Client asks <b>exactly</b> the fields it needs — no over/under-fetching</td><td>Complex UIs, many clients</td></tr>
+    <tr><td>gRPC</td><td>Protobuf (binary) over HTTP/2</td><td>Very fast, typed contracts, streaming</td><td>Service ↔ service (microservices)</td></tr>
+    <tr><td>WebSocket</td><td>Persistent TCP connection</td><td>Two-way, real-time push</td><td>Chat, live scores (Ch 15)</td></tr>
+  </table>
+  <h2>API vs SDK (L26)</h2>
+  <table class="t">
+    <tr><th style="width:18%">Point</th><th>API</th><th>SDK (Software Development Kit)</th></tr>
+    <tr><td>What</td><td>The interface / contract (endpoints)</td><td>A <b>toolkit</b>: libraries, docs, samples, tools — often <span class="hl">wraps the API</span></td></tr>
+    <tr><td>Analogy</td><td>The electric socket</td><td>The whole toolbox with ready-made plugs</td></tr>
+    <tr><td>Example</td><td><code class="k">POST /v1/payments</code></td><td><code class="k">razorpay.orders.create()</code>, AWS SDK, Firebase SDK</td></tr>
+  </table>
+  <div class="box mine"><h3>From my work</h3>Amazon <b>Chime SDK</b> for doctor video consultations (SDK); <b>Zoho Books API</b> integration + cron sync in the event platform (API); <b>PayU</b> payment flow with server-side hash verification.</div>
+  <h2>FastAPI in 5 minutes (L36)</h2>
+  <ul class="pen">
+    <li>Modern <b>Python</b> web framework for APIs, built on <b>Starlette</b> (async web) + <b>Pydantic</b> (validation).</li>
+    <li><span class="hl">Type hints → automatic validation</span> + <span class="hl">auto docs</span> at <code class="k">/docs</code> (Swagger) and <code class="k">/redoc</code>.</li>
+    <li><code class="k">async def</code> support → high performance; dependency injection with <code class="k">Depends</code>.</li>
+  </ul>
+  <div class="cw"><span class="tag">main.py — run: uvicorn main:app --reload</span><pre><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI, HTTPException
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
+
+app = FastAPI()
+
+<span class="kw">class</span> <span class="f">User</span>(BaseModel):
+    name: str
+    age: int                       <span class="c"># "abc" → automatic 422 error</span>
+
+<span class="f">@app.get</span>(<span class="s">"/users/{user_id}"</span>)
+<span class="kw">async def</span> <span class="f">get_user</span>(user_id: int):
+    <span class="kw">if</span> user_id != <span class="nu">1</span>: <span class="kw">raise</span> HTTPException(<span class="nu">404</span>, <span class="s">"Not found"</span>)
+    <span class="kw">return</span> {<span class="s">"id"</span>: user_id, <span class="s">"name"</span>: <span class="s">"Sandeep"</span>}
+
+<span class="f">@app.post</span>(<span class="s">"/users"</span>, status_code=<span class="nu">201</span>)
+<span class="kw">async def</span> <span class="f">create_user</span>(user: User):
+    <span class="kw">return</span> user</pre></div>
+  <div class="box rev"><h3>Revision</h3>API = contract. REST (JSON, verbs, stateless), SOAP (XML, strict), GraphQL (ask exact fields), gRPC (binary, fast, internal), WebSocket (real-time). SDK = toolkit around an API. FastAPI = Python + type hints + auto docs.</div>
+</section>
+
+<!-- ================= 9 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">9</span>Horizontal vs Vertical Scaling</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Scalability</span> = ability to handle more load by adding resources. <b>Vertical</b> = make <span class="hl">one machine bigger</span> (scale up). <b>Horizontal</b> = add <span class="hl">more machines</span> (scale out).</div>
+  <div class="two">
+    <div class="box gbox" style="margin:0"><h3>Vertical ⬆</h3>4 GB → 64 GB RAM, 2 → 32 CPUs.<br>Real life: replace a car with a <b>bigger truck</b>.</div>
+    <div class="box def" style="margin:0"><h3>Horizontal ➡</h3>1 server → 10 servers behind a load balancer.<br>Real life: <b>more trucks</b> in the fleet.</div>
+  </div>
+  <table class="t">
+    <tr><th style="width:22%">Point</th><th>Vertical</th><th>Horizontal</th></tr>
+    <tr><td>How</td><td>Upgrade CPU / RAM / disk</td><td>Add servers + load balancer</td></tr>
+    <tr><td>Limit</td><td><span class="hl">Hardware ceiling</span></td><td>Practically unlimited</td></tr>
+    <tr><td>Failure</td><td>Single point of failure</td><td>Fault tolerant — one dies, others serve</td></tr>
+    <tr><td>Downtime</td><td>Often needs restart</td><td>Add/remove with no downtime</td></tr>
+    <tr><td>Complexity</td><td>Simple, no code change</td><td>Needs LB, stateless apps, data distribution</td></tr>
+    <tr><td>Cost</td><td>High-end hardware gets expensive fast</td><td>Commodity machines, pay as you grow</td></tr>
+    <tr><td>Data consistency</td><td>Easy (one machine)</td><td>Harder (distributed)</td></tr>
+    <tr><td>Good for</td><td>Early stage, relational DB primary</td><td>Web/app tier, large scale</td></tr>
+  </table>
+  <ul class="pen">
+    <li>Horizontal needs <span class="hl">stateless servers</span>: no session in memory → put sessions in Redis or use JWT.</li>
+    <li><b>Auto-scaling</b>: cloud adds/removes servers based on CPU, request count (AWS Auto Scaling Group, Kubernetes HPA).</li>
+    <li>Real systems use <b>both</b>: scale up a DB first, then scale out with replicas / shards (Ch 10).</li>
+  </ul>
+  <div class="box mis"><h3>Mistake</h3>"Horizontal is always better" — no. It brings network calls, consistency issues and ops overhead. Start simple (vertical) and scale out when needed.</div>
+  <div class="box rev"><h3>Revision</h3>Vertical = bigger box (simple, limit, SPOF). Horizontal = more boxes (LB, stateless, fault tolerant, complex). Use both.</div>
+</section>
+
+<!-- ================= 10 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">10</span>Partitioning · Sharding · Replication</h1><div class="rule"></div>
+  <div class="box def"><h3>Definitions</h3>
+    <span class="hl">Partitioning</span> = splitting a big table into smaller pieces (can be on the <b>same</b> server).<br>
+    <span class="hl">Sharding</span> = horizontal partitioning where pieces live on <b>different servers</b> (shards).<br>
+    <span class="hl">Replication</span> = keeping <b>copies of the same data</b> on multiple servers.
+  </div>
+  <h2>Horizontal vs Vertical partitioning (L10)</h2>
+  <div class="two">
+    <div class="box gbox" style="margin:0"><h3>Horizontal (by rows)</h3>Users 1–1M in P1, 1M–2M in P2. Same columns, different rows.</div>
+    <div class="box def" style="margin:0"><h3>Vertical (by columns)</h3>users(id, name, email) + users_profile(id, bio, photo). Split rarely used / heavy columns.</div>
+  </div>
+  <h2>Partitioning strategies</h2>
+  <table class="t">
+    <tr><th style="width:20%">Strategy</th><th>How</th><th>Problem</th></tr>
+    <tr><td>Range</td><td>By range: dates, IDs, A–M / N–Z</td><td><span class="hl">Hotspots</span> (all new orders hit latest range)</td></tr>
+    <tr><td>Hash</td><td><code class="k">hash(user_id) % N</code></td><td>Even spread, but adding a shard reshuffles most keys</td></tr>
+    <tr><td>List</td><td>By category: region = India / US / EU</td><td>Uneven sizes</td></tr>
+    <tr><td>Directory</td><td>Lookup table: key → shard</td><td>Lookup service is extra hop / SPOF</td></tr>
+    <tr><td>Consistent hashing</td><td>Keys &amp; servers on a ring; key goes to next server clockwise</td><td>Adding a server moves only ~1/N keys ✓</td></tr>
+  </table>
+  <div class="cw"><span class="tag">MySQL range partition (same server)</span><pre><span class="kw">CREATE TABLE</span> orders (
+  id <span class="kw">BIGINT</span>, created_at <span class="kw">DATE</span>, amount <span class="kw">DECIMAL</span>(<span class="nu">10</span>,<span class="nu">2</span>)
+) <span class="kw">PARTITION BY RANGE</span> (<span class="f">YEAR</span>(created_at)) (
+  <span class="kw">PARTITION</span> p2024 <span class="kw">VALUES LESS THAN</span> (<span class="nu">2025</span>),
+  <span class="kw">PARTITION</span> p2025 <span class="kw">VALUES LESS THAN</span> (<span class="nu">2026</span>),
+  <span class="kw">PARTITION</span> pmax  <span class="kw">VALUES LESS THAN</span> MAXVALUE
+);  <span class="c">-- WHERE created_at in 2025 → scans only p2025 (partition pruning)</span></pre></div>
+  <h2>Partitioning vs Sharding (L11)</h2>
+  <table class="t">
+    <tr><th style="width:20%">Point</th><th>Partitioning</th><th>Sharding</th></tr>
+    <tr><td>Where</td><td>Usually one DB server</td><td>Many DB servers</td></tr>
+    <tr><td>Goal</td><td>Faster queries, easier maintenance</td><td>Scale writes + storage beyond one machine</td></tr>
+    <tr><td>Complexity</td><td>Handled by DB</td><td>App/router must know which shard</td></tr>
+    <tr><td>Real life</td><td>Separate shelves in one library</td><td>Separate library branches in each city</td></tr>
+  </table>
+  <div class="box mis"><h3>Sharding pain points</h3>Bad <b>shard key</b> → hotspots (celebrity user). <b>Cross-shard joins</b> &amp; transactions are hard. <b>Resharding</b> is painful → use consistent hashing. Shard only when you must.</div>
+  <h2>Replication</h2>
+  <div class="flow"><div class="nd o">App writes</div><span class="ar">→</span><div class="nd r">Primary (master)</div><span class="ar">copies →</span><div class="nd g">Replica 1</div><div class="nd g" style="margin-left:8px">Replica 2</div><span class="ar">←</span><div class="nd p">App reads</div></div>
+  <ul class="pen">
+    <li><b>Primary–replica</b>: writes to primary, reads from replicas → scales <span class="hl">reads</span>, gives failover.</li>
+    <li><b>Multi-primary</b>: writes on many nodes → conflict resolution needed.</li>
+    <li><b>Sync</b> = wait for replica (consistent, slower). <b>Async</b> = don't wait (fast, <span class="hl">replication lag</span> → stale reads).</li>
+  </ul>
+  <h2>Replication vs Sharding (L24)</h2>
+  <table class="t">
+    <tr><th style="width:20%">Point</th><th>Replication</th><th>Sharding</th></tr>
+    <tr><td>Data</td><td>Same full copy everywhere</td><td>Each shard has a different subset</td></tr>
+    <tr><td>Solves</td><td>Read scaling, high availability, backup</td><td>Write scaling, huge data size</td></tr>
+    <tr><td>Storage</td><td>Multiplies storage</td><td>Divides storage</td></tr>
+    <tr><td>Together</td><td colspan="2">Real systems shard the data <b>and</b> replicate each shard (e.g. MongoDB sharded cluster of replica sets).</td></tr>
+  </table>
+  <div class="box rev"><h3>Revision</h3>Partition = split (same server). Shard = split across servers (scale writes). Replicate = copy (scale reads + HA). Pick shard key carefully; consistent hashing for resharding.</div>
+</section>
+
+<!-- ================= 11 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">11</span>CAP Theorem · ACID vs BASE</h1><div class="rule"></div>
+  <div class="box def"><h3>CAP theorem</h3>In a <span class="hl">distributed</span> system, when a <span class="hl">network partition</span> happens you can guarantee only one of: <b>Consistency</b> or <b>Availability</b>.
+  <ul class="pen" style="margin-top:6px">
+    <li><b>C</b>onsistency — every read gets the latest write (all nodes show the same data).</li>
+    <li><b>A</b>vailability — every request gets a (non-error) response, even if not the latest.</li>
+    <li><b>P</b>artition tolerance — system keeps working when messages between nodes are lost.</li>
+  </ul></div>
+  <svg viewBox="0 0 420 230" width="100%" style="max-width:420px;display:block;margin:4px auto">
+    <polygon points="210,20 40,205 380,205" fill="#fffcf3" stroke="#1d3a5f" stroke-width="3"/>
+    <circle cx="210" cy="20" r="18" fill="#d62f4b"/><text x="210" y="27" text-anchor="middle" fill="#fff" font-size="20">C</text>
+    <circle cx="40" cy="205" r="18" fill="#1f8a5b"/><text x="40" y="212" text-anchor="middle" fill="#fff" font-size="20">A</text>
+    <circle cx="380" cy="205" r="18" fill="#7b4fd6"/><text x="380" y="212" text-anchor="middle" fill="#fff" font-size="20">P</text>
+    <text x="320" y="105" font-size="16" fill="#1f2a44">CP: banks,</text><text x="320" y="123" font-size="16" fill="#1f2a44">HBase, ZooKeeper</text>
+    <text x="150" y="226" text-anchor="middle" font-size="16" fill="#1f2a44">AP: Cassandra, DynamoDB, DNS</text>
+    <text x="125" y="80" text-anchor="end" font-size="16" fill="#d62f4b">CA: one node</text><text x="125" y="98" text-anchor="end" font-size="16" fill="#d62f4b">(no partition)</text>
+  </svg>
+  <table class="t">
+    <tr><th style="width:16%">Choice</th><th>During a partition…</th><th style="width:36%">Use for</th></tr>
+    <tr><td>CP</td><td>Reject / block requests rather than return stale data</td><td>Bank balance, payments, inventory/booking</td></tr>
+    <tr><td>AP</td><td>Answer anyway, may be stale; sync later (eventual consistency)</td><td>Social feed, likes, product reviews, DNS</td></tr>
+  </table>
+  <div class="box mis"><h3>Mistake</h3>"Pick any 2 of 3" — in a real distributed system <b>P is not optional</b> (networks fail). The real choice is <b>C vs A when a partition happens</b>. Bonus: <span class="hl">PACELC</span> — Else (no partition) you trade <b>Latency vs Consistency</b>.</div>
+  <h2>ACID (SQL transactions)</h2>
+  <ul class="pen">
+    <li><span class="hl">Atomicity</span> — all or nothing. <span class="hl">Consistency</span> — rules/constraints always hold. <span class="hl">Isolation</span> — concurrent transactions don't interfere. <span class="hl">Durability</span> — committed = survives crash.</li>
+  </ul>
+  <div class="cw"><span class="tag">bank transfer — atomic</span><pre><span class="kw">START TRANSACTION</span>;
+  <span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance - <span class="nu">500</span> <span class="kw">WHERE</span> id = <span class="nu">1</span>;
+  <span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance + <span class="nu">500</span> <span class="kw">WHERE</span> id = <span class="nu">2</span>;
+<span class="kw">COMMIT</span>;   <span class="c">-- any failure → ROLLBACK, money never disappears</span></pre></div>
+  <h2>BASE (many NoSQL)</h2>
+  <ul class="pen"><li><span class="hl">Basically Available</span> · <span class="hl">Soft state</span> (may change without input as replicas sync) · <span class="hl">Eventual consistency</span> (all replicas agree… eventually).</li></ul>
+  <table class="t">
+    <tr><th style="width:20%">Point</th><th>ACID</th><th>BASE</th></tr>
+    <tr><td>Priority</td><td>Correctness, strong consistency</td><td>Availability, scale, speed</td></tr>
+    <tr><td>Typical DB</td><td>MySQL, PostgreSQL, Oracle</td><td>Cassandra, DynamoDB, CouchDB</td></tr>
+    <tr><td>Scaling</td><td>Mostly vertical (harder to distribute)</td><td>Horizontal by design</td></tr>
+    <tr><td>Example</td><td>Payments, orders, ledgers</td><td>Likes count, feeds, analytics</td></tr>
+  </table>
+  <div class="box rev"><h3>Revision</h3>CAP: partition will happen → choose C (CP) or A (AP). ACID = strict transactions (SQL). BASE = available + eventually consistent (NoSQL). Money → ACID/CP; social → BASE/AP.</div>
+</section>
+
+<!-- ================= 12 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">12</span>SQL vs NoSQL + 4 NoSQL types</h1><div class="rule"></div>
+  <table class="t">
+    <tr><th style="width:18%">Point</th><th>SQL (relational)</th><th>NoSQL</th></tr>
+    <tr><td>Structure</td><td>Tables, rows, fixed <span class="hl">schema</span></td><td>Documents, key-value, columns, graphs — <span class="hl">flexible schema</span></td></tr>
+    <tr><td>Relations</td><td>JOINs, foreign keys</td><td>Usually denormalised / embedded</td></tr>
+    <tr><td>Transactions</td><td>Strong ACID</td><td>Often BASE (many now offer ACID per document)</td></tr>
+    <tr><td>Scaling</td><td>Vertical first; sharding is hard</td><td>Horizontal by design</td></tr>
+    <tr><td>Query</td><td>SQL (standard)</td><td>DB-specific APIs</td></tr>
+    <tr><td>Examples</td><td>MySQL, PostgreSQL, Oracle</td><td>MongoDB, Redis, Cassandra, Neo4j</td></tr>
+    <tr><td>Pick when</td><td>Structured data, complex queries, money</td><td>Huge scale, fast-changing shape, high write volume</td></tr>
+  </table>
+
+  <h2>1 · Document DB (L17)</h2>
+  <div class="two">
+    <div><p>Stores <span class="hl">JSON-like documents</span>; each can have different fields; nested data in one read.</p>
+    <ul class="pen"><li><b>MongoDB</b>, CouchDB, Firestore</li><li>Use: product catalog, CMS, user profiles</li></ul></div>
+    <div class="cw" style="margin-top:6px"><span class="tag">MongoDB doc</span><pre>{ _id: <span class="s">"p101"</span>, name: <span class="s">"iPhone 16"</span>,
+  price: <span class="nu">79900</span>,
+  specs: { ram: <span class="s">"8GB"</span>, color: <span class="s">"black"</span> },
+  tags: [<span class="s">"phone"</span>, <span class="s">"apple"</span>] }</pre></div>
+  </div>
+  <h2>2 · Key-Value DB (L18)</h2>
+  <div class="two">
+    <div><p>Simplest: <span class="hl">key → value</span>, like a giant hash map. O(1) lookups, often in-memory.</p>
+    <ul class="pen"><li><b>Redis</b>, DynamoDB, Memcached</li><li>Use: cache, sessions, shopping cart, rate-limit counters, leaderboards</li></ul></div>
+    <div class="cw" style="margin-top:6px"><span class="tag">redis-cli</span><pre>SET session:abc123 <span class="s">"user:7"</span> EX <span class="nu">1800</span>
+GET session:abc123
+INCR page:views:home
+ZADD leaderboard <span class="nu">980</span> <span class="s">"sandeep"</span></pre></div>
+  </div>
+  <h2>3 · Column-Family DB (L19)</h2>
+  <div class="two">
+    <div><p>Rows identified by a key, columns grouped in <span class="hl">families</span>; each row can have different columns (wide rows). Data stored by column → great for <span class="hl">huge write volume</span>.</p>
+    <ul class="pen"><li><b>Cassandra</b>, HBase, ScyllaDB</li><li>Use: time-series, IoT sensors, messages, activity logs</li></ul></div>
+    <div class="cw" style="margin-top:6px"><span class="tag">Cassandra CQL</span><pre><span class="kw">CREATE TABLE</span> messages (
+  chat_id uuid, sent_at timeuuid,
+  sender text, body text,
+  <span class="kw">PRIMARY KEY</span> (chat_id, sent_at)
+) <span class="kw">WITH CLUSTERING ORDER BY</span> (sent_at <span class="kw">DESC</span>);</pre></div>
+  </div>
+  <h2>4 · Graph DB (L20)</h2>
+  <div class="two">
+    <div><p>Data as <span class="hl">nodes (entities) + edges (relationships)</span>. Following relationships is fast — no expensive multi-JOINs.</p>
+    <ul class="pen"><li><b>Neo4j</b>, Amazon Neptune</li><li>Use: social network ("friends of friends"), recommendations, fraud detection, maps</li></ul></div>
+    <div class="cw" style="margin-top:6px"><span class="tag">Neo4j Cypher</span><pre><span class="c">// friends-of-friends I don't follow yet</span>
+<span class="kw">MATCH</span> (me:User {name:<span class="s">'Sandeep'</span>})
+      -[:FOLLOWS]->()-[:FOLLOWS]->(f)
+<span class="kw">WHERE NOT</span> (me)-[:FOLLOWS]->(f)
+<span class="kw">RETURN</span> f.name <span class="kw">LIMIT</span> <span class="nu">10</span>;</pre></div>
+  </div>
+  <div class="tip">Decision rule: <b>money / relations / reports → SQL</b>. Flexible docs → MongoDB. Speed / cache → Redis. Massive writes → Cassandra. Relationships → Neo4j. Big systems use <b>several</b> (polyglot persistence).</div>
+  <div class="box mine"><h3>From my work</h3>MySQL behind the Livia HMIS NestJS services (relational: patients, appointments, billing need ACID); MongoDB in the Cold Storage tool (flexible calculation inputs).</div>
+  <div class="box rev"><h3>Revision</h3>SQL = schema + JOIN + ACID. NoSQL = flexible + horizontal. Document (Mongo), Key-value (Redis), Column-family (Cassandra), Graph (Neo4j) — know one use case each.</div>
+</section>
+
+<!-- ================= 13 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">13</span>Message Queues</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3>A <span class="hl">message queue</span> lets services talk <span class="hl">asynchronously</span>: a <b>producer</b> puts a message in the queue and moves on; a <b>consumer</b> picks it up and processes it later. Real life: <b>restaurant order slips</b> — the waiter pins the order and goes back to customers; the kitchen cooks at its own pace.</div>
+  <div class="flow"><div class="nd g">Producer<small>Order service</small></div><span class="ar">→</span><div class="nd o" style="min-width:200px">[ msg | msg | msg ]<small>Queue / Broker</small></div><span class="ar">→</span><div class="nd p">Consumers<small>Email · Invoice · SMS</small></div></div>
+  <h2>Why use it?</h2>
+  <ul class="pen">
+    <li><span class="hl">Decoupling</span> — producer doesn't know/care who consumes.</li>
+    <li><span class="hl">Buffer spikes</span> — 10k orders/sec queue up; consumers process at their own speed.</li>
+    <li><b>Async heavy work</b> — user gets "Order placed ✓" instantly; email, PDF invoice, notifications happen in background.</li>
+    <li><b>Reliability</b> — if a consumer is down, messages wait; retries on failure.</li>
+  </ul>
+  <h2>Two models</h2>
+  <div class="two">
+    <div class="box gbox" style="margin:0"><h3>Point-to-point</h3>Each message is consumed by <b>one</b> consumer (work queue). e.g. resize image jobs.</div>
+    <div class="box def" style="margin:0"><h3>Publish / Subscribe</h3>Message goes to a <b>topic</b>; <b>every</b> subscriber gets a copy. e.g. "OrderPlaced" → email + analytics + inventory.</div>
+  </div>
+  <h2>Delivery guarantees</h2>
+  <table class="t">
+    <tr><th style="width:24%">Guarantee</th><th>Meaning</th></tr>
+    <tr><td>At-most-once</td><td>May be lost, never duplicated (fire and forget)</td></tr>
+    <tr><td>At-least-once</td><td>Never lost, <span class="hl">may be duplicated</span> → consumers must be <b>idempotent</b> (most common)</td></tr>
+    <tr><td>Exactly-once</td><td>Hard &amp; costly; approximated with idempotency keys / transactions</td></tr>
+  </table>
+  <ul class="pen"><li><b>Dead Letter Queue (DLQ)</b> — messages that keep failing after N retries go here for inspection, so they don't block the queue.</li><li><b>Ack</b> — consumer acknowledges after success; un-acked messages are redelivered.</li></ul>
+  <table class="t">
+    <tr><th style="width:18%">Tool</th><th>Style</th><th style="width:38%">Best for</th></tr>
+    <tr><td>Kafka</td><td>Distributed append-only <b>log</b>, partitions, messages kept for days, replayable</td><td>Event streaming, very high throughput, analytics</td></tr>
+    <tr><td>RabbitMQ</td><td>Classic broker with exchanges &amp; routing</td><td>Task queues, complex routing</td></tr>
+    <tr><td>AWS SQS / SNS</td><td>Managed queue / pub-sub</td><td>No-ops cloud apps</td></tr>
+  </table>
+  <div class="cw"><span class="tag">BullMQ (Redis-backed) in Node</span><pre><span class="c">// producer — inside the order API</span>
+<span class="kw">await</span> emailQueue.<span class="f">add</span>(<span class="s">'order-confirmation'</span>, { orderId, email },
+                     { attempts: <span class="nu">3</span>, backoff: { type: <span class="s">'exponential'</span>, delay: <span class="nu">2000</span> } });
+<span class="kw">return</span> res.<span class="f">status</span>(<span class="nu">201</span>).<span class="f">json</span>({ orderId });   <span class="c">// respond immediately</span>
+
+<span class="c">// consumer — separate worker process</span>
+<span class="kw">new</span> <span class="f">Worker</span>(<span class="s">'email'</span>, <span class="kw">async</span> (job) => {
+  <span class="kw">await</span> <span class="f">sendMail</span>(job.data.email, job.data.orderId);   <span class="c">// make it idempotent!</span>
+});</pre></div>
+  <div class="box rev"><h3>Revision</h3>MQ = async + decoupling + spike buffer + retries. P2P (one consumer) vs Pub/Sub (all subscribers). At-least-once → idempotent consumers + DLQ. Kafka = log/streaming, RabbitMQ = task broker.</div>
+</section>
+
+<!-- ================= 14 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">14</span>Microservice Architecture</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Microservices</span> = building an app as <span class="hl">many small, independent services</span>, each owning <b>one business capability</b> and its <b>own database</b>, deployed separately, talking over APIs/queues. Opposite: a <b>monolith</b> — one codebase, one deploy, one DB.</div>
+  <svg viewBox="0 0 720 230" width="100%" style="max-width:720px;display:block;margin:4px auto">
+    <defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#d62f4b"/></marker></defs>
+    <rect x="10" y="90" width="110" height="46" rx="12" fill="#eaf7ef" stroke="#1f8a5b" stroke-width="2.5"/><text x="65" y="119" text-anchor="middle" font-size="17">Web / App</text>
+    <rect x="170" y="80" width="130" height="66" rx="12" fill="#f3eefe" stroke="#7b4fd6" stroke-width="2.5"/><text x="235" y="108" text-anchor="middle" font-size="17">API Gateway</text><text x="235" y="128" text-anchor="middle" font-size="12" fill="#555">auth · routing · rate limit</text>
+    <path d="M120 113 H165" stroke="#d62f4b" stroke-width="2.5" marker-end="url(#m)"/>
+    <g font-size="16">
+      <rect x="360" y="10" width="130" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="425" y="36" text-anchor="middle">User svc</text>
+      <rect x="360" y="70" width="130" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="425" y="96" text-anchor="middle">Order svc</text>
+      <rect x="360" y="130" width="130" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="425" y="156" text-anchor="middle">Payment svc</text>
+      <rect x="360" y="185" width="130" height="40" rx="10" fill="#fff4e8" stroke="#e8762b" stroke-width="2.5"/><text x="425" y="211" text-anchor="middle">Message queue</text>
+      <rect x="560" y="10" width="110" height="40" rx="18" fill="#fdecee" stroke="#d62f4b" stroke-width="2"/><text x="615" y="36" text-anchor="middle">User DB</text>
+      <rect x="560" y="70" width="110" height="40" rx="18" fill="#fdecee" stroke="#d62f4b" stroke-width="2"/><text x="615" y="96" text-anchor="middle">Order DB</text>
+      <rect x="560" y="130" width="110" height="40" rx="18" fill="#fdecee" stroke="#d62f4b" stroke-width="2"/><text x="615" y="156" text-anchor="middle">Payment DB</text>
+    </g>
+    <path d="M300 105 L355 32" stroke="#1f8a5b" stroke-width="2"/><path d="M300 112 H355" stroke="#1f8a5b" stroke-width="2"/><path d="M300 120 L355 150" stroke="#1f8a5b" stroke-width="2"/>
+    <path d="M490 30 H558M490 90 H558M490 150 H558" stroke="#1d3a5f" stroke-width="2"/>
+    <path d="M425 110 V128M425 170 V183" stroke="#e8762b" stroke-width="2" stroke-dasharray="4 4"/>
+  </svg>
+  <table class="t">
+    <tr><th style="width:20%">Point</th><th>Monolith</th><th>Microservices</th></tr>
+    <tr><td>Deploy</td><td>Whole app every time</td><td>Each service independently</td></tr>
+    <tr><td>Scale</td><td>Scale everything together</td><td>Scale only the hot service</td></tr>
+    <tr><td>Failure</td><td>One bug can crash all</td><td>Isolated (if designed well)</td></tr>
+    <tr><td>Tech</td><td>One stack</td><td>Each team picks its stack</td></tr>
+    <tr><td>Complexity</td><td>Simple to start, debug, test</td><td>Network calls, distributed data, monitoring, DevOps</td></tr>
+    <tr><td>Best for</td><td>Small team, early product</td><td>Large teams, large scale, clear domains</td></tr>
+  </table>
+  <h2>Building blocks</h2>
+  <ul class="pen">
+    <li><span class="hl">API Gateway</span> — single entry: routing, auth, rate limiting, aggregation.</li>
+    <li><span class="hl">Service discovery</span> — find service addresses dynamically (Consul, Kubernetes DNS).</li>
+    <li><b>Communication</b> — sync REST/gRPC, async message queue / events.</li>
+    <li><b>Database per service</b> — no sharing tables across services.</li>
+    <li><b>Resilience</b> — timeouts, retries, <span class="hl">circuit breaker</span> (stop calling a failing service).</li>
+    <li><b>Observability</b> — central logs, metrics, distributed tracing (correlation IDs).</li>
+    <li><b>Saga pattern</b> — a distributed transaction as a chain of local steps + compensating actions (refund if shipping fails).</li>
+  </ul>
+  <div class="box mine"><h3>From my work</h3>Livia HMIS: legacy <b>PHP monolith → 7 NestJS microservices</b> + MySQL, 48 modules migrated, keeping API contracts &amp; business rules unchanged and checked with <b>API parity tests</b> (strangler-style migration).</div>
+  <div class="box mis"><h3>Mistake</h3><b>Distributed monolith</b> — services share one DB or must deploy together. You pay microservice costs with none of the benefits. Also: starting a tiny project with microservices.</div>
+  <div class="box rev"><h3>Revision</h3>Small services, own DB, independent deploy. Gateway + discovery + async events + circuit breaker + tracing. Saga for cross-service transactions. Monolith first is fine.</div>
+</section>
+
+<!-- ================= 15 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">15</span>HTTP(S) vs WebSocket</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><b>HTTP</b> is <span class="hl">request → response</span>: client always asks first, server can't push. <b>WebSocket</b> is a <span class="hl">persistent, full-duplex</span> connection: after one handshake, both sides can send messages any time. Real life: HTTP = <b>sending letters</b>; WebSocket = <b>a phone call</b> that stays open.</div>
+  <h2>WebSocket handshake</h2>
+  <div class="flow"><div class="nd g">Client<small>GET /chat<br>Upgrade: websocket</small></div><span class="ar">→</span><div class="nd p">Server<small>101 Switching<br>Protocols</small></div><span class="ar">⇄</span><div class="nd o">Two-way frames<small>ws:// · wss://</small></div></div>
+  <table class="t">
+    <tr><th style="width:20%">Point</th><th>HTTP</th><th>WebSocket</th></tr>
+    <tr><td>Connection</td><td>Short-lived per request (keep-alive reuses TCP)</td><td>Long-lived, stays open</td></tr>
+    <tr><td>Direction</td><td>Client → server only (half-duplex)</td><td>Both ways (full-duplex)</td></tr>
+    <tr><td>State</td><td>Stateless</td><td>Stateful (server tracks connections)</td></tr>
+    <tr><td>Overhead</td><td>Headers on every request</td><td>Tiny frames after handshake</td></tr>
+    <tr><td>Caching / LB</td><td>Easy</td><td>Harder (sticky connections)</td></tr>
+    <tr><td>Use</td><td>CRUD APIs, pages, files</td><td>Chat, live scores, stock ticker, multiplayer games, collaborative editing</td></tr>
+  </table>
+  <h2>Ways to get "real-time"</h2>
+  <ul class="pen">
+    <li><b>Short polling</b> — ask every few seconds (wasteful).</li>
+    <li><b>Long polling</b> — server holds the request until there's data.</li>
+    <li><b>SSE</b> (Server-Sent Events) — one-way server → client stream over HTTP (notifications, live feeds).</li>
+    <li><b>WebSocket</b> — two-way, lowest latency.</li>
+  </ul>
+  <div class="cw"><span class="tag">ws server + browser client</span><pre><span class="c">// server.js (npm i ws)</span>
+<span class="kw">const</span> wss = <span class="kw">new</span> <span class="f">WebSocketServer</span>({ port: <span class="nu">8080</span> });
+wss.<span class="f">on</span>(<span class="s">'connection'</span>, (ws) => {
+  ws.<span class="f">on</span>(<span class="s">'message'</span>, (msg) => {
+    wss.clients.<span class="f">forEach</span>(c => c.<span class="f">send</span>(msg.<span class="f">toString</span>()));   <span class="c">// broadcast</span>
+  });
+});
+
+<span class="c">// browser</span>
+<span class="kw">const</span> socket = <span class="kw">new</span> <span class="f">WebSocket</span>(<span class="s">'wss://chat.example.com'</span>);
+socket.<span class="f">onmessage</span> = (e) => console.<span class="f">log</span>(<span class="s">'new:'</span>, e.data);
+socket.<span class="f">send</span>(<span class="s">'Hello!'</span>);</pre></div>
+  <div class="box mis"><h3>Scaling gotcha</h3>User A on server 1, user B on server 2 → a message to B must cross servers. Use a <span class="hl">pub/sub backbone</span> (Redis Pub/Sub, Kafka) between WebSocket servers, plus sticky load balancing and heartbeats / reconnect logic.</div>
+  <div class="box rev"><h3>Revision</h3>HTTP = ask → answer, stateless. WebSocket = Upgrade → 101 → open two-way pipe. Polling → long polling → SSE → WebSocket. Scale with Redis pub/sub.</div>
+</section>
+
+<!-- ================= 16 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">16</span>Rate Limiting</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Rate limiting</span> = controlling <span class="hl">how many requests a client can make in a time window</span> (e.g. 100 req/min per user/IP/API key). Extra requests get <code class="k">429 Too Many Requests</code>. Real life: an <b>ATM daily withdrawal limit</b> / OTP "try again after 30 s".</div>
+  <h2>Why</h2>
+  <ul class="pen"><li>Stop abuse: brute-force login, scraping, spam, DDoS. · Fair use between customers. · Protect DB/servers &amp; control cost (paid 3rd-party APIs). · Pricing tiers (free 100/day, pro 10k/day).</li></ul>
+  <h2>Algorithms</h2>
+  <table class="t">
+    <tr><th style="width:22%">Algorithm</th><th>How it works</th><th style="width:30%">Pros / cons</th></tr>
+    <tr><td>Token bucket</td><td>Bucket holds N tokens, refilled at fixed rate. Each request takes 1 token; empty → reject.</td><td>✓ Allows short <b>bursts</b>, memory-light. Used by AWS, Stripe.</td></tr>
+    <tr><td>Leaky bucket</td><td>Requests enter a queue, processed (leak) at a <b>constant rate</b>; full → drop.</td><td>✓ Smooth output. ✗ Bursts wait / dropped.</td></tr>
+    <tr><td>Fixed window counter</td><td>Count per window (12:00–12:01); reset each minute.</td><td>✓ Simple. ✗ <span class="hl">Boundary burst</span>: 100 at 12:00:59 + 100 at 12:01:00.</td></tr>
+    <tr><td>Sliding window log</td><td>Store timestamp of each request; count those in last 60 s.</td><td>✓ Accurate. ✗ Memory heavy.</td></tr>
+    <tr><td>Sliding window counter</td><td>Current count + previous window × overlap %.</td><td>✓ Accurate enough + cheap (best balance).</td></tr>
+  </table>
+  <h2>Where to put it</h2>
+  <div class="flow"><div class="nd g">Client</div><span class="ar">→</span><div class="nd p">API Gateway / LB<small>global limits</small></div><span class="ar">→</span><div class="nd o">App middleware<small>per user / route</small></div><span class="ar">↔</span><div class="nd r">Redis<small>shared counters</small></div></div>
+  <div class="cw"><span class="tag">fixed window with Redis (shared across servers)</span><pre><span class="kw">async function</span> <span class="f">rateLimit</span>(req, res, next) {
+  <span class="kw">const</span> key = <span class="s">`rl:${req.ip}:${Math.floor(Date.now() / 60000)}`</span>;  <span class="c">// per minute</span>
+  <span class="kw">const</span> count = <span class="kw">await</span> redis.<span class="f">incr</span>(key);
+  <span class="kw">if</span> (count === <span class="nu">1</span>) <span class="kw">await</span> redis.<span class="f">expire</span>(key, <span class="nu">60</span>);
+  res.<span class="f">set</span>(<span class="s">'X-RateLimit-Remaining'</span>, Math.<span class="f">max</span>(<span class="nu">0</span>, <span class="nu">100</span> - count));
+  <span class="kw">if</span> (count > <span class="nu">100</span>) <span class="kw">return</span> res.<span class="f">status</span>(<span class="nu">429</span>).<span class="f">set</span>(<span class="s">'Retry-After'</span>, <span class="s">'60'</span>).<span class="f">send</span>(<span class="s">'Slow down'</span>);
+  <span class="f">next</span>();
+}</pre></div>
+  <div class="box mis"><h3>Mistake</h3>Keeping counters <b>in each server's memory</b> — with 5 servers behind an LB the user really gets 5× the limit. Use a <b>shared store (Redis)</b>. Also rate-limit login/OTP endpoints much tighter than normal ones.</div>
+  <div class="box rev"><h3>Revision</h3>Limit requests per key per window → 429 + Retry-After. Token bucket (bursts), leaky bucket (smooth), fixed window (simple, edge burst), sliding log/counter (accurate). Shared counters in Redis.</div>
+</section>
+
+<!-- ================= 17 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">17</span>Security layers · JWT · Session vs JWT</h1><div class="rule"></div>
+  <div class="box def"><h3>Defense in depth (L21)</h3>Never rely on one lock. Put <span class="hl">security at every layer</span>, so if one fails the next stops the attacker. Real life: a <b>bank</b> — guard at the gate, CCTV, ID check at the counter, locker with a key + PIN.</div>
+  <table class="t">
+    <tr><th style="width:20%">Layer</th><th>What protects it</th></tr>
+    <tr><td>Network</td><td>Firewall, VPC / private subnets (DB not public), security groups, DDoS protection (Cloudflare / AWS Shield)</td></tr>
+    <tr><td>Transport</td><td>HTTPS / TLS everywhere, HSTS</td></tr>
+    <tr><td>Application</td><td><span class="hl">Authentication + authorization</span>, input validation, parameterised queries (SQL injection), output escaping (XSS), CSRF tokens, WAF, rate limiting</td></tr>
+    <tr><td>Data</td><td>Encryption at rest, <span class="hl">hash passwords</span> (bcrypt/argon2 — never plain/MD5), least-privilege DB users, backups</td></tr>
+    <tr><td>Monitoring</td><td>Audit logs, alerts, intrusion detection, dependency scanning</td></tr>
+  </table>
+  <div class="tip"><b>AuthN</b> (authentication) = <i>who are you?</i> (login). <b>AuthZ</b> (authorization) = <i>what are you allowed to do?</i> (roles: admin / doctor / patient). 401 = not authenticated, 403 = authenticated but not allowed.</div>
+  <h2>JWT — JSON Web Token (L31)</h2>
+  <div class="flow"><div class="nd r">Header<small>{alg:"HS256",typ:"JWT"}</small></div><span class="ar">.</span><div class="nd p">Payload<small>{sub:7, role:"admin", exp}</small></div><span class="ar">.</span><div class="nd g">Signature<small>HMAC(header.payload, secret)</small></div></div>
+  <ul class="pen">
+    <li>3 parts, each <b>Base64URL</b>-encoded, joined by dots: <code class="k">xxxxx.yyyyy.zzzzz</code>.</li>
+    <li>Payload is <span class="hl">signed, NOT encrypted</span> — anyone can decode it. Signature only proves it wasn't tampered with.</li>
+    <li><b>HS256</b> = one shared secret. <b>RS256</b> = private key signs, public key verifies (good for many services).</li>
+  </ul>
+  <div class="cw"><span class="tag">jsonwebtoken (Node)</span><pre><span class="c">// login → issue tokens</span>
+<span class="kw">const</span> access  = jwt.<span class="f">sign</span>({ sub: user.id, role: user.role }, ACCESS_SECRET,  { expiresIn: <span class="s">'15m'</span> });
+<span class="kw">const</span> refresh = jwt.<span class="f">sign</span>({ sub: user.id },                  REFRESH_SECRET, { expiresIn: <span class="s">'7d'</span> });
+res.<span class="f">cookie</span>(<span class="s">'refresh'</span>, refresh, { httpOnly: <span class="kw">true</span>, secure: <span class="kw">true</span>, sameSite: <span class="s">'strict'</span> });
+
+<span class="c">// middleware → verify on every request</span>
+<span class="kw">const</span> token = req.headers.authorization?.<span class="f">split</span>(<span class="s">' '</span>)[<span class="nu">1</span>];   <span class="c">// "Bearer &lt;token&gt;"</span>
+<span class="kw">try</span> { req.user = jwt.<span class="f">verify</span>(token, ACCESS_SECRET); <span class="f">next</span>(); }
+<span class="kw">catch</span> { res.<span class="f">status</span>(<span class="nu">401</span>).<span class="f">send</span>(<span class="s">'Invalid or expired token'</span>); }</pre></div>
+  <h2>Session vs JWT (L32)</h2>
+  <table class="t">
+    <tr><th style="width:20%">Point</th><th>Session (stateful)</th><th>JWT (stateless)</th></tr>
+    <tr><td>Stored where</td><td>Session data on <b>server</b> (memory/Redis/DB); browser holds only a session ID cookie</td><td>All claims inside the <b>token</b> on the client</td></tr>
+    <tr><td>Verify</td><td>Look up session ID in store each request</td><td>Check signature — no DB lookup</td></tr>
+    <tr><td>Scaling</td><td>Needs shared session store (Redis) or sticky sessions</td><td>Any server can verify → easy horizontal scale, microservices</td></tr>
+    <tr><td>Logout / revoke</td><td><span class="hl">Easy</span> — delete the session</td><td><span class="hl">Hard</span> — valid until <code class="k">exp</code>; use short expiry + refresh tokens / denylist</td></tr>
+    <tr><td>Size</td><td>Small cookie</td><td>Bigger token on every request</td></tr>
+    <tr><td>Best for</td><td>Classic server-rendered web apps</td><td>APIs, SPAs, mobile apps, service-to-service</td></tr>
+  </table>
+  <div class="box mine"><h3>From my work</h3>NextAuth in the Marriage Registration portal (session handling); PayU flow where the <b>server builds and verifies the hash</b> — never trust amounts or status coming from the browser.</div>
+  <div class="box mis"><h3>Mistake</h3>Putting passwords / secrets in the JWT payload (it's readable!). Storing tokens in <code class="k">localStorage</code> → stolen by XSS; prefer <b>httpOnly, secure cookies</b>. Never skip checking <code class="k">exp</code> and the algorithm.</div>
+  <div class="box rev"><h3>Revision</h3>Defense in depth: network → transport → app → data → monitoring. JWT = header.payload.signature, signed not encrypted. Session = server state, easy revoke. JWT = stateless, easy scale, hard revoke → short-lived access + refresh token.</div>
+</section>
+
+<!-- ================= 18 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">18</span>SOLID Principles</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">SOLID</span> = 5 object-oriented design principles (Robert C. Martin) that make code <span class="hl">easy to change, test and extend</span>. Core of LLD interviews.</div>
+  <table class="t">
+    <tr><th style="width:8%">#</th><th style="width:27%">Principle</th><th>One line</th></tr>
+    <tr><td>S</td><td>Single Responsibility</td><td>A class should have <b>one reason to change</b>.</td></tr>
+    <tr><td>O</td><td>Open / Closed</td><td>Open for <b>extension</b>, closed for <b>modification</b>.</td></tr>
+    <tr><td>L</td><td>Liskov Substitution</td><td>A subclass must work <b>anywhere its parent works</b>.</td></tr>
+    <tr><td>I</td><td>Interface Segregation</td><td>Many <b>small</b> interfaces &gt; one fat interface.</td></tr>
+    <tr><td>D</td><td>Dependency Inversion</td><td>Depend on <b>abstractions</b>, not concrete classes.</td></tr>
+  </table>
+  <div class="two">
+    <div class="cw"><span class="tag">S — split jobs</span><pre><span class="c">// ✗ Invoice does maths + PDF + email</span>
+<span class="kw">class</span> <span class="f">InvoiceCalculator</span> { <span class="f">total</span>() {} }
+<span class="kw">class</span> <span class="f">InvoicePdf</span>        { <span class="f">render</span>() {} }
+<span class="kw">class</span> <span class="f">InvoiceMailer</span>     { <span class="f">send</span>() {} }</pre></div>
+    <div class="cw"><span class="tag">O — add, don't edit</span><pre><span class="kw">interface</span> <span class="f">Payment</span> { <span class="f">pay</span>(amt: number): <span class="kw">void</span> }
+<span class="kw">class</span> <span class="f">Upi</span>  <span class="kw">implements</span> Payment { <span class="f">pay</span>(a) {} }
+<span class="kw">class</span> <span class="f">Card</span> <span class="kw">implements</span> Payment { <span class="f">pay</span>(a) {} }
+<span class="c">// new Wallet? add a class, no if/else edits</span></pre></div>
+  </div>
+  <div class="two">
+    <div class="cw"><span class="tag">L — don't break the parent</span><pre><span class="c">// ✗ Penguin extends Bird { fly() { throw } }</span>
+<span class="kw">class</span> <span class="f">Bird</span> { <span class="f">eat</span>() {} }
+<span class="kw">class</span> <span class="f">FlyingBird</span> <span class="kw">extends</span> Bird { <span class="f">fly</span>() {} }
+<span class="kw">class</span> <span class="f">Penguin</span> <span class="kw">extends</span> Bird {}   <span class="c">// ✓</span></pre></div>
+    <div class="cw"><span class="tag">I — small interfaces</span><pre><span class="c">// ✗ Machine { print(); scan(); fax(); }</span>
+<span class="kw">interface</span> <span class="f">Printer</span> { <span class="f">print</span>(): <span class="kw">void</span> }
+<span class="kw">interface</span> <span class="f">Scanner</span> { <span class="f">scan</span>(): <span class="kw">void</span> }
+<span class="kw">class</span> <span class="f">BasicPrinter</span> <span class="kw">implements</span> Printer {}</pre></div>
+  </div>
+  <div class="cw"><span class="tag">D — inject the abstraction (NestJS does this for me)</span><pre><span class="kw">interface</span> <span class="f">Notifier</span> { <span class="f">send</span>(to: string, msg: string): Promise&lt;<span class="kw">void</span>&gt; }
+
+<span class="kw">class</span> <span class="f">OrderService</span> {
+  <span class="kw">constructor</span>(<span class="kw">private</span> notifier: Notifier) {}     <span class="c">// not "new EmailService()"</span>
+  <span class="kw">async</span> <span class="f">place</span>(o) { <span class="c">/* save */</span> <span class="kw">await</span> <span class="kw">this</span>.notifier.<span class="f">send</span>(o.email, <span class="s">'Placed'</span>); }
+}
+<span class="kw">new</span> <span class="f">OrderService</span>(<span class="kw">new</span> <span class="f">SmsNotifier</span>());   <span class="c">// swap Email/SMS/mock in tests</span></pre></div>
+  <div class="box rev"><h3>Revision</h3>S one job · O extend not edit · L child replaces parent safely · I small interfaces · D depend on interfaces (DI). Benefit: changes stay local, tests are easy.</div>
+</section>
+
+<!-- ================= 19 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">19</span>Case study — Instagram</h1><div class="rule"></div>
+  <h2>1 · Requirements</h2>
+  <div class="two">
+    <div class="box gbox" style="margin:0"><h3>Functional</h3>Upload photo/video + caption · follow / unfollow · home <b>feed</b> · like &amp; comment · stories (24 h) · search · notifications.</div>
+    <div class="box def" style="margin:0"><h3>Non-functional</h3>Read-heavy (reads ≫ writes) · feed &lt; ~200 ms · highly available (AP is OK for likes/feed) · media never lost · global users.</div>
+  </div>
+  <h2>2 · Estimates (rough)</h2>
+  <div class="cw"><span class="tag">back-of-envelope</span><pre>500M DAU, 1 in 10 uploads/day → 50M uploads/day ≈ <span class="nu">600</span> uploads/s
+avg media 1 MB (+ resized copies)       → ~50 TB/day new storage
+each user opens feed ~20×/day          → 10B feed reads/day ≈ <span class="nu">115K</span> reads/s
+→ read-heavy: <span class="kw">cache + CDN</span> everything we can</pre></div>
+  <h2>3 · High-level design</h2>
+  <svg viewBox="0 0 740 300" width="100%" style="max-width:740px;display:block;margin:4px auto">
+    <defs><marker id="i" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#d62f4b"/></marker></defs>
+    <g font-size="15" fill="#1f2a44">
+    <rect x="10" y="125" width="96" height="44" rx="12" fill="#eaf7ef" stroke="#1f8a5b" stroke-width="2.5"/><text x="58" y="152" text-anchor="middle">Mobile app</text>
+    <rect x="10" y="20" width="96" height="44" rx="12" fill="#fff4e8" stroke="#e8762b" stroke-width="2.5"/><text x="58" y="47" text-anchor="middle">CDN</text>
+    <path d="M58 125 V68" stroke="#e8762b" stroke-width="2" marker-end="url(#i)"/><text x="64" y="100" font-size="12">media</text>
+    <rect x="140" y="118" width="120" height="58" rx="12" fill="#f3eefe" stroke="#7b4fd6" stroke-width="2.5"/><text x="200" y="143" text-anchor="middle">LB + API</text><text x="200" y="162" text-anchor="middle">Gateway</text>
+    <path d="M106 147 H136" stroke="#d62f4b" stroke-width="2.5" marker-end="url(#i)"/>
+    <rect x="300" y="10" width="130" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="365" y="35" text-anchor="middle">Upload svc</text>
+    <rect x="300" y="70" width="130" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="365" y="95" text-anchor="middle">User / Follow svc</text>
+    <rect x="300" y="130" width="130" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="365" y="155" text-anchor="middle">Feed svc</text>
+    <rect x="300" y="190" width="130" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="365" y="215" text-anchor="middle">Like / Comment</text>
+    <rect x="300" y="250" width="130" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="365" y="275" text-anchor="middle">Search svc</text>
+    <path d="M260 140 L296 30M260 144 L296 90M260 147 H296M260 152 L296 210M260 156 L296 270" stroke="#1f8a5b" stroke-width="2"/>
+    <rect x="480" y="10" width="140" height="40" rx="18" fill="#fdecee" stroke="#d62f4b" stroke-width="2"/><text x="550" y="35" text-anchor="middle">Object store (S3)</text>
+    <rect x="480" y="70" width="140" height="40" rx="18" fill="#fdecee" stroke="#d62f4b" stroke-width="2"/><text x="550" y="95" text-anchor="middle">SQL / Graph DB</text>
+    <rect x="480" y="130" width="140" height="40" rx="18" fill="#fdecee" stroke="#d62f4b" stroke-width="2"/><text x="550" y="155" text-anchor="middle">Redis feed cache</text>
+    <rect x="480" y="190" width="140" height="40" rx="18" fill="#fdecee" stroke="#d62f4b" stroke-width="2"/><text x="550" y="215" text-anchor="middle">Cassandra</text>
+    <rect x="480" y="250" width="140" height="40" rx="18" fill="#fdecee" stroke="#d62f4b" stroke-width="2"/><text x="550" y="275" text-anchor="middle">Elasticsearch</text>
+    <path d="M430 30 H476M430 90 H476M430 150 H476M430 210 H476M430 270 H476" stroke="#1d3a5f" stroke-width="2"/>
+    <rect x="645" y="70" width="88" height="100" rx="12" fill="#fff4e8" stroke="#e8762b" stroke-width="2.5"/><text x="689" y="105" text-anchor="middle">Kafka</text><text x="689" y="125" text-anchor="middle" font-size="12">fan-out</text><text x="689" y="141" text-anchor="middle" font-size="12">notifications</text>
+    <path d="M620 30 L645 80" stroke="#e8762b" stroke-width="2" stroke-dasharray="4 4"/><path d="M645 150 L620 150" stroke="#e8762b" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#i)"/>
+    </g>
+  </svg>
+  <h2>4 · Upload flow</h2>
+  <ol>
+    <li>App asks Upload svc for a <b>pre-signed URL</b> → uploads the file <b>directly to S3</b> (API servers don't carry big files).</li>
+    <li>Metadata (post id, user id, caption, s3 key, time) saved in DB.</li>
+    <li>Event <code class="k">PostCreated</code> → Kafka → workers make thumbnails / multiple resolutions, update feeds, send notifications.</li>
+    <li>Media served to everyone through the <b>CDN</b>.</li>
+  </ol>
+  <h2>5 · The feed — fan-out (key interview point)</h2>
+  <table class="t">
+    <tr><th style="width:22%">Approach</th><th>How</th><th style="width:32%">Trade-off</th></tr>
+    <tr><td>Fan-out on <b>write</b> (push)</td><td>When I post, push post-id into every follower's pre-computed feed list in Redis</td><td>✓ Feed read is instant. ✗ Celebrity with 100M followers = 100M writes</td></tr>
+    <tr><td>Fan-out on <b>read</b> (pull)</td><td>When I open the app, fetch latest posts from everyone I follow and merge</td><td>✓ Cheap writes. ✗ Slow reads</td></tr>
+    <tr><td><span class="hl">Hybrid</span> ✓</td><td>Push for normal users; <b>pull</b> celebrity posts at read time and merge</td><td>Best of both — what large social apps do</td></tr>
+  </table>
+  <ul class="pen">
+    <li>Likes/comments: huge write volume → Cassandra; like <b>counts</b> in Redis, flushed in batches (write-back!).</li>
+    <li>Stories: stored with <b>24 h TTL</b>. Search: Elasticsearch on users/hashtags. Feed paginated with a cursor.</li>
+  </ul>
+  <div class="box rev"><h3>Revision</h3>Read-heavy → CDN + cache. Media → pre-signed URL → S3 → CDN. Metadata in DB, events via Kafka. Feed = hybrid fan-out (push normal, pull celebrities). Counters in Redis.</div>
+</section>
+
+<!-- ================= 20 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">20</span>Case study — IRCTC Tatkal</h1><div class="rule"></div>
+  <div class="box def"><h3>The problem</h3>Tatkal booking opens at a fixed time (<b>10:00 AM AC, 11:00 AM non-AC</b>). Lakhs of users hit "Book" in the <span class="hl">same few seconds</span> for a <span class="hl">very small number of seats</span>. Need: no crash, <b>no double booking</b>, fair order, and payments that don't lose money.</div>
+  <h2>Design — layer by layer</h2>
+  <div class="flow">
+    <div class="nd g">Users</div><span class="ar">→</span>
+    <div class="nd o">CDN + WAF<small>static, bot block</small></div><span class="ar">→</span>
+    <div class="nd p">Virtual waiting room<small>queue + token</small></div><span class="ar">→</span>
+    <div class="nd">LB → booking servers</div><span class="ar">→</span>
+    <div class="nd r">Seat inventory<small>locked update</small></div><span class="ar">→</span>
+    <div class="nd g">Payment</div>
+  </div>
+  <ol>
+    <li><b>Absorb the spike at the edge</b> — static pages, train lists and schedules from CDN / cache; login done before 10:00.</li>
+    <li><b>Rate limiting + CAPTCHA + bot detection</b> — stop scripts and agents spamming requests; limit per user/IP.</li>
+    <li><span class="hl">Virtual waiting room / queue</span> — users get a place in line; only as many as the booking servers can handle are let in. Smooth load instead of a crash.</li>
+    <li><b>Horizontal scaling</b> — many stateless booking servers behind load balancers; auto-scale before the window opens (the spike is <i>predictable</i>).</li>
+    <li><b>Search ≠ booking</b> — availability searches go to <b>read replicas / cache</b>; only the final booking touches the primary DB.</li>
+    <li><span class="hl">Seat inventory with locking</span> — the critical part: decrement seats atomically so two people never get the same berth.</li>
+    <li><b>Temporary hold</b> — seat is held for the payment window; payment fails / times out → seat released back.</li>
+    <li><b>Async after payment</b> — ticket PDF, SMS, email go through a <b>message queue</b>.</li>
+  </ol>
+  <div class="cw"><span class="tag">no double booking — atomic conditional update</span><pre><span class="c">-- only succeeds if a seat is still free; DB row lock makes it atomic</span>
+<span class="kw">UPDATE</span> train_quota
+   <span class="kw">SET</span> available = available - <span class="nu">1</span>
+ <span class="kw">WHERE</span> train_no = <span class="s">'12951'</span> <span class="kw">AND</span> journey_date = <span class="s">'2026-11-02'</span>
+   <span class="kw">AND</span> class = <span class="s">'3A'</span> <span class="kw">AND</span> quota = <span class="s">'TATKAL'</span> <span class="kw">AND</span> available > <span class="nu">0</span>;
+<span class="c">-- rows affected = 1 → seat held, go to payment
+-- rows affected = 0 → sold out / waitlist</span>
+
+<span class="c">// or a fast pre-check in Redis (atomic DECR) before touching the DB</span>
+<span class="kw">if</span> (<span class="kw">await</span> redis.<span class="f">decr</span>(<span class="s">'seats:12951:3A:TQ'</span>) &lt; <span class="nu">0</span>) { <span class="kw">await</span> redis.<span class="f">incr</span>(...); <span class="kw">return</span> <span class="f">soldOut</span>(); }</pre></div>
+  <table class="t">
+    <tr><th style="width:24%">Locking</th><th>How</th><th style="width:32%">When</th></tr>
+    <tr><td>Pessimistic</td><td><code class="k">SELECT … FOR UPDATE</code> — lock row, others wait</td><td>High contention (Tatkal!)</td></tr>
+    <tr><td>Optimistic</td><td>Version column; update fails if version changed → retry</td><td>Low contention</td></tr>
+  </table>
+  <div class="box mis"><h3>Mistake</h3>"Just add more servers" — the bottleneck is the <b>shared seat inventory</b>, not web servers. Without atomic updates you get <b>double booking</b>; without a queue, the DB melts. This is a <b>CP</b> choice: better to say "try again" than sell one berth twice.</div>
+  <div class="box rev"><h3>Revision</h3>Predictable spike → pre-scale + CDN + cache. Rate limit + CAPTCHA + waiting room. Search on replicas. Atomic / locked seat decrement, hold during payment, release on timeout. Async ticket/SMS via MQ.</div>
+</section>
+
+<!-- ================= 21 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">21</span>Case study — UPI</h1><div class="rule"></div>
+  <div class="box def"><h3>What is UPI?</h3><span class="hl">Unified Payments Interface</span> — India's real-time, 24×7 bank-to-bank payment system run by <b>NPCI</b>. Pay using a <span class="hl">VPA / UPI ID</span> (<code class="k">name@okbank</code>) or QR code — no account number / IFSC needed.</div>
+  <h2>The actors</h2>
+  <table class="t">
+    <tr><th style="width:26%">Actor</th><th>Role</th></tr>
+    <tr><td>Payer app (TPAP)</td><td>PhonePe, Google Pay, Paytm, BHIM — the UI on my phone</td></tr>
+    <tr><td>PSP bank</td><td>Payment Service Provider bank behind the app; connects the app to UPI, owns the <code class="k">@handle</code></td></tr>
+    <tr><td><span class="hl">NPCI UPI switch</span></td><td>Central router: resolves VPA → bank account, routes debit/credit, keeps the records</td></tr>
+    <tr><td>Remitter bank</td><td>My bank — verifies UPI PIN, debits my account</td></tr>
+    <tr><td>Beneficiary bank</td><td>Receiver's bank — credits their account</td></tr>
+  </table>
+  <h2>Payment flow (send ₹500)</h2>
+  <svg viewBox="0 0 740 150" width="100%" style="max-width:740px;display:block;margin:4px auto">
+    <defs><marker id="u" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#d62f4b"/></marker></defs>
+    <g font-size="15" fill="#1f2a44" text-anchor="middle">
+    <rect x="5" y="50" width="100" height="50" rx="12" fill="#eaf7ef" stroke="#1f8a5b" stroke-width="2.5"/><text x="55" y="72">Payer app</text><text x="55" y="90" font-size="12">PIN entered</text>
+    <rect x="150" y="50" width="100" height="50" rx="12" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="200" y="80">PSP bank</text>
+    <rect x="295" y="45" width="140" height="60" rx="12" fill="#f3eefe" stroke="#7b4fd6" stroke-width="2.5"/><text x="365" y="72">NPCI UPI switch</text><text x="365" y="92" font-size="12">VPA → account</text>
+    <rect x="490" y="5" width="130" height="46" rx="12" fill="#fdecee" stroke="#d62f4b" stroke-width="2.5"/><text x="555" y="25">Remitter bank</text><text x="555" y="42" font-size="12">verify PIN · DEBIT</text>
+    <rect x="490" y="99" width="130" height="46" rx="12" fill="#eaf7ef" stroke="#1f8a5b" stroke-width="2.5"/><text x="555" y="119">Beneficiary bank</text><text x="555" y="136" font-size="12">CREDIT</text>
+    <rect x="660" y="99" width="75" height="46" rx="12" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="697" y="127">Payee</text>
+    </g>
+    <g stroke="#d62f4b" stroke-width="2.5" fill="none"><path d="M105 75 H146" marker-end="url(#u)"/><path d="M250 75 H291" marker-end="url(#u)"/><path d="M435 62 L486 32" marker-end="url(#u)"/><path d="M435 90 L486 118" marker-end="url(#u)"/><path d="M620 122 H656" marker-end="url(#u)"/></g>
+    <g font-size="13" fill="#1f8a5b"><text x="125" y="68" text-anchor="middle">1</text><text x="270" y="68" text-anchor="middle">2</text><text x="455" y="38">3</text><text x="455" y="122">4</text><text x="638" y="115" text-anchor="middle">5</text></g>
+  </svg>
+  <ol>
+    <li>I enter the payee VPA + ₹500 + <b>UPI PIN</b>. The PIN is <span class="hl">encrypted on the device</span> (NPCI common library) — the app never sees it in plain text.</li>
+    <li>App → PSP bank → <b>NPCI switch</b> with a unique <b>transaction ID</b>.</li>
+    <li>NPCI resolves payee VPA and sends a <b>debit request</b> to my bank → bank verifies PIN, checks balance, debits.</li>
+    <li>NPCI sends a <b>credit request</b> to the beneficiary bank → credits payee.</li>
+    <li>Success travels back to both apps in seconds; both get notifications.</li>
+  </ol>
+  <h2>System design ideas inside UPI</h2>
+  <ul class="pen">
+    <li><span class="hl">Idempotency</span> — every transaction has a unique ID; retries never debit twice.</li>
+    <li><b>Strong consistency (CP / ACID)</b> for money: debit + credit must both happen, or the debit is <b>reversed</b>.</li>
+    <li><b>Timeouts &amp; deemed status</b> — if a bank doesn't respond, the transaction goes to "pending" and is resolved by status checks + <span class="hl">reconciliation</span>; failed debits are auto-reversed.</li>
+    <li><b>Security</b> — device binding (SIM + phone) + UPI PIN = 2-factor; everything over encrypted channels; per-transaction &amp; daily limits.</li>
+    <li><b>Scale &amp; availability</b> — billions of transactions/month, 24×7; NPCI switch is horizontally scaled with redundant data centres; bank downtimes are isolated.</li>
+    <li><b>Interoperability</b> — any app ↔ any bank through one central switch (hub-and-spoke), like a standard API contract.</li>
+  </ul>
+  <div class="box mis"><h3>Mistake</h3>Thinking the app (PhonePe/GPay) holds my money — it doesn't. Money moves <b>bank → bank</b>; the app is only the interface, NPCI is the router.</div>
+  <div class="box rev"><h3>Revision</h3>App → PSP → NPCI (resolve VPA) → remitter bank (PIN + debit) → beneficiary bank (credit). Unique txn ID = idempotent. Money = consistency first, reversals + reconciliation. Device binding + PIN.</div>
+</section>
+
+<!-- ================= 22 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">22</span>Rapid-fire Q&amp;A</h1><div class="rule"></div>
+  <div class="qa">
+    <p class="q">Q. What happens when you type a URL?</p><p class="a"><b>A.</b> DNS → TCP → TLS → HTTP → CDN/LB → app → cache → DB → response → render.</p>
+    <p class="q">Q. Load balancer vs reverse proxy?</p><p class="a"><b>A.</b> LB spreads load across many servers; a reverse proxy fronts servers (SSL, cache, security). Every LB is a reverse proxy.</p>
+    <p class="q">Q. Which LB algorithm for long-lived uneven requests?</p><p class="a"><b>A.</b> Least connections.</p>
+    <p class="q">Q. How does a CDN reduce latency?</p><p class="a"><b>A.</b> Serves cached copies from an edge server physically near the user; only misses go to origin.</p>
+    <p class="q">Q. Write-through vs write-back?</p><p class="a"><b>A.</b> Write-through writes cache + DB together (safe, slower). Write-back writes cache, flushes later (fast, risk of loss).</p>
+    <p class="q">Q. What is cache stampede?</p><p class="a"><b>A.</b> A hot key expires and many requests hit the DB at once — fix with locking / single-flight and TTL jitter.</p>
+    <p class="q">Q. Horizontal vs vertical scaling?</p><p class="a"><b>A.</b> Vertical = bigger machine (limit, SPOF). Horizontal = more machines (needs LB + stateless apps).</p>
+    <p class="q">Q. Sharding vs replication?</p><p class="a"><b>A.</b> Sharding splits data (scale writes/storage); replication copies data (scale reads, HA). Use both.</p>
+    <p class="q">Q. Why consistent hashing?</p><p class="a"><b>A.</b> Adding/removing a node moves only ~1/N keys instead of reshuffling everything.</p>
+    <p class="q">Q. CAP in one line?</p><p class="a"><b>A.</b> Partitions will happen, so choose consistency (CP) or availability (AP) during one.</p>
+    <p class="q">Q. ACID vs BASE?</p><p class="a"><b>A.</b> ACID = strict transactions, strong consistency. BASE = basically available, eventually consistent.</p>
+    <p class="q">Q. When NoSQL over SQL?</p><p class="a"><b>A.</b> Flexible schema, massive scale / write volume, simple access patterns. SQL for relations, transactions, reporting.</p>
+    <p class="q">Q. Why a message queue?</p><p class="a"><b>A.</b> Decouple services, absorb spikes, do slow work async, retry safely.</p>
+    <p class="q">Q. At-least-once delivery means…?</p><p class="a"><b>A.</b> Messages can repeat → consumers must be idempotent; failed ones go to a DLQ.</p>
+    <p class="q">Q. When NOT to use microservices?</p><p class="a"><b>A.</b> Small team / early product — a modular monolith is simpler; split later along clear domains.</p>
+    <p class="q">Q. WebSocket vs SSE?</p><p class="a"><b>A.</b> WebSocket is two-way; SSE is one-way server → client over plain HTTP.</p>
+    <p class="q">Q. Best rate-limit algorithm for bursts?</p><p class="a"><b>A.</b> Token bucket.</p>
+    <p class="q">Q. Is JWT encrypted?</p><p class="a"><b>A.</b> No — signed. Anyone can read the payload; the signature only prevents tampering.</p>
+    <p class="q">Q. How to log out a JWT user?</p><p class="a"><b>A.</b> Short-lived access token + revocable refresh token (or a denylist).</p>
+    <p class="q">Q. HLD vs LLD?</p><p class="a"><b>A.</b> HLD = components &amp; data flow; LLD = classes, methods, schema inside each component.</p>
+    <p class="q">Q. How to prevent double booking?</p><p class="a"><b>A.</b> Atomic conditional update / row lock on inventory + temporary hold + release on timeout.</p>
+  </div>
+  <h2>One-page cheat sheet</h2>
+  <div class="two">
+    <div class="cw"><span class="tag">building blocks</span><pre>DNS        → name to IP (cached by TTL)
+CDN        → static near users
+LB         → spread + health checks
+Rev proxy  → SSL, cache, hide servers
+Cache      → Redis, cache-aside, LRU
+MQ         → async, decouple, retry
+Gateway    → auth, route, rate limit
+WebSocket  → real-time two-way</pre></div>
+    <div class="cw"><span class="tag">data</span><pre>SQL        → ACID, joins, money
+Document   → MongoDB
+Key-value  → Redis
+Column     → Cassandra (heavy writes)
+Graph      → Neo4j (relations)
+Replicate  → reads + HA
+Shard      → writes + size
+CAP        → CP money · AP feeds</pre></div>
+  </div>
+  <div class="box gbox"><h3>Next step</h3>Practice drawing: URL shortener, WhatsApp chat, YouTube, Uber, notification system — each in 30 minutes with the 7-step approach from Chapter 1.</div>
+  <p class="end">— End of System Design · keep drawing! ✍️ —</p>
+</section>
+
+</body>
+</html>
