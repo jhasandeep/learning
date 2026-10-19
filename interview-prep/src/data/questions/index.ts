@@ -1,6 +1,9 @@
 // Most-asked interview questions: one set per technology, in curriculum order.
 import { NOTE_TOPICS_BY_ID } from '../notes'
 import { javascript } from './javascript'
+import { nextjs } from './nextjs'
+import { react } from './react'
+import { testing } from './testing'
 import type { Question, QuestionSet } from './types'
 
 export type { Difficulty, Question, QuestionSet } from './types'
@@ -22,6 +25,9 @@ const fromNotes = (set: QuestionSet): QuestionTech => {
 
 export const QUESTION_SETS: QuestionTech[] = [
   fromNotes(javascript),
+  fromNotes(react),
+  fromNotes(nextjs),
+  fromNotes(testing),
 ]
 
 export const QUESTION_SETS_BY_ID: Record<string, QuestionTech> = Object.fromEntries(QUESTION_SETS.map((s) => [s.id, s]))

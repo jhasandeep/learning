@@ -1,17 +1,15 @@
 import { execFileSync } from 'node:child_process'
+import { readdirSync } from 'node:fs'
 import vm from 'node:vm'
 import initSqlJs from 'sql.js'
 import { transform } from 'sucrase'
 import { describe, expect, it } from 'vitest'
-import type { Question, QuestionSet } from '@/data/questions/types'
+import { QUESTION_SETS } from '@/data/questions'
+import type { Question } from '@/data/questions/types'
 
-// Every set file in src/data/questions (so a new file is checked as soon as it exists).
-const modules = import.meta.glob<Record<string, unknown>>('../src/data/questions/*.ts', { eager: true })
-const SETS = Object.entries(modules).flatMap(([file, mod]) =>
-  Object.values(mod)
-    .filter((v): v is QuestionSet => Boolean(v && typeof v === 'object' && 'questions' in v && Array.isArray((v as QuestionSet).questions)))
-    .map((set) => ({ file: file.split('/').pop()!.replace(/\.ts$/, ''), set })),
-)
+// Every registered set; the first test checks that every set file is registered.
+const SET_FILES = readdirSync('src/data/questions').filter((f) => f.endsWith('.ts') && f !== 'index.ts' && f !== 'types.ts').map((f) => f.replace(/\.ts$/, ''))
+const SETS = QUESTION_SETS.map((set) => ({ file: set.id, set }))
 
 const RUNNABLE = new Set(['javascript', 'typescript', 'sql', 'python'])
 const hasPython = (() => {
@@ -36,8 +34,8 @@ async function runJs(code: string): Promise<string[]> {
 }
 
 describe('question sets', () => {
-  it('found the sets', () => {
-    expect(SETS.length).toBeGreaterThan(0)
+  it('registers every set file, once', () => {
+    expect(SETS.map((s) => s.set.id).sort()).toEqual([...SET_FILES].sort())
     expect(new Set(SETS.map((s) => s.set.id)).size).toBe(SETS.length)
   })
 
