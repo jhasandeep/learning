@@ -5,7 +5,11 @@ import { useSyncExternalStore } from 'react'
 
 // The inline script in layout.tsx applies the saved theme before first paint;
 // this component only flips the attribute and remembers the choice.
-const THEME_KEY = 'prep-arena:theme'
+// Light is the default. The key was renamed (from 'prep-arena:theme') when dark
+// mode was fixed, so a "dark" saved while the toggle had no visible effect
+// doesn't switch anyone to dark unexpectedly; the old key is cleared.
+const THEME_KEY = 'prep-arena:theme-v2'
+const OLD_THEME_KEY = 'prep-arena:theme'
 
 function subscribe(cb: () => void) {
   const obs = new MutationObserver(cb)
@@ -29,7 +33,7 @@ export function toggleTheme() {
   } catch {}
 }
 
-export const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem("${THEME_KEY}");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})()`
+export const THEME_SCRIPT = `(function(){try{localStorage.removeItem("${OLD_THEME_KEY}");var t=localStorage.getItem("${THEME_KEY}");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})()`
 
 export function ThemeToggle() {
   const theme = useTheme()
