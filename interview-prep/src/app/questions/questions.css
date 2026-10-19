@@ -4,7 +4,11 @@
   html, body { background: #fff !important; }
   aside, header:not(.q-head), nav, .no-print { display: none !important; }
   main { padding: 0 !important; }
-  .q-card { display: block !important; break-inside: avoid; border-color: #d4d4d8 !important; box-shadow: none !important; margin-bottom: 10px; }
+  /* Cards may split across pages (keeping them whole leaves half-empty pages);
+     the question stays with its answer and code blocks stay whole. */
+  .q-card { display: block !important; border-color: #d4d4d8 !important; box-shadow: none !important; margin-bottom: 10px; }
+  .q-card > button { break-after: avoid; break-inside: avoid; }
+  .q-head { break-after: avoid; }
   .q-card.hidden { display: none !important; }
   .q-body { display: block !important; }
   .q-card button svg:last-child { display: none; }

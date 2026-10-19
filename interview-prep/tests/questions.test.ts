@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import vm from 'node:vm'
 import initSqlJs from 'sql.js'
 import { transform } from 'sucrase'
@@ -37,6 +37,10 @@ describe('question sets', () => {
   it('registers every set file, once', () => {
     expect(SETS.map((s) => s.set.id).sort()).toEqual([...SET_FILES].sort())
     expect(new Set(SETS.map((s) => s.set.id)).size).toBe(SETS.length)
+  })
+
+  it('ships a PDF for every set and the top page (npm run notes:pdf regenerates them)', () => {
+    for (const id of ['top', ...SETS.map((s) => s.set.id)]) expect(existsSync(`public/notes/questions/${id}.pdf`), id).toBe(true)
   })
 
   for (const { file, set } of SETS) {

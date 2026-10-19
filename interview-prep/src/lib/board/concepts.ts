@@ -7,6 +7,7 @@
 import type { ExcalidrawElementSkeleton } from '@excalidraw/excalidraw/data/transform'
 import type { Block, NoteTopic } from '@/data/notes'
 import { SQL_SETUP } from '@/data/notes/sql'
+import { plainText } from '@/lib/markup'
 
 export type Skeleton = ExcalidrawElementSkeleton
 
@@ -33,13 +34,8 @@ const C = {
   codeBg: '#f1f3f5', codeLine: '#868e96',
 }
 
-/** Drops the notes mini-markup (`code`, **bold**, ==highlight==), tokenized like <Inline>. */
-export function plain(text: string): string {
-  return text
-    .split(/(`[^`]+`|\*\*[^*]+\*\*|==[^=]+==)/)
-    .map((part) => (/^(`[^`]+`)$/.test(part) ? part.slice(1, -1) : /^(\*\*.+\*\*|==.+==)$/.test(part) ? part.slice(2, -2) : part))
-    .join('')
-}
+/** Drops the notes mini-markup (`code`, **bold**, ==highlight==). */
+export const plain = plainText
 
 /** Greedy word wrap to `max` characters; long words are hard-broken. */
 export function wrap(text: string, max: number): string[] {
