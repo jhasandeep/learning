@@ -9,7 +9,7 @@ A personal space for tracking what I'm learning: notes, practice exercises, and 
 | [`notes/`](notes/) | Concept notes, one Markdown file per topic or session. Start from [`notes/_template.md`](notes/_template.md). |
 | [`exercises/`](exercises/) | Practice code and problem solutions, grouped by topic or language. |
 | [`resources/`](resources/) | Links to books, courses, articles and videos worth keeping. |
-| [`interview-prep/`](interview-prep/) | **PrepArena**: a Next.js interview-prep web app — an 18-language online compiler (Programiz-style), debug-the-code DSA levels, endless verified bugs, spaced-repetition flashcards, full-stack revision notes, most-asked interview questions for 16 technologies, a zoomable mind map of every topic, and an Excalidraw whiteboard for learning and teaching. See its README. |
+| [`interview-prep/`](interview-prep/) | **PrepArena**: a Next.js interview-prep web app — an 18-language online compiler (Programiz-style), debug-the-code DSA levels, endless verified bugs, spaced-repetition flashcards, full-stack revision notes, most-asked interview questions for 16 technologies, a zoomable mind map of every topic, a typing trainer (home row to real code), and an Excalidraw whiteboard for learning and teaching. See its README. |
 
 ## Notes so far
 
@@ -38,5 +38,6 @@ Track current goals here. Tick items off as you finish them.
 | 2026-10-19 | Online compiler | Programiz-style compiler for 18 languages, light theme by default |
 | 2026-10-19 | Full-stack notes | 14 topics in the app + handwritten PDFs + flashcard decks |
 | 2026-10-19 | Interview questions | ~400 most-asked questions for 16 technologies, with practice mode and PDFs |
+| 2026-10-19 | Typing | typing.com-style lessons, timed tests, finger guide, weak-key heatmap |
 | 2026-10-19 | Mind map | Zoomable visual map of all 16 technologies with recall mode |
 | 2026-10-19 | Whiteboard | Excalidraw concept boards for every topic, PDF import/annotate, present, export to PDF |

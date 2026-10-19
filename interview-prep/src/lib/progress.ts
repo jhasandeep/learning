@@ -25,6 +25,26 @@ export interface Progress {
   notesRead: Record<string, string>
   /** "<set>/<question id>" → how well you know a most-asked interview question. */
   questions: Record<string, QuestionStatus>
+  typing: TypingProgress
+}
+
+export interface TypingResult {
+  at: string
+  wpm: number
+  raw: number
+  accuracy: number
+  seconds: number
+  /** Lesson id, or the test mode (e.g. "test:60s:words"). */
+  mode: string
+}
+
+export interface TypingProgress {
+  /** Best result per lesson. */
+  lessons: Record<string, { stars: number; wpm: number; accuracy: number; at: string }>
+  /** Most recent timed tests, newest first (capped). */
+  tests: TypingResult[]
+  /** Physical key → [hits, misses], across all sessions. */
+  keys: Record<string, [number, number]>
 }
 
 export type QuestionStatus = 'known' | 'review'
@@ -42,6 +62,7 @@ export const EMPTY: Progress = {
   dailyGoal: 3,
   notesRead: {},
   questions: {},
+  typing: { lessons: {}, tests: [], keys: {} },
 }
 
 let state: Progress = EMPTY
@@ -67,6 +88,7 @@ function normalise(raw: unknown): Progress {
     ...EMPTY,
     ...p,
     endless: { ...EMPTY.endless, ...p.endless },
+    typing: { ...EMPTY.typing, ...p.typing },
   } as Progress
 }
 
@@ -216,6 +238,43 @@ export function setQuestionStatus(key: string, status: QuestionStatus): number {
   return gain
 }
 
+export const TYPING_LESSON_XP = 20
+export const TYPING_STAR_XP = 10
+export const TYPING_TEST_XP = 10
+const MAX_TESTS = 50
+
+function mergeKeys(into: Record<string, [number, number]>, add: Record<string, [number, number]>) {
+  const out = { ...into }
+  for (const [k, [h, m]] of Object.entries(add)) {
+    const [h0, m0] = out[k] ?? [0, 0]
+    out[k] = [h0 + h, m0 + m]
+  }
+  return out
+}
+
+/**
+ * Saves a finished lesson. XP: the first pass (1+ star) earns TYPING_LESSON_XP,
+ * and each extra star above your best earns TYPING_STAR_XP, so replays can't farm it.
+ */
+export function recordTypingLesson(id: string, r: { stars: number; wpm: number; accuracy: number }, keys: Record<string, [number, number]>): number {
+  const p = load()
+  const prev = p.typing.lessons[id]
+  const prevStars = prev?.stars ?? 0
+  const gain = r.stars > prevStars ? (prevStars === 0 ? TYPING_LESSON_XP + (r.stars - 1) * TYPING_STAR_XP : (r.stars - prevStars) * TYPING_STAR_XP) : 0
+  const best = !prev || r.stars > prev.stars || (r.stars === prev.stars && r.wpm > prev.wpm) ? { ...r, at: new Date().toISOString() } : prev
+  commit(bump({ ...p, typing: { ...p.typing, lessons: { ...p.typing.lessons, [id]: best }, keys: mergeKeys(p.typing.keys, keys) } }, gain))
+  return gain
+}
+
+/** Saves a timed test. XP only for a real attempt: 15 s or longer at 80%+ accuracy. */
+export function recordTypingTest(r: Omit<TypingResult, 'at'>, keys: Record<string, [number, number]>): number {
+  const p = load()
+  const gain = r.seconds >= 15 && r.accuracy >= 80 ? TYPING_TEST_XP : 0
+  const tests = [{ ...r, at: new Date().toISOString() }, ...p.typing.tests].slice(0, MAX_TESTS)
+  commit(bump({ ...p, typing: { ...p.typing, tests, keys: mergeKeys(p.typing.keys, keys) } }, gain))
+  return gain
+}
+
 export function setDailyGoal(goal: number) {
   commit({ ...load(), dailyGoal: Math.min(20, Math.max(1, Math.round(goal))) })
 }
@@ -251,6 +310,7 @@ export const BADGES: Badge[] = [
   { id: 'cards-50', title: 'Flash Learner', description: 'Review 50 flashcards.', earned: (p) => p.reviews >= 50 },
   { id: 'mastered', title: 'Long-Term Memory', description: 'Move 10 cards to box 4 or higher.', earned: (p) => Object.values(p.cards).filter((c) => c.box >= 4).length >= 10 },
   { id: 'week', title: 'Week Warrior', description: 'Practise 7 days in a row.', earned: (p, { today }) => dayStreak(p.activity, today) >= 7 },
+  { id: 'touch-typist', title: 'Touch Typist', description: 'Type 40 WPM at 95% accuracy in a timed test.', earned: (p) => p.typing.tests.some((t) => t.wpm >= 40 && t.accuracy >= 95) },
   { id: 'interview-ready', title: 'Interview Ready', description: 'Know 100 most-asked interview questions.', earned: (p) => Object.values(p.questions).filter((s) => s === 'known').length >= 100 },
   { id: 'reader', title: 'Full-Stack Reader', description: 'Mark 10 notes topics as read.', earned: (p) => Object.keys(p.notesRead).length >= 10 },
   { id: 'level-5', title: 'Level 5', description: 'Earn 1,600 XP.', earned: (p) => p.xp >= 1600 },

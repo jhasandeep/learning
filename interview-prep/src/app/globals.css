@@ -151,3 +151,13 @@ body {
 }
 @keyframes lang-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 .lang-float > * { animation: lang-float 4s ease-in-out infinite; animation-delay: inherit; }
+
+/* Typing trainer caret */
+.typing-caret { position: relative; }
+.typing-caret::before {
+  content: ""; position: absolute; left: -1px; top: 12%; bottom: 12%; width: 2px; border-radius: 2px;
+  background: var(--accent); animation: typing-blink 1s steps(1) infinite;
+}
+@keyframes typing-blink { 50% { opacity: 0; } }
+.typing-text { --line: 2.4rem; }
+@media (min-width: 640px) { .typing-text { --line: 2.75rem; } }
