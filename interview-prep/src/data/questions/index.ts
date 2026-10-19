@@ -1,9 +1,15 @@
 // Most-asked interview questions: one set per technology, in curriculum order.
 import { NOTE_TOPICS_BY_ID } from '../notes'
+import { css } from './css'
+import { git } from './git'
+import { html } from './html'
 import { javascript } from './javascript'
+import { mongodb } from './mongodb'
 import { nextjs } from './nextjs'
 import { react } from './react'
+import { sql } from './sql'
 import { testing } from './testing'
+import { typescript } from './typescript'
 import type { Question, QuestionSet } from './types'
 
 export type { Difficulty, Question, QuestionSet } from './types'
@@ -24,9 +30,15 @@ const fromNotes = (set: QuestionSet): QuestionTech => {
 }
 
 export const QUESTION_SETS: QuestionTech[] = [
+  fromNotes(html),
+  fromNotes(css),
   fromNotes(javascript),
+  fromNotes(typescript),
   fromNotes(react),
   fromNotes(nextjs),
+  fromNotes(sql),
+  fromNotes(mongodb),
+  fromNotes(git),
   fromNotes(testing),
 ]
 
