@@ -1,8 +1,9 @@
 'use client'
 
-import { ArrowRight, Brain, Search } from 'lucide-react'
+import { ArrowRight, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { TechTile } from '@/components/tech-icon'
 import { Card, cx, ProgressBar } from '@/components/ui'
 import { ALL_CARDS, DECKS, DECKS_BY_ID } from '@/data/decks'
 import { useProgress } from '@/lib/progress'
@@ -61,9 +62,7 @@ export function DeckList() {
           return (
             <Card key={d.id} className="group flex flex-col p-5 transition hover:border-line-strong">
               <div className="flex items-start gap-3">
-                <span className="grid size-10 place-items-center rounded-xl" style={{ background: `color-mix(in srgb, ${color} 15%, transparent)`, color }}>
-                  <Brain size={20} />
-                </span>
+                <TechTile id={d.id} color={color} size={44} fallback={d.title.slice(0, 2)} className="transition group-hover:scale-105" />
                 <div className="flex-1">
                   <h2 className="font-semibold">{d.title}</h2>
                   <p className="text-sm text-muted">{d.description}</p>

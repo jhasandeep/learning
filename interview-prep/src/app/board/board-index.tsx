@@ -3,6 +3,7 @@
 import { CircleDot, Download, FileText, Frame, MonitorPlay, PenTool, Shapes } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { TechIcon, TechTile } from '@/components/tech-icon'
 import type { BoardDef } from '@/data/boards'
 import { savedBoardIds } from '@/lib/board/store'
 
@@ -60,7 +61,7 @@ export function BoardIndex({ sketch, groups, pdfs }: { sketch: BoardDef[]; group
             {g.boards.map((b) => b.kind === 'topic' && (
               <li key={b.id} className="flex flex-col rounded-2xl border border-line bg-surface p-4 transition hover:border-line-strong">
                 <Link href={`/board/${b.id}`} className="group flex items-start gap-3">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl font-mono text-xs font-bold" style={{ color: b.color, background: `color-mix(in srgb, ${b.color} 13%, transparent)` }}>{b.badge}</span>
+                  <TechTile id={b.id} color={b.color} size={46} fallback={b.badge} className="transition group-hover:scale-105" />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-1.5 font-medium group-hover:underline">{b.title} {mark(b.id)}</span>
                     <span className="mt-0.5 block text-sm text-muted">{b.text}</span>
@@ -84,7 +85,7 @@ export function BoardIndex({ sketch, groups, pdfs }: { sketch: BoardDef[]; group
           {pdfs.map((b) => b.kind === 'pdf' && (
             <li key={b.id}>
               <Link href={`/board/${b.id}`} className="flex h-full flex-col rounded-2xl border border-line bg-surface p-4 hover:border-line-strong">
-                <span className="flex items-center gap-2 font-medium"><FileText size={16} className="text-good" /> {b.title} {mark(b.id)}</span>
+                <span className="flex items-center gap-2 font-medium"><TechIcon id={b.id.startsWith('dsa') ? 'dsa' : b.id} size={18} color={b.id.startsWith('dsa') ? '#16a34a' : '#e11d48'} /> {b.title} {mark(b.id)}</span>
                 <span className="mt-1 text-sm text-muted">{b.text}</span>
               </Link>
             </li>

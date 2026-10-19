@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Shell } from '@/components/shell'
 import { THEME_SCRIPT } from '@/components/theme-toggle'
+import { QUESTION_SETS } from '@/data/questions'
 import './globals.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -23,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
-        <Shell>{children}</Shell>
+        <Shell questionSets={QUESTION_SETS.map((q) => ({ id: q.id, title: q.title, color: q.color, badge: q.badge, count: q.questions.length }))}>{children}</Shell>
       </body>
     </html>
   )

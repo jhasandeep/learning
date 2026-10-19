@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Blocks } from '@/components/notes/blocks'
 import { Inline } from '@/components/notes/inline'
+import { TechIcon, TechTile } from '@/components/tech-icon'
 import { NOTE_TOPICS, NOTE_TOPICS_BY_ID } from '@/data/notes'
 import { HAND_SCRIPT, NoteToolbar } from './note-toolbar'
 import '../notes.css'
@@ -58,8 +59,13 @@ export default async function Page({ params }: PageProps<'/notes/[topic]'>) {
 
         <article className="note-article min-w-0 max-w-[860px]">
           <header className="note-head mb-6">
-            <p className="text-sm font-medium" style={{ color: topic.color }}>{topic.category} · revision notes</p>
-            <h1 className="note-title mt-1 text-4xl font-semibold tracking-tight">{topic.title}</h1>
+            <div className="flex items-center gap-4">
+              <TechTile id={topic.id} color={topic.color} size={60} fallback={topic.badge} className="shadow-sm" />
+              <div className="min-w-0">
+                <p className="text-sm font-medium" style={{ color: topic.color }}>{topic.category} · revision notes</p>
+                <h1 className="note-title mt-0.5 text-4xl font-semibold tracking-tight">{topic.title}</h1>
+              </div>
+            </div>
             <p className="mt-2 text-muted">{topic.tagline}</p>
             <div className="mt-4"><NoteToolbar topicId={topic.id} deckId={topic.id} compilerLang={COMPILER_FOR[topic.id]} /></div>
           </header>
@@ -87,13 +93,13 @@ export default async function Page({ params }: PageProps<'/notes/[topic]'>) {
             {prev ? (
               <Link href={`/notes/${prev.id}`} className="rounded-xl border border-line p-4 hover:border-line-strong">
                 <span className="flex items-center gap-1 text-xs text-muted"><ChevronLeft size={14} /> Previous</span>
-                <span className="font-medium">{prev.title}</span>
+                <span className="flex items-center gap-2 font-medium"><TechIcon id={prev.id} size={18} color={prev.color} />{prev.title}</span>
               </Link>
             ) : <span />}
             {next && (
               <Link href={`/notes/${next.id}`} className="rounded-xl border border-line p-4 text-right hover:border-line-strong">
                 <span className="flex items-center justify-end gap-1 text-xs text-muted">Next <ChevronRight size={14} /></span>
-                <span className="font-medium">{next.title}</span>
+                <span className="flex items-center justify-end gap-2 font-medium">{next.title}<TechIcon id={next.id} size={18} color={next.color} /></span>
               </Link>
             )}
           </nav>

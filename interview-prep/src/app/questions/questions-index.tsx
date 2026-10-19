@@ -2,6 +2,7 @@
 
 import { ArrowRight, Flame, GraduationCap, MessageCircleQuestion } from 'lucide-react'
 import Link from 'next/link'
+import { TechTile } from '@/components/tech-icon'
 import { ProgressBar } from '@/components/ui'
 import type { QuestionCategory } from '@/data/questions'
 import { useProgress } from '@/lib/progress'
@@ -67,7 +68,7 @@ export function QuestionsIndex({ sets, categories }: { sets: SetCard[]; categori
                   <li key={s.id}>
                     <Link href={`/questions/${s.id}`} className="lang-card group flex h-full flex-col rounded-2xl border border-line bg-surface p-4 transition hover:-translate-y-0.5" style={{ '--lang': s.color } as React.CSSProperties}>
                       <div className="relative flex items-start gap-3">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-xl font-mono text-xs font-bold" style={{ color: s.color, background: `color-mix(in srgb, ${s.color} 13%, transparent)` }}>{s.badge}</span>
+                        <TechTile id={s.id} color={s.color} size={46} fallback={s.badge} className="transition group-hover:scale-105" />
                         <span className="min-w-0 flex-1">
                           <span className="block font-semibold">{s.title}</span>
                           <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted">

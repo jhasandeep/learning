@@ -2,6 +2,7 @@
 
 import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronsDownUp, ChevronsUpDown, Flame, GraduationCap, Link2, Printer, RotateCcw, Search, Shuffle, X } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { TechIcon } from '@/components/tech-icon'
 import { useToast } from '@/components/toast'
 import { Button, cx } from '@/components/ui'
 import type { Difficulty } from '@/data/questions/types'
@@ -18,7 +19,7 @@ export interface QuestionItem {
   tags: string[]
   search: string
   /** Shown on the cross-technology page. */
-  set?: { title: string; color: string; badge: string }
+  set?: { id: string; title: string; color: string; badge: string }
   /** Server-rendered question title (inline markup) and answer. */
   title: ReactNode
   body: ReactNode
@@ -176,7 +177,7 @@ export function QuestionBrowser({ items }: { items: QuestionItem[] }) {
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium leading-snug sm:text-[17px]">{it.title}</span>
                   <span className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
-                    {it.set && <span className="rounded-md px-1.5 py-0.5 font-mono text-[10px] font-bold" style={{ color: it.set.color, background: `color-mix(in srgb, ${it.set.color} 12%, transparent)` }}>{it.set.title}</span>}
+                    {it.set && <span className="inline-flex items-center gap-1 rounded-md border border-line bg-surface-2/60 px-1.5 py-0.5 text-[11px] font-medium text-text"><TechIcon id={it.set.id} size={13} color={it.set.color} />{it.set.title}</span>}
                     <DiffPill d={it.difficulty} />
                     <Freq n={it.freq} />
                     {it.tags.map((t) => <span key={t} className="hidden sm:inline">#{t}</span>)}
@@ -247,7 +248,7 @@ function Practice({ items, state, setState, mark, status }: {
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-8">
           <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted">
-            {item.set && <span className="font-medium" style={{ color: item.set.color }}>{item.set.title}</span>}
+            {item.set && <span className="inline-flex items-center gap-1.5 font-medium text-text"><TechIcon id={item.set.id} size={16} color={item.set.color} />{item.set.title}</span>}
             <DiffPill d={item.difficulty} />
             <Freq n={item.freq} />
             {status[item.key] && <span className={status[item.key] === 'known' ? 'text-good' : 'text-warn'}>· {status[item.key] === 'known' ? 'known' : 'to review'}</span>}

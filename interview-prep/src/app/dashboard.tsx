@@ -1,23 +1,29 @@
 'use client'
 
-import { ArrowRight, BookOpen, Bug, Flame, Infinity as InfinityIcon, Layers, Minus, Plus, SquareTerminal, Target } from 'lucide-react'
+import { ArrowRight, BookOpen, Bug, Flame, Infinity as InfinityIcon, Layers, MessageCircleQuestion, Minus, PenTool, Plus, SquareTerminal, Target } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { TechIcon, TechTile } from '@/components/tech-icon'
 import { buttonClass, Card, cx, ProgressBar, Ring } from '@/components/ui'
 import { ALGORITHMS } from '@/data/algorithms'
 import { CAMPAIGN } from '@/data/campaign'
-import { ALL_CARDS } from '@/data/decks'
+import { ALL_CARDS, DECKS } from '@/data/decks'
 import { LANGUAGES } from '@/data/languages'
 import { ENDLESS_COUNT, nextUnsolved } from '@/lib/endless'
 import { dayStreak, levelFromXp, setDailyGoal, useProgress } from '@/lib/progress'
 import { isDue } from '@/lib/srs'
 import { useToday } from '@/lib/today'
 
-export function Dashboard() {
+/** One technology on the home page (built on the server from the question sets). */
+export interface TechSummary { id: string; title: string; short: string; color: string; badge: string; questions: number; keys: string[]; notes: boolean }
+
+export function Dashboard({ techs }: { techs: TechSummary[] }) {
   const p = useProgress()
   const today = useToday()
   const lv = levelFromXp(p.xp)
   const streak = dayStreak(p.activity, today)
+  const totalQuestions = techs.reduce((n, t) => n + t.questions, 0)
+  const knownQuestions = techs.reduce((n, t) => n + t.keys.filter((k) => p.questions[k] === 'known').length, 0)
   const doneToday = p.activity[today] ?? 0
   const campaignSolved = CAMPAIGN.filter((l) => p.campaign[l.id]).length
   const nextLevel = CAMPAIGN.find((l) => !p.campaign[l.id])
@@ -77,8 +83,9 @@ export function Dashboard() {
         </div>
       </section>
 
-      <section aria-label="Modes" className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section aria-label="Modes" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <ModeCard
+          wide
           href={nextLevel ? `/campaign/${nextLevel.id}` : '/campaign'}
           icon={<Bug size={20} />} color="var(--accent)" title="Bug Hunt"
           text="Hand-made levels that teach one pattern each, ending in a two-bug boss."
@@ -92,20 +99,54 @@ export function Dashboard() {
         />
         <ModeCard
           href="/flashcards" icon={<Layers size={20} />} color="var(--violet)" title="Flashcards"
-          text={`${ALL_CARDS.length} interview questions on system design, DSA, React and JS with spaced repetition.`}
+          text={`${ALL_CARDS.length} cards in ${DECKS.length} decks, one per technology, scheduled with spaced repetition.`}
           footer={<span>{due > 0 ? `${due} due today` : 'Nothing due — learn new cards'}</span>}
         />
         <ModeCard
           href="/compiler" icon={<SquareTerminal size={20} />} color="var(--accent)" title="Online compiler"
           text={`Write and run code in ${LANGUAGES.length} languages — Python, Java, C++, SQL, JS and more. Share with a link.`}
-          footer={<span>{LANGUAGES.filter((l) => l.engine === 'browser').length} run right in your browser</span>}
+          footer={<span className="flex items-center gap-1">{['python', 'java', 'cpp', 'javascript', 'go'].map((id) => <TechIcon key={id} kind="lang" id={id} size={14} />)} <span className="ml-1">+{LANGUAGES.length - 5} more</span></span>}
+        />
+        <ModeCard
+          href="/questions" icon={<MessageCircleQuestion size={20} />} color="#ea580c" title="Interview questions"
+          text={`${totalQuestions} most-asked questions across ${techs.length} technologies, with answers, code and a practice mode.`}
+          footer={<><ProgressBar value={totalQuestions ? knownQuestions / totalQuestions : 0} className="w-24" color="var(--good)" /><span>{knownQuestions} known</span></>}
           tag="New"
         />
         <ModeCard
           href="/notes" icon={<BookOpen size={20} />} color="var(--good)" title="Revision notes"
-          text="Handwritten-style PDFs for system design and DSA (Python + JS) to read before a round."
-          footer={<span>3 PDFs</span>}
+          text={`${techs.filter((t) => t.notes).length} full-stack topics to revise, in a handwritten style, plus System Design and DSA PDFs.`}
+          footer={<span>{Object.keys(p.notesRead).length} read · PDF downloads</span>}
         />
+        <ModeCard
+          href="/board" icon={<PenTool size={20} />} color="var(--violet)" title="Whiteboard"
+          text="Hand-drawn concept boards for every topic. Present them, annotate PDFs and export to PDF."
+          footer={<span>Excalidraw · draw, present, export</span>}
+        />
+      </section>
+
+      <section aria-labelledby="pick-tech">
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <div>
+            <h2 id="pick-tech" className="font-semibold">Pick a technology</h2>
+            <p className="text-sm text-muted">Interview questions, notes, flashcards and a whiteboard for each one.</p>
+          </div>
+          <Link href="/questions/top" className="hidden shrink-0 items-center gap-1 text-sm font-medium text-accent sm:inline-flex">Top questions <ArrowRight size={14} /></Link>
+        </div>
+        <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-8">
+          {techs.map((t) => {
+            const known = t.keys.filter((k) => p.questions[k] === 'known').length
+            return (
+              <li key={t.id}>
+                <Link href={`/questions/${t.id}`} title={`${t.title}: ${t.questions} interview questions`} className="lang-card group flex h-full flex-col items-center gap-2 rounded-2xl border border-line bg-surface px-2 py-3.5 text-center transition hover:-translate-y-0.5" style={{ '--lang': t.color } as React.CSSProperties}>
+                  <TechTile id={t.id} color={t.color} size={44} fallback={t.badge} className="relative transition group-hover:scale-110" />
+                  <span className="relative line-clamp-1 text-xs font-medium">{t.short}</span>
+                  <span className="relative text-[10px] text-muted">{known ? <span className="text-good">{known}/{t.questions} known</span> : `${t.questions} questions`}</span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
       </section>
 
       <section aria-label="How it works" className="grid gap-4 md:grid-cols-3">
@@ -141,9 +182,9 @@ export function Dashboard() {
   )
 }
 
-function ModeCard({ href, icon, color, title, text, footer, tag }: { href: string; icon: ReactNode; color: string; title: string; text: string; footer: ReactNode; tag?: string }) {
+function ModeCard({ href, icon, color, title, text, footer, tag, wide }: { href: string; icon: ReactNode; color: string; title: string; text: string; footer: ReactNode; tag?: string; wide?: boolean }) {
   return (
-    <Link href={href} className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:-translate-y-0.5 hover:border-line-strong">
+    <Link href={href} className={cx('group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:-translate-y-0.5 hover:border-line-strong', wide && 'lg:col-span-2')}>
       {tag && <span className="absolute right-4 top-4 rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ color, background: `color-mix(in srgb, ${color} 15%, transparent)` }}>{tag}</span>}
       <span className="grid size-10 place-items-center rounded-xl" style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}>{icon}</span>
       <h2 className="mt-4 font-semibold group-hover:underline">{title}</h2>

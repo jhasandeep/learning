@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState, type ReactNode } from 'react'
 import { dayStreak, levelFromXp, useProgress } from '@/lib/progress'
 import { useToday } from '@/lib/today'
-import { CommandPalette, openCommandPalette } from './command-palette'
+import { CommandPalette, openCommandPalette, type PaletteQuestionSet } from './command-palette'
 import { isActive, NAV } from './nav'
 import { ThemeToggle } from './theme-toggle'
 import { ToastProvider } from './toast'
@@ -86,7 +86,7 @@ function ShortcutsDialog() {
   )
 }
 
-export function Shell({ children }: { children: ReactNode }) {
+export function Shell({ children, questionSets }: { children: ReactNode; questionSets: PaletteQuestionSet[] }) {
   const pathname = usePathname()
   const p = useProgress()
   const lv = levelFromXp(p.xp)
@@ -165,7 +165,7 @@ export function Shell({ children }: { children: ReactNode }) {
         })}
       </nav>
 
-      <CommandPalette />
+      <CommandPalette questionSets={questionSets} />
       <ShortcutsDialog />
     </ToastProvider>
   )

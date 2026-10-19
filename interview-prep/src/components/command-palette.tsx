@@ -1,6 +1,6 @@
 'use client'
 
-import { BookOpen, Bug, Hash, Layers, Moon, Search, SquareTerminal } from 'lucide-react'
+import { Bug, Hash, Moon, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { CAMPAIGN } from '@/data/campaign'
@@ -9,8 +9,12 @@ import { LANGUAGES } from '@/data/languages'
 import { NOTE_TOPICS } from '@/data/notes'
 import { ENDLESS_COUNT } from '@/lib/endless'
 import { NAV } from './nav'
+import { TechIcon } from './tech-icon'
 import { toggleTheme } from './theme-toggle'
 import { cx, Kbd } from './ui'
+
+/** A question set as listed in the palette (the full sets stay out of the client bundle). */
+export interface PaletteQuestionSet { id: string; title: string; color: string; badge: string; count: number }
 
 interface Item { id: string; label: string; hint: string; icon: ReactNode; run: () => void }
 
@@ -18,7 +22,7 @@ export function openCommandPalette() {
   window.dispatchEvent(new Event('open-command-palette'))
 }
 
-export function CommandPalette() {
+export function CommandPalette({ questionSets }: { questionSets: PaletteQuestionSet[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -51,9 +55,10 @@ export function CommandPalette() {
     const all: Item[] = [
       ...NAV.map((n) => ({ id: n.href, label: n.label, hint: 'Page', icon: <n.icon size={16} />, run: go(n.href) })),
       ...CAMPAIGN.map((l, i) => ({ id: l.id, label: `${i + 1}. ${l.title}`, hint: `Campaign · ${l.topic}`, icon: <Bug size={16} />, run: go(`/campaign/${l.id}`) })),
-      ...LANGUAGES.map((l) => ({ id: `compiler-${l.id}`, label: `${l.name} compiler`, hint: `Compiler · ${l.engine === 'browser' ? 'in browser' : 'server'}`, icon: <SquareTerminal size={16} />, run: go(`/compiler/${l.id}`) })),
-      ...NOTE_TOPICS.map((t) => ({ id: `notes-${t.id}`, label: `${t.title} notes`, hint: `Notes · ${t.category}`, icon: <BookOpen size={16} />, run: go(`/notes/${t.id}`) })),
-      ...DECKS.map((d) => ({ id: d.id, label: `${d.title} flashcards`, hint: `${d.cards.length} cards`, icon: <Layers size={16} />, run: go(`/flashcards/${d.id}`) })),
+      ...LANGUAGES.map((l) => ({ id: `compiler-${l.id}`, label: `${l.name} compiler`, hint: `Compiler · ${l.engine === 'browser' ? 'in browser' : 'server'}`, icon: <TechIcon kind="lang" id={l.id} size={16} color={l.color} fallback={l.badge} />, run: go(`/compiler/${l.id}`) })),
+      ...NOTE_TOPICS.map((t) => ({ id: `notes-${t.id}`, label: `${t.title} notes`, hint: `Notes · ${t.category}`, icon: <TechIcon id={t.id} size={16} color={t.color} fallback={t.badge} />, run: go(`/notes/${t.id}`) })),
+      ...questionSets.map((q) => ({ id: `questions-${q.id}`, label: `${q.title} interview questions`, hint: `${q.count} questions`, icon: <TechIcon id={q.id} size={16} color={q.color} fallback={q.badge} />, run: go(`/questions/${q.id}`) })),
+      ...DECKS.map((d) => ({ id: d.id, label: `${d.title} flashcards`, hint: `${d.cards.length} cards`, icon: <TechIcon id={d.id} size={16} color={d.color} />, run: go(`/flashcards/${d.id}`) })),
       { id: 'theme', label: 'Toggle light / dark theme', hint: 'Action', icon: <Moon size={16} />, run: toggleTheme },
     ]
     const q = query.trim().toLowerCase()
@@ -64,7 +69,7 @@ export function CommandPalette() {
     const words = q.split(/\s+/).filter(Boolean)
     const matches = all.filter((it) => words.every((w) => `${it.label} ${it.hint}`.toLowerCase().includes(w)))
     return [...jump, ...matches].slice(0, 12)
-  }, [query, router])
+  }, [query, router, questionSets])
 
   if (!open) return null
 

@@ -137,9 +137,8 @@ body {
   }
 }
 
-/* Language logos (src/components/lang-icon.tsx) */
-.lang-tile svg { display: block; width: 100%; height: 100%; }
-:root[data-theme="dark"] .lang-ink { filter: invert(1); }
+/* Technology logos drawn in black (src/components/tech-icon.tsx) */
+:root[data-theme="dark"] .tech-ink { filter: invert(1) hue-rotate(180deg); }
 .lang-card { position: relative; overflow: hidden; }
 .lang-card::before {
   content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 200ms;

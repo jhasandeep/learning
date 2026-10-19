@@ -7,6 +7,7 @@ import { BookOpen, ChevronLeft, ChevronRight, FileDown, FileUp, Loader2, Monitor
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import '@excalidraw/excalidraw/index.css'
+import { TechIcon } from '@/components/tech-icon'
 import { useTheme } from '@/components/theme-toggle'
 import { useToast } from '@/components/toast'
 import { cx } from '@/components/ui'
@@ -245,7 +246,10 @@ function Board({ def, onReset }: { def: BoardDef; onReset: () => void }) {
       <div className={cx('flex items-center gap-2 overflow-x-auto border-b border-line px-3 py-2', slides && 'hidden')}>
         <Link href="/board" className="inline-flex shrink-0 items-center gap-1 text-sm text-muted hover:text-text"><ChevronLeft size={16} /> Boards</Link>
         <span className="text-muted">/</span>
-        <h1 className="shrink-0 truncate text-sm font-semibold">{def.title}</h1>
+        <h1 className="flex shrink-0 items-center gap-1.5 truncate text-sm font-semibold">
+          {def.kind !== 'sketch' && <TechIcon id={def.kind === 'topic' ? def.topicId : def.id.startsWith('dsa') ? 'dsa' : def.id} size={18} color={def.kind === 'topic' ? def.color : def.id.startsWith('dsa') ? '#16a34a' : '#e11d48'} />}
+          {def.title}
+        </h1>
         <span className={cx('shrink-0 text-xs', saved === 'error' ? 'text-bad' : 'text-muted')} aria-live="polite">
           {saved === 'saving' ? 'Saving…' : saved === 'error' ? 'Not saved' : 'Saved in this browser'}
         </span>

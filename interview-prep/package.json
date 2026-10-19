@@ -10,7 +10,7 @@
     "test": "vitest run",
     "build:bank": "node scripts/build-bank.ts",
     "notes:pdf": "node scripts/export-notes-pdf.mjs",
-    "icons": "node scripts/build-lang-icons.mjs",
+    "icons": "node scripts/build-tech-icons.mjs",
     "postinstall": "node scripts/vendor-runtimes.mjs",
     "predev": "node scripts/vendor-runtimes.mjs",
     "prebuild": "node scripts/vendor-runtimes.mjs"

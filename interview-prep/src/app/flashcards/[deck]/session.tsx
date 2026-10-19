@@ -3,6 +3,7 @@
 import { ChevronLeft, PartyPopper, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { TechIcon } from '@/components/tech-icon'
 import { useToast } from '@/components/toast'
 import { Button, buttonClass, cx, Kbd, ProgressBar } from '@/components/ui'
 import { DECKS_BY_ID, type Card } from '@/data/decks'
@@ -81,7 +82,7 @@ export function Session({ deckId }: { deckId: string }) {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <Link href="/flashcards" className="inline-flex items-center gap-1 text-sm text-muted hover:text-text"><ChevronLeft size={16} /> Flashcards</Link>
         <span className="text-sm text-muted">/</span>
-        <span className="text-sm font-medium">{deck.title}</span>
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium"><TechIcon id={deck.id} size={18} color={deck.color} />{deck.title}</span>
         <div className="ml-auto flex rounded-lg border border-line bg-surface p-0.5 text-sm" role="group" aria-label="Session mode">
           {(['due', 'all'] as const).map((m) => (
             <button key={m} type="button" aria-pressed={mode === m} onClick={() => start(m)} className={cx('rounded-md px-3 py-1', mode === m ? 'bg-surface-2 text-text' : 'text-muted')}>

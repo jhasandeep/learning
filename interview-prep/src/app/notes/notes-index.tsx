@@ -3,6 +3,7 @@
 import { CircleCheck, Download, FileText, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { TechTile } from '@/components/tech-icon'
 import { ProgressBar } from '@/components/ui'
 import type { NoteCategory } from '@/data/notes'
 import { useProgress } from '@/lib/progress'
@@ -66,7 +67,7 @@ export function NotesIndex({ topics, categories }: { topics: TopicCard[]; catego
                   <li key={t.id}>
                     <Link href={`/notes/${t.id}`} className="group flex h-full flex-col rounded-2xl border border-line bg-surface p-4 transition hover:-translate-y-0.5 hover:border-line-strong">
                       <div className="flex items-start gap-3">
-                        <span className="grid size-11 shrink-0 place-items-center rounded-xl font-mono text-xs font-bold" style={{ color: t.color, background: `color-mix(in srgb, ${t.color} 13%, transparent)` }}>{t.badge}</span>
+                        <TechTile id={t.id} color={t.color} size={46} fallback={t.badge} className="transition group-hover:scale-105" />
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-1.5 font-medium group-hover:underline">
                             {t.title}

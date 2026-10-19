@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { CodeBlock } from '@/components/notes/blocks'
 import { Inline } from '@/components/notes/inline'
 import { Answer } from '@/components/questions/answer'
+import { TechTile } from '@/components/tech-icon'
 import { buttonClass } from '@/components/ui'
 import { BOARDS_BY_ID } from '@/data/boards'
 import { DECKS } from '@/data/decks'
@@ -50,7 +51,7 @@ const item = (set: QuestionTech, q: Question, cross: boolean): QuestionItem => (
   freq: q.freq,
   tags: q.tags,
   search: questionText(q) + (cross ? ` ${set.title.toLowerCase()}` : ''),
-  set: cross ? { title: set.title, color: set.color, badge: set.badge } : undefined,
+  set: cross ? { id: set.id, title: set.title, color: set.color, badge: set.badge } : undefined,
   title: <Inline text={q.q} />,
   body: <Body q={q} />,
 })
@@ -79,9 +80,11 @@ export default async function Page({ params }: PageProps<'/questions/[set]'>) {
       <header className="q-head relative mb-6 overflow-hidden rounded-3xl border border-line bg-surface p-6 sm:p-8">
         <div className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full blur-3xl" style={{ background: `color-mix(in srgb, ${cross ? '#f97316' : set.color} 14%, transparent)` }} aria-hidden />
         <div className="relative flex items-start gap-4">
-          <span className="grid size-14 shrink-0 place-items-center rounded-2xl font-mono text-sm font-bold" style={cross ? { color: '#ea580c', background: '#fff7ed' } : { color: set.color, background: `color-mix(in srgb, ${set.color} 13%, transparent)` }}>
-            {cross ? <Flame size={26} className="fill-orange-400" /> : set.badge}
-          </span>
+          {cross ? (
+            <span className="grid size-14 shrink-0 place-items-center rounded-2xl border border-orange-200 bg-orange-50"><Flame size={26} className="fill-orange-400 text-orange-500" /></span>
+          ) : (
+            <TechTile id={set.id} color={set.color} size={56} fallback={set.badge} className="shadow-sm" />
+          )}
           <div className="min-w-0">
             <p className="text-sm font-medium" style={{ color: cross ? '#ea580c' : set.color }}>{cross ? 'Across every technology' : `${set.category} · most asked`}</p>
             <h1 className="mt-0.5 text-2xl font-semibold tracking-tight sm:text-3xl">{cross ? 'Top interview questions' : `${set.title} interview questions`}</h1>
