@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSA Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fffcf3; --dot:#e9e2cf; --ink:#1f2a44; --red:#d62f4b; --orange:#e8762b;
+  --purple:#7b4fd6; --purple-bg:#f3eefe; --green:#1f8a5b; --green-bg:#eaf7ef;
+  --red-bg:#fdecee; --orange-bg:#fff4e8; --yellow:#fff1a6; --navy:#1d3a5f; --code:#1e2233;
+  --py:#3776ab; --js:#f0db4f;
+}
+@page{ size:A4; margin:12mm 11mm; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{
+  font-family:'Patrick Hand',cursive; color:var(--ink); font-size:15.5px; line-height:1.5;
+  background-color:var(--paper);
+  background-image:radial-gradient(var(--dot) 1.1px, transparent 1.2px);
+  background-size:22px 22px;
+  -webkit-print-color-adjust:exact; print-color-adjust:exact;
+}
+.page{ padding:4px 6px; }
+.chap{ break-before:page; }
+h1.ct{ font-family:'Caveat',cursive; font-weight:700; color:var(--red); font-size:46px; margin:6px 0 0; display:flex; align-items:center; gap:14px; line-height:1.1; }
+h1.ct .n{ flex:none; width:52px; height:52px; border-radius:50%; background:var(--red); color:#fff; font-family:'Patrick Hand'; font-size:26px; display:grid; place-items:center; }
+.vid{ font-family:'Patrick Hand'; font-size:15px; color:#fff; background:var(--navy); border-radius:20px; padding:1px 12px; margin-left:auto; white-space:nowrap; transform:rotate(2deg); }
+.rule{ height:5px; border-radius:3px; margin:6px 0 12px; background:linear-gradient(90deg,var(--red),var(--orange) 45%,rgba(232,118,43,.15)); }
+h2{ font-family:'Caveat',cursive; font-weight:700; color:var(--purple); font-size:31px; margin:14px 0 6px; display:block; width:fit-content;
+    text-decoration:underline wavy #f5d33d; text-decoration-thickness:2px; text-underline-offset:7px; break-after:avoid; }
+h2 + *{ break-before:avoid; }
+h3{ font-family:'Caveat',cursive; font-size:25px; margin:0 0 2px; font-weight:700; }
+p{ margin:6px 0; }
+.hl{ background:linear-gradient(transparent 45%, var(--yellow) 45%, var(--yellow) 92%, transparent 92%); padding:0 2px; }
+code.k{ font-family:'JetBrains Mono',monospace; font-size:12.5px; background:#fde8eb; color:#b3203a; border:1px solid #f4b9c3; border-radius:5px; padding:0 5px; }
+.box{ border:2.5px solid; border-radius:16px; padding:8px 18px 10px; margin:10px 0; break-inside:avoid; }
+.def{ border-color:var(--purple); background:var(--purple-bg); } .def h3{ color:var(--purple); }
+.mis{ border-color:var(--red); background:var(--red-bg); } .mis h3{ color:var(--red); }
+.rev{ border-color:var(--orange); background:var(--orange-bg); } .rev h3{ color:var(--orange); }
+.gbox{ border-color:var(--green); background:var(--green-bg); } .gbox h3{ color:var(--green); }
+.tip{ background:#fff3b0; padding:12px 18px; margin:14px 0; transform:rotate(-.4deg); box-shadow:2px 3px 0 rgba(0,0,0,.06); break-inside:avoid; }
+ul.pen{ list-style:none; padding-left:4px; margin:6px 0; }
+ul.pen li{ padding-left:24px; position:relative; margin:4px 0; }
+ul.pen li::before{ content:"\270F\FE0F"; position:absolute; left:0; top:0; font-size:13px; }
+ol{ margin:6px 0; padding-left:24px; } ol li{ margin:3px 0; }
+.cw{ position:relative; margin:6px 0 12px; padding-top:18px; break-inside:avoid; min-width:0; }
+.cw .tag{ position:absolute; right:10px; top:5px; background:var(--orange); color:#fff; font-family:'Caveat',cursive; font-weight:700; font-size:19px; padding:0 12px; border-radius:10px; transform:rotate(-2deg); z-index:1; }
+.cw .tag.py{ background:var(--py); } .cw .tag.js{ background:var(--js); color:#2b2b2b; }
+pre, code.k{ font-variant-ligatures:none; font-feature-settings:"liga" 0, "calt" 0; }
+pre{ margin:0; background:var(--code); color:#e8eaf2; border-left:6px solid var(--orange); border-radius:12px; padding:16px 16px 12px; font-family:'JetBrains Mono',monospace; font-size:11.6px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+.cw.py pre{ border-left-color:var(--py); } .cw.js pre{ border-left-color:var(--js); }
+.pair{ display:grid; grid-template-columns:1fr 1fr; gap:12px; break-inside:avoid; } .pair pre{ font-size:9.4px; padding:16px 12px 10px; }
+pre .t-k,pre .t-kd,pre .t-kn,pre .t-kr,pre .t-kc,pre .t-ow,pre .t-kp{ color:#f07fa7; }
+pre .t-s,pre .t-s1,pre .t-s2,pre .t-sa,pre .t-sr,pre .t-sd,pre .t-si,pre .t-dl,pre .t-se,pre .t-sb{ color:#a5dd8a; }
+pre .t-nf,pre .t-nb,pre .t-bp,pre .t-fm{ color:#7fb4ff; }
+pre .t-c,pre .t-c1,pre .t-cm,pre .t-cs,pre .t-ch{ color:#7f88a8; font-style:italic; }
+pre .t-m,pre .t-mi,pre .t-mf,pre .t-il{ color:#f6c56b; }
+pre .c{ color:#7f88a8; font-style:italic; } pre .kw{ color:#f07fa7; } pre .nu{ color:#f6c56b; }
+.two{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+table.t{ width:100%; border-collapse:collapse; margin:10px 0; break-inside:avoid; font-size:14.5px; background:#fff; }
+table.t th{ background:var(--navy); color:#fff; font-family:'Caveat',cursive; font-size:21px; font-weight:700; padding:4px 10px; }
+table.t td{ border:2px solid var(--navy); padding:5px 10px; vertical-align:top; }
+table.t td:first-child{ background:#eef3fb; }
+table.t code.k{ font-size:11.5px; }
+.big{ text-align:center; color:var(--red); font-size:21px; margin:4px 0 10px; }
+/* array diagrams */
+.arrd{ display:flex; flex-direction:column; align-items:center; margin:14px 0 8px; break-inside:avoid; }
+.row{ display:flex; gap:0; }
+.cell{ width:44px; height:40px; border:2.5px solid var(--navy); margin-left:-2.5px; display:grid; place-items:center; background:#fff; font-size:18px; }
+.cell:first-child{ margin-left:0; border-radius:8px 0 0 8px; } .cell:last-child{ border-radius:0 8px 8px 0; }
+.cell.g{ background:var(--green-bg); border-color:var(--green); z-index:1; } .cell.r{ background:var(--red-bg); border-color:var(--red); z-index:1; }
+.cell.o{ background:var(--orange-bg); border-color:var(--orange); z-index:1; } .cell.p{ background:var(--purple-bg); border-color:var(--purple); z-index:1; }
+.cell.dim{ color:#b8bccb; }
+.idx .cell, .ptrs .cell{ border:none; background:none; height:auto; font-size:12px; color:#7a7f8f; }
+.ptrs .cell{ font-size:15px; color:var(--red); line-height:1.1; }
+.cap{ font-size:14.5px; color:#555; margin-top:4px; text-align:center; }
+.steps{ display:flex; flex-direction:column; gap:6px; align-items:center; margin:10px 0; break-inside:avoid; }
+.steps .lbl{ text-align:right; padding-right:10px; font-size:14px; color:#555; }
+.steps > div{ display:grid; grid-template-columns:150px auto 190px; align-items:center; }
+.steps > div > span:not(.lbl){ margin-left:10px !important; }
+.qa p{ margin:0; } .qa .q{ color:var(--red); font-weight:700; margin-top:10px; } .qa .a b{ color:var(--green); }
+svg text{ font-family:'Patrick Hand',cursive; }
+/* cover */
+.cover{ min-height:265mm; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.logo{ width:120px; height:120px; border-radius:24px; background:linear-gradient(160deg,#2fbf8f,#18865f); display:grid; place-items:center; box-shadow:0 6px 0 #11694a; }
+.cover h1{ font-family:'Caveat',cursive; color:var(--red); font-size:80px; margin:22px 0 0; line-height:1; transform:rotate(-2deg); }
+.cover .sub{ font-family:'Caveat',cursive; font-size:30px; color:var(--navy); margin:12px 0; }
+.langs{ display:flex; gap:14px; margin-top:6px; } .langs span{ font-family:'Caveat'; font-weight:700; font-size:24px; padding:2px 16px; border-radius:12px; }
+.squig{ width:430px; height:16px; }
+.byline{ border:2.5px dashed var(--navy); border-radius:14px; padding:10px 24px; margin-top:26px; font-size:17px; transform:rotate(.6deg); }
+.end{ text-align:center; font-family:'Caveat',cursive; font-size:38px; color:var(--red); margin-top:20px; }
+.toc{ columns:2; column-gap:30px; font-size:17px; } .toc div{ margin:4px 0; break-inside:avoid; } .toc small{ color:#7a7f8f; }
+@media screen{ body{ max-width:900px; margin:0 auto; padding:24px 16px; } .chap{ margin-top:50px; } }
+@media screen and (max-width:640px){ .two,.pair{ grid-template-columns:1fr; } .toc{ columns:1; } .cover h1{ font-size:54px; } .squig{ width:90%; } }
+</style>
+</head>
+<body>
+
+<!-- ================= COVER ================= -->
+<section class="page cover">
+  <div class="logo">
+    <svg width="78" height="78" viewBox="0 0 78 78" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="39" cy="12" r="8"/><circle cx="18" cy="40" r="8"/><circle cx="60" cy="40" r="8"/><circle cx="8" cy="68" r="6"/><circle cx="30" cy="68" r="6"/>
+      <path d="M34 18 L22 33M44 18 L56 33M14 47 L10 62M22 47 L27 62"/>
+    </svg>
+  </div>
+  <h1>DSA in Python &amp; JS</h1>
+  <div class="sub">Big-O · patterns · recursion · searching · sorting · strings</div>
+  <div class="langs"><span style="background:#3776ab;color:#fff">Python</span><span style="background:#f0db4f;color:#2b2b2b">JavaScript</span></div>
+  <svg class="squig" viewBox="0 0 430 16"><path d="M4 10 C 80 2, 150 16, 220 8 S 360 4, 426 9" stroke="#e8762b" stroke-width="5" fill="none" stroke-linecap="round"/></svg>
+  <div class="byline">Notes by <span class="hl">Sandeep Kumar Jha</span> · Senior Full Stack Developer<br>Revision notes · handwritten style · based on Technical Suneja's "DSA in JavaScript" playlist (#1–#21)<br>Every solution written twice — Python + JavaScript — and tested</div>
+  <p style="margin-top:26px">Part of my interview-revision series</p>
+</section>
+
+<!-- ================= CONTENTS ================= -->
+<section class="page chap">
+  <h1 class="ct">Contents</h1><div class="rule"></div>
+  <div class="toc">
+    <div>1 · How to approach DSA + Big-O</div>
+    <div>2 · The 4 problem-solving patterns</div>
+    <div>3 · Sum Zero — brute → two pointers <small>(#1, #2)</small></div>
+    <div>4 · Valid Anagram — frequency counter <small>(#3)</small></div>
+    <div>5 · Count Unique Values — two pointers <small>(#4)</small></div>
+    <div>6 · Largest Sum of Consecutive Elements — sliding window <small>(#5)</small></div>
+    <div>7 · Divide &amp; Conquer — Binary Search <small>(#6)</small></div>
+    <div>8 · Squares in Another Array <small>(#7, #8)</small></div>
+    <div>9 · Recursion basics <small>(#9)</small></div>
+    <div>10 · Advanced recursion <small>(#10)</small></div>
+    <div>11 · Helper-method recursion <small>(#12)</small></div>
+    <div>12 · Searching — Linear vs Binary <small>(#13, #14)</small></div>
+    <div>13 · Bubble Sort + optimisation <small>(#15, #16)</small></div>
+    <div>14 · Selection Sort <small>(#17)</small></div>
+    <div>15 · Insertion Sort + sorting summary <small>(#18)</small></div>
+    <div>16 · Maximum Occurring Character <small>(#19)</small></div>
+    <div>17 · Palindrome Check <small>(#20)</small></div>
+    <div>18 · Longest Substring Without Repeating Chars <small>(#21)</small></div>
+    <div>19 · Python ⇄ JS cheat sheet · Rapid-fire Q&amp;A</div>
+  </div>
+  <div class="box gbox">
+    <h3>How to use these notes</h3>
+    <ul class="pen">
+      <li>Read the problem, <b>cover the code</b>, solve it on paper in one language, then write it in the other.</li>
+      <li>Yellow = remember. Orange box = revision / interview. Red = common mistake. Purple = definition / problem statement.</li>
+      <li><span style="background:#3776ab;color:#fff;border-radius:6px;padding:0 6px">python</span> and <span style="background:#f0db4f;border-radius:6px;padding:0 6px">javascript</span> cards are side by side. All code is copied from <code class="k">exercises/dsa/</code> where it is tested.</li>
+      <li>"#n" = video number in the Technical Suneja playlist (the videos teach in JavaScript; the Python versions are my own translation).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 1 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">1</span>How to approach DSA + Big-O</h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Data structure</span> = a way to <b>store &amp; organise data</b> (array, object/dict, set, stack…). <span class="hl">Algorithm</span> = a <b>step-by-step recipe</b> to solve a problem. DSA = picking the right structure + recipe so the solution is <b>correct and fast</b>.</div>
+  <h2>My 5-step problem-solving routine</h2>
+  <ol>
+    <li><b>Understand</b> — restate the problem; inputs? outputs? sorted? negatives? empty input?</li>
+    <li><b>Examples</b> — simple case, edge cases (<code class="k">[]</code>, one item, duplicates, no answer).</li>
+    <li><b>Brute force first</b> — any working solution, say its Big-O out loud.</li>
+    <li><b>Optimise</b> — look for a pattern: frequency counter, two pointers, sliding window, divide &amp; conquer.</li>
+    <li><b>Refactor &amp; test</b> — clean names, re-run the examples, state final time + space.</li>
+  </ol>
+  <h2>Big-O = how work grows with input size n</h2>
+  [[code:bigo_slow]]
+  [[code:bigo_fast]]
+  <p class="big">same answer — but one does n additions, the other does 3 operations</p>
+  <table class="t">
+    <tr><th style="width:16%">Big-O</th><th style="width:18%">Name</th><th>Example</th><th style="width:18%">n = 1,000</th></tr>
+    <tr><td>O(1)</td><td>Constant</td><td>Array index <code class="k">arr[5]</code>, dict/object lookup, formula</td><td>1</td></tr>
+    <tr><td>O(log n)</td><td>Logarithmic</td><td>Binary search — halve each step</td><td>~10</td></tr>
+    <tr><td>O(n)</td><td>Linear</td><td>One loop, linear search, frequency counter</td><td>1,000</td></tr>
+    <tr><td>O(n log n)</td><td>Linearithmic</td><td>Merge sort, built-in <code class="k">sort()</code></td><td>~10,000</td></tr>
+    <tr><td>O(n²)</td><td>Quadratic</td><td>Nested loops, bubble / selection / insertion sort</td><td>1,000,000</td></tr>
+    <tr><td>O(2ⁿ)</td><td>Exponential</td><td>Naive recursive Fibonacci</td><td>astronomical</td></tr>
+  </table>
+  <svg viewBox="0 0 520 210" width="100%" style="max-width:520px;display:block;margin:6px auto" aria-label="Big-O growth curves">
+    <g stroke="#1d3a5f" stroke-width="2.5"><path d="M50 185 H500"/><path d="M50 185 V15"/></g>
+    <text x="490" y="203" font-size="15" fill="#1f2a44">n →</text><text x="8" y="22" font-size="15" fill="#1f2a44">ops</text>
+    <path d="M50 185 C 110 182, 150 150, 190 15" stroke="#d62f4b" stroke-width="3" fill="none"/><text x="196" y="26" font-size="16" fill="#d62f4b">O(n²)</text>
+    <path d="M50 185 C 200 150, 350 95, 490 40" stroke="#e8762b" stroke-width="3" fill="none"/><text x="442" y="34" font-size="16" fill="#e8762b">O(n log n)</text>
+    <path d="M50 185 L 490 85" stroke="#7b4fd6" stroke-width="3" fill="none"/><text x="455" y="105" font-size="16" fill="#7b4fd6">O(n)</text>
+    <path d="M50 185 C 90 160, 200 150, 490 140" stroke="#1f8a5b" stroke-width="3" fill="none"/><text x="440" y="134" font-size="16" fill="#1f8a5b">O(log n)</text>
+    <path d="M50 172 H490" stroke="#1d3a5f" stroke-width="2.5" stroke-dasharray="6 5" fill="none"/><text x="455" y="167" font-size="16" fill="#1d3a5f">O(1)</text>
+  </svg>
+  <h2>Big-O rules</h2>
+  <ul class="pen">
+    <li><span class="hl">Drop constants</span>: O(2n) → O(n). O(500) → O(1).</li>
+    <li><span class="hl">Keep the biggest term</span>: O(n² + n) → O(n²).</li>
+    <li>Loops one after another <b>add</b> (O(n + n) = O(n)); loops <b>inside</b> each other <b>multiply</b> (O(n · n) = O(n²)).</li>
+    <li>We talk about the <b>worst case</b> unless told otherwise.</li>
+    <li><b>Space complexity</b> = extra memory the algorithm uses (a new dict of n keys → O(n); a few variables → O(1)).</li>
+  </ul>
+  <h2>Python ⇄ JS — the structures we use</h2>
+  <table class="t">
+    <tr><th style="width:24%">Idea</th><th>Python</th><th>JavaScript</th><th style="width:22%">Cost</th></tr>
+    <tr><td>Dynamic array</td><td><code class="k">list</code> → <code class="k">[1, 2]</code></td><td><code class="k">Array</code> → <code class="k">[1, 2]</code></td><td>index / push O(1), insert front O(n)</td></tr>
+    <tr><td>Key → value</td><td><code class="k">dict</code> → <code class="k">{"a": 1}</code></td><td><code class="k">{}</code> object or <code class="k">new Map()</code></td><td>get / set O(1) avg</td></tr>
+    <tr><td>Unique values</td><td><code class="k">set()</code></td><td><code class="k">new Set()</code></td><td>add / has O(1) avg</td></tr>
+    <tr><td>String</td><td><code class="k">str</code> (immutable)</td><td><code class="k">string</code> (immutable)</td><td>slice O(k)</td></tr>
+    <tr><td>Integer divide</td><td><code class="k">a // b</code></td><td><code class="k">Math.floor(a / b)</code></td><td></td></tr>
+  </table>
+  <div class="box rev"><h3>Revision</h3>Understand → examples → brute force → optimise with a pattern → refactor. Big-O: drop constants, keep the biggest term, nested loops multiply. Always state <b>time AND space</b>.</div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">2</span>The 4 problem-solving patterns</h1><div class="rule"></div>
+  <style>.shapes .box{ padding:6px 14px 10px; } .shapes pre{ font-size:10.5px; padding:10px 12px; }</style>
+  <div class="box def"><h3>Why patterns?</h3>Most beginner/intermediate array &amp; string questions are solved by <span class="hl">turning an O(n²) nested loop into O(n)</span> using one of these 4 tricks. The whole playlist is built around them.</div>
+  <table class="t">
+    <tr><th style="width:17%">Pattern</th><th>Idea</th><th style="width:31%">Signal in the question</th><th style="width:19%">Used in</th></tr>
+    <tr><td><b>Frequency counter</b></td><td>Count things in a dict/object, then compare counts instead of nested loops.</td><td>"same letters", "same frequency", "most common", compare two collections</td><td>Anagram, Squares, Max char</td></tr>
+    <tr><td><b>Multiple / two pointers</b></td><td>Two indexes moving towards each other or in the same direction based on a condition.</td><td><b>Sorted</b> array, pairs, "in place", palindrome</td><td>Sum Zero, Count Unique, Palindrome</td></tr>
+    <tr><td><b>Sliding window</b></td><td>Keep a window (start…end) over the data; slide it instead of recomputing.</td><td>"consecutive", "subarray / substring", "longest / max of size k"</td><td>Largest sum, Longest substring</td></tr>
+    <tr><td><b>Divide &amp; conquer</b></td><td>Split the input into halves, solve the smaller part, discard the rest.</td><td>Sorted data, "find" fast, O(log n) hinted</td><td>Binary search</td></tr>
+  </table>
+  <div class="two shapes">
+    <div class="box gbox" style="margin:0"><h3>Frequency counter shape</h3><pre style="font-size:11px">freq = {}
+for x in data:
+    freq[x] = freq.get(x, 0) + 1
+<span class="c"># compare / scan freq → O(n)</span></pre></div>
+    <div class="box def" style="margin:0"><h3>Two pointers shape</h3><pre style="font-size:11px">left, right = 0, len(arr) - 1
+<span class="kw">while</span> left &lt; right:
+    <span class="c"># decide: left += 1 or right -= 1</span></pre></div>
+  </div>
+  <div class="two shapes" style="margin-top:12px">
+    <div class="box rev" style="margin:0"><h3>Sliding window shape</h3><pre style="font-size:11px">window = sum(arr[:k])
+<span class="kw">for</span> i <span class="kw">in</span> range(k, len(arr)):
+    window += arr[i] - arr[i-k]</pre></div>
+    <div class="box mis" style="margin:0"><h3>Divide &amp; conquer shape</h3><pre style="font-size:11px">lo, hi = 0, len(arr) - 1
+<span class="kw">while</span> lo &lt;= hi:
+    mid = (lo + hi) // 2
+    <span class="c"># keep one half</span></pre></div>
+  </div>
+  <div class="box rev"><h3>Revision</h3>Compare/count → frequency counter. Sorted + pairs → two pointers. Consecutive / substring → sliding window. Sorted + find fast → divide &amp; conquer.</div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">3</span>Sum Zero<span class="vid">video #1, #2</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Problem</h3>Given a <span class="hl">sorted</span> array of integers, return the <b>first pair whose sum is 0</b>. If no pair, return <code class="k">None</code> / <code class="k">undefined</code>.<br><code class="k">[-4,-3,-2,-1,0,1,2,5]</code> → <code class="k">[-2, 2]</code> · <code class="k">[-3,-2,-1,0,5]</code> → none</div>
+  <h2>Way 1 · Brute force — O(n²)</h2>
+  <p>Check every pair with two nested loops.</p>
+  [[code:sum_zero_brute]]
+  <h2>Way 2 · Two pointers — O(n) time, O(1) space</h2>
+  <div class="arrd">
+    <div class="row"><div class="cell r">-4</div><div class="cell">-3</div><div class="cell">-2</div><div class="cell">-1</div><div class="cell">0</div><div class="cell">1</div><div class="cell">2</div><div class="cell g">5</div></div>
+    <div class="row ptrs"><div class="cell">↑<br>L</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell">↑<br>R</div></div>
+    <div class="cap">-4 + 5 = 1 &gt; 0 → too big → move <b>R left</b>. If sum &lt; 0 → too small → move <b>L right</b>.</div>
+  </div>
+  <div class="steps">
+    <div><span class="lbl">-4 + 5 = 1</span><span>&gt; 0 → R--</span></div>
+    <div><span class="lbl">-4 + 2 = -2</span><span>&lt; 0 → L++</span></div>
+    <div><span class="lbl">-3 + 2 = -1</span><span>&lt; 0 → L++</span></div>
+    <div><span class="lbl">-2 + 2 = 0</span><span>✓ return [-2, 2]</span></div>
+  </div>
+  [[code:sum_zero]]
+  <div class="box mis"><h3>Mistake</h3>Using <code class="k">left &lt;= right</code> → when they meet you add the <b>same element</b> to itself (0 + 0 = 0 gives a wrong pair <code class="k">[0, 0]</code>). Use <code class="k">left &lt; right</code>. And two pointers only work because the array is <b>sorted</b>.</div>
+  <div class="box rev"><h3>Revision</h3>Sorted + find a pair → two pointers from both ends. Sum too big → right--, too small → left++. O(n²) → O(n).</div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">4</span>Valid Anagram<span class="vid">video #3</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Problem</h3>Two strings are <span class="hl">anagrams</span> if they use <b>exactly the same letters, the same number of times</b>, in any order.<br><code class="k">"anagram", "nagaram"</code> → true · <code class="k">"rat", "car"</code> → false · <code class="k">"aaz", "zza"</code> → false</div>
+  <table class="t">
+    <tr><th style="width:30%">Approach</th><th>How</th><th style="width:22%">Big-O</th></tr>
+    <tr><td>Nested loops</td><td>For each char of a, search &amp; remove it from b</td><td>O(n²)</td></tr>
+    <tr><td>Sort &amp; compare</td><td><code class="k">sorted(a) == sorted(b)</code></td><td>O(n log n)</td></tr>
+    <tr><td><span class="hl">Frequency counter</span> ✓</td><td>Count chars of a, then "use them up" with b</td><td>O(n) time, O(k) space</td></tr>
+  </table>
+  <div class="arrd">
+    <div class="row"><div class="cell p">a:3</div><div class="cell p">n:1</div><div class="cell p">g:1</div><div class="cell p">r:1</div><div class="cell p">m:1</div></div>
+    <div class="cap">freq after counting "anagram" → each char of "nagaram" decrements; any missing / zero count → false</div>
+  </div>
+  [[code:anagram]]
+  <div class="tip">Python: <code class="k">Counter(a) == Counter(b)</code>. JS has no Counter → memorise <code class="k">freq[ch] = (freq[ch] || 0) + 1</code>.</div>
+  <div class="box mis"><h3>Mistake</h3>Forgetting the <b>length check</b> first, and checking only "does b's char exist in a" (that says <code class="k">"aaz"</code> and <code class="k">"zza"</code> match). Counts matter, not just presence. Ask the interviewer about <b>case &amp; spaces</b> ("Dormitory" vs "dirty room").</div>
+  <div class="box rev"><h3>Revision</h3>Anagram = same chars, same counts. Length check → count first string → decrement with second → any miss = false. O(n).</div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">5</span>Count Unique Values<span class="vid">video #4</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Problem</h3>Given a <span class="hl">sorted</span> array, count how many <b>unique</b> values it has. Can be negative.<br><code class="k">[1,1,1,2,3,3,4,4,5,6]</code> → 6 · <code class="k">[]</code> → 0</div>
+  <h2>Two pointers, same direction</h2>
+  <p><b>i</b> = last unique value found, <b>j</b> = scout scanning ahead. When j finds a new value, move i one step and copy the value there.</p>
+  <div class="steps">
+    <div><span class="lbl">start</span><div class="row"><div class="cell g">1</div><div class="cell o">1</div><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">3</div><div class="cell">4</div></div><span style="margin-left:10px">i=0, j=1 → same, j++</span></div>
+    <div><span class="lbl">j finds 2</span><div class="row"><div class="cell">1</div><div class="cell g">2</div><div class="cell">1</div><div class="cell o">2</div><div class="cell">3</div><div class="cell">3</div><div class="cell">4</div></div><span style="margin-left:10px">i=1, arr[1] = 2</span></div>
+    <div><span class="lbl">j finds 3</span><div class="row"><div class="cell">1</div><div class="cell">2</div><div class="cell g">3</div><div class="cell">2</div><div class="cell o">3</div><div class="cell">3</div><div class="cell">4</div></div><span style="margin-left:10px">i=2, arr[2] = 3</span></div>
+    <div><span class="lbl">end</span><div class="row"><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell g">4</div><div class="cell dim">3</div><div class="cell dim">3</div><div class="cell dim">4</div></div><span style="margin-left:10px">answer = i + 1 = 4</span></div>
+  </div>
+  <p class="cap"><span style="color:var(--green)">green</span> = i (last unique) · <span style="color:var(--orange)">orange</span> = j (scout)</p>
+  [[code:count_unique]]
+  <div class="box mis"><h3>Mistake</h3>Returning <code class="k">i</code> instead of <code class="k">i + 1</code> (i is an index), and crashing on an empty array. This version <b>modifies the input</b> — say so in an interview, or use a counter instead of copying.</div>
+  <div class="box rev"><h3>Revision</h3>Sorted → duplicates are neighbours. i = last unique, j scans; new value → i++ and copy. Answer i + 1. O(n) time, O(1) space. Shortcut: <code class="k">len(set(arr))</code> / <code class="k">new Set(arr).size</code> (O(n) space).</div>
+</section>
+
+<!-- ================= 6 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">6</span>Largest Sum of Consecutive Elements<span class="vid">video #5</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Problem</h3>Given an array and a number <b>k</b>, find the <span class="hl">maximum sum of k consecutive elements</span>.<br><code class="k">[2,6,9,2,1,8,5,6,3], k=3</code> → 19 (8 + 5 + 6)</div>
+  <h2>Way 1 · Brute force — O(n·k)</h2>
+  <p>For every starting index, add up the next k numbers again from scratch.</p>
+  [[code:max_sum_brute]]
+  <h2>Way 2 · Sliding window — O(n)</h2>
+  <div class="steps">
+    <div><span class="lbl">window 1 = 17</span><div class="row"><div class="cell o">2</div><div class="cell o">6</div><div class="cell o">9</div><div class="cell">2</div><div class="cell">1</div><div class="cell">8</div><div class="cell">5</div><div class="cell">6</div><div class="cell">3</div></div></div>
+    <div><span class="lbl">17 − 2 + 2 = 17</span><div class="row"><div class="cell dim">2</div><div class="cell o">6</div><div class="cell o">9</div><div class="cell o">2</div><div class="cell">1</div><div class="cell">8</div><div class="cell">5</div><div class="cell">6</div><div class="cell">3</div></div></div>
+    <div><span class="lbl">17 − 6 + 1 = 12</span><div class="row"><div class="cell dim">2</div><div class="cell dim">6</div><div class="cell o">9</div><div class="cell o">2</div><div class="cell o">1</div><div class="cell">8</div><div class="cell">5</div><div class="cell">6</div><div class="cell">3</div></div></div>
+    <div><span class="lbl">… best = 19</span><div class="row"><div class="cell dim">2</div><div class="cell dim">6</div><div class="cell dim">9</div><div class="cell dim">2</div><div class="cell dim">1</div><div class="cell g">8</div><div class="cell g">5</div><div class="cell g">6</div><div class="cell">3</div></div></div>
+  </div>
+  <p class="big">new window = old window − element leaving + element entering</p>
+  [[code:max_sum]]
+  <div class="box mis"><h3>Mistake</h3>Starting <code class="k">best = 0</code> — wrong when all numbers are negative (<code class="k">[-3,-1,-2], k=2</code> → -3). Start from the <b>first window</b> (or -∞). And handle <code class="k">len(arr) &lt; k</code>.</div>
+  <div class="box rev"><h3>Revision</h3>"k consecutive" → fixed sliding window. Sum first k, then slide: + arr[i] − arr[i−k], track max. O(n·k) → O(n), O(1) space.</div>
+</section>
+
+<!-- ================= 7 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">7</span>Divide &amp; Conquer — Binary Search<span class="vid">video #6</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Divide &amp; conquer</span> = break a problem into smaller pieces, solve the piece that matters, ignore the rest. <span class="hl">Binary search</span> applies it to a <b>sorted</b> array: look at the middle, then throw away the half that can't contain the target. Real life: finding a word in a <b>dictionary</b> — open the middle, go left or right.</div>
+  <div class="steps">
+    <div><span class="lbl">find 16 · mid=4</span><div class="row"><div class="cell">1</div><div class="cell">3</div><div class="cell">5</div><div class="cell">8</div><div class="cell o">10</div><div class="cell">12</div><div class="cell">16</div><div class="cell">20</div><div class="cell">25</div></div><span style="margin-left:10px">10 &lt; 16 → go right</span></div>
+    <div><span class="lbl">lo=5 · mid=6</span><div class="row"><div class="cell dim">1</div><div class="cell dim">3</div><div class="cell dim">5</div><div class="cell dim">8</div><div class="cell dim">10</div><div class="cell">12</div><div class="cell g">16</div><div class="cell">20</div><div class="cell">25</div></div><span style="margin-left:10px">found at index 6 ✓</span></div>
+  </div>
+  <p class="big">n = 1,000,000 → at most ~20 checks (2²⁰ ≈ 1M)</p>
+  [[code:binary_search]]
+  <ul class="pen"><li>Best <b>O(1)</b> (first middle) · worst / average <span class="hl">O(log n)</span> (halves every step) · space <b>O(1)</b> iterative, O(log n) recursive.</li></ul>
+  <div class="box mis"><h3>Mistakes</h3>
+    <ul class="pen">
+      <li><code class="k">while lo &lt; hi</code> misses the last element → use <code class="k">lo &lt;= hi</code>.</li>
+      <li><code class="k">lo = mid</code> / <code class="k">hi = mid</code> → infinite loop; always <code class="k">mid + 1</code> / <code class="k">mid - 1</code>.</li>
+      <li>JS: <code class="k">(lo + hi) / 2</code> is a decimal → wrap in <code class="k">Math.floor</code>. Python: use <code class="k">//</code>.</li>
+      <li>Running it on <b>unsorted</b> data gives wrong answers.</li>
+    </ul></div>
+  <div class="box rev"><h3>Revision</h3>Sorted + search → binary search. lo, hi, mid; equal → return; smaller → lo = mid+1; bigger → hi = mid−1; loop while lo ≤ hi. O(log n). Python built-in: <code class="k">bisect.bisect_left(arr, x)</code>.</div>
+</section>
+
+<!-- ================= 8 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">8</span>Squares in Another Array<span class="vid">video #7, #8</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Problem</h3>Write <code class="k">same(a, b)</code> → true if <b>every value in a has its square in b</b>, with the <span class="hl">same frequency</span>. Order doesn't matter.<br><code class="k">[1,2,3,2], [9,1,4,4]</code> → true · <code class="k">[1,2,3], [1,9]</code> → false · <code class="k">[1,2,1], [4,4,1]</code> → false (frequencies differ)</div>
+  <h2>Way 1 · Brute force — O(n²)</h2>
+  <p>For each x in a, <b>search</b> for x² in b (that search is itself a loop) and remove it so it can't be reused.</p>
+  [[code:same_brute]]
+  <h2>Way 2 · Frequency counter — O(n)</h2>
+  <div class="two">
+    <div class="arrd"><div class="row"><div class="cell p">1:1</div><div class="cell p">2:2</div><div class="cell p">3:1</div></div><div class="cap">freq of a = [1,2,3,2]</div></div>
+    <div class="arrd"><div class="row"><div class="cell g">1:1</div><div class="cell g">4:2</div><div class="cell g">9:1</div></div><div class="cap">freq of b = [9,1,4,4]</div></div>
+  </div>
+  <p class="big">for each key x in freqA → freqB[x²] must equal freqA[x]</p>
+  [[code:same]]
+  <div class="box mis"><h3>Mistake</h3>Brute force with <code class="k">indexOf</code> / <code class="k">in</code> <b>looks</b> like one loop but is O(n²) — the search hides a second loop. And don't mutate the caller's array with <code class="k">splice</code> / <code class="k">remove</code>; copy it first.</div>
+  <div class="box rev"><h3>Revision</h3>Compare two collections by value + count → two frequency maps, then compare keys. Three separate loops = O(3n) = O(n). Space O(n).</div>
+</section>
+
+<!-- ================= 9 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">9</span>Recursion basics<span class="vid">video #9</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Recursion</span> = a function that <b>calls itself</b> on a smaller version of the problem until it reaches a case it can answer directly. Real life: <b>Russian dolls</b> — open one, there's a smaller one inside, until the tiniest doll.</div>
+  <h2>Every recursive function needs 2 things</h2>
+  <div class="two">
+    <div class="box gbox" style="margin:0"><h3>1 · Base case</h3>The stopping condition — returns without calling itself. No base case = <b>infinite recursion</b>.</div>
+    <div class="box def" style="margin:0"><h3>2 · Smaller input</h3>Each call must move <b>closer</b> to the base case (n − 1, slice(1), half…).</div>
+  </div>
+  [[code:countdown]]
+  [[code:factorial]]
+  <h2>The call stack — factorial(4)</h2>
+  <svg viewBox="0 0 640 230" width="100%" style="max-width:640px;display:block;margin:4px auto" aria-label="call stack for factorial 4">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#d62f4b"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#1f8a5b"/></marker></defs>
+    <g font-size="17" fill="#1f2a44">
+      <rect x="20" y="10" width="230" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="135" y="36" text-anchor="middle">factorial(4) = 4 × f(3)</text>
+      <rect x="60" y="62" width="230" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="175" y="88" text-anchor="middle">factorial(3) = 3 × f(2)</text>
+      <rect x="100" y="114" width="230" height="40" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="215" y="140" text-anchor="middle">factorial(2) = 2 × f(1)</text>
+      <rect x="140" y="166" width="230" height="40" rx="10" fill="#eaf7ef" stroke="#1f8a5b" stroke-width="2.5"/><text x="255" y="192" text-anchor="middle">factorial(1) = 1  ← base</text>
+      <text x="470" y="36" fill="#1f8a5b">returns 24</text><text x="470" y="88" fill="#1f8a5b">returns 6</text><text x="470" y="140" fill="#1f8a5b">returns 2</text><text x="470" y="192" fill="#1f8a5b">returns 1</text>
+    </g>
+    <path d="M30 52 V 205" stroke="#d62f4b" stroke-width="2.5" marker-end="url(#ar)"/><text x="4" y="225" font-size="14" fill="#d62f4b">calls push ↓</text>
+    <path d="M610 200 V 30" stroke="#1f8a5b" stroke-width="2.5" marker-end="url(#ag)"/><text x="560" y="225" font-size="14" fill="#1f8a5b">results pop ↑</text>
+  </svg>
+  <div class="box mis"><h3>Mistakes</h3>
+    <ul class="pen">
+      <li><b>No / wrong base case</b> → <code class="k">RecursionError</code> (Python, default limit ~1000) / <code class="k">RangeError: Maximum call stack size exceeded</code> (JS).</li>
+      <li><b>Forgetting to return</b> the recursive result — <code class="k">factorial(n - 1)</code> without <code class="k">return</code> gives <code class="k">None</code> / <code class="k">undefined</code>.</li>
+      <li>Input that never shrinks (calling with <code class="k">n</code> instead of <code class="k">n - 1</code>).</li>
+    </ul></div>
+  <div class="box rev"><h3>Revision</h3>Base case + smaller input + return the result. Each call waits on the stack until the base case answers, then results bubble back up. Stack space = O(depth).</div>
+</section>
+
+<!-- ================= 10 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">10</span>Advanced recursion<span class="vid">video #10</span></h1><div class="rule"></div>
+  <div class="box def"><h3>The recipe</h3>Ask: <span class="hl">"If someone solved the smaller problem for me, how do I finish?"</span> — power(b, e) = b × power(b, e−1); product(arr) = arr[0] × product(rest); fib(n) = fib(n−1) + fib(n−2).</div>
+  [[code:adv_recursion]]
+  <h2>Why naive Fibonacci is slow</h2>
+  <svg viewBox="0 0 620 175" width="100%" style="max-width:620px;display:block;margin:4px auto" aria-label="fib recursion tree">
+    <g stroke="#1d3a5f" stroke-width="2"><path d="M310 30 L170 80M310 30 L450 80M170 80 L90 135M170 80 L250 135M450 80 L400 135M450 80 L520 135"/></g>
+    <g font-size="17" text-anchor="middle">
+      <rect x="265" y="12" width="90" height="34" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="310" y="35">fib(5)</text>
+      <rect x="125" y="64" width="90" height="34" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="170" y="87">fib(4)</text>
+      <rect x="405" y="64" width="90" height="34" rx="10" fill="#fdecee" stroke="#d62f4b" stroke-width="2.5"/><text x="450" y="87" fill="#d62f4b">fib(3)</text>
+      <rect x="45" y="120" width="90" height="34" rx="10" fill="#fdecee" stroke="#d62f4b" stroke-width="2.5"/><text x="90" y="143" fill="#d62f4b">fib(3)</text>
+      <rect x="205" y="120" width="90" height="34" rx="10" fill="#fff4e8" stroke="#e8762b" stroke-width="2.5"/><text x="250" y="143" fill="#e8762b">fib(2)</text>
+      <rect x="355" y="120" width="90" height="34" rx="10" fill="#fff4e8" stroke="#e8762b" stroke-width="2.5"/><text x="400" y="143" fill="#e8762b">fib(2)</text>
+      <rect x="475" y="120" width="90" height="34" rx="10" fill="#fff" stroke="#1d3a5f" stroke-width="2.5"/><text x="520" y="143">fib(1)</text>
+    </g>
+    <text x="310" y="172" text-anchor="middle" font-size="15" fill="#d62f4b">fib(3) and fib(2) computed again and again → O(2ⁿ)</text>
+  </svg>
+  <h2>Fix · memoisation — remember answers</h2>
+  [[code:fib_memo]]
+  <h2>Recursion on strings</h2>
+  [[code:reverse_rec]]
+  <div class="tip">Python shortcut for memo: <code class="k">@functools.lru_cache(maxsize=None)</code> on top of the plain <code class="k">fib</code>. Memoisation is the first step into <b>Dynamic Programming</b>.</div>
+  <div class="box mis"><h3>Mistake</h3>Slicing (<code class="k">arr[1:]</code>, <code class="k">arr.slice(1)</code>, <code class="k">s[1:]</code>) copies the array every call → hidden O(n) per call, O(n²) total. Fine for learning; in interviews mention passing an <b>index</b> instead.</div>
+  <div class="box rev"><h3>Revision</h3>Trust the smaller call, finish the last step. Fibonacci tree repeats work → memo with a dict/object turns O(2ⁿ) into O(n).</div>
+</section>
+
+<!-- ================= 11 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">11</span>Helper-method recursion<span class="vid">video #12</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3>A <span class="hl">helper method</span> pattern = an <b>outer function</b> that holds the result (array, counter) and an <b>inner recursive function</b> that does the work and writes into it. Useful when you need to <b>collect</b> things — because a plain recursive call would reset the result every time.</div>
+  <p><b>Problem:</b> collect all <b>odd</b> numbers from an array. <code class="k">[1,2,3,4,5]</code> → <code class="k">[1,3,5]</code></p>
+  [[code:helper]]
+  <h2>Same thing with pure recursion</h2>
+  <p>No outer variable: each call <b>returns</b> its piece; pieces join on the way back. <span class="hl">Helper: the result lives outside the recursion, so it isn't reset each call.</span></p>
+  [[code:pure]]
+  <table class="t">
+    <tr><th style="width:22%">Point</th><th>Helper method</th><th>Pure recursion</th></tr>
+    <tr><td>State</td><td>Outer variable (closure)</td><td>Passed back via return values</td></tr>
+    <tr><td>Tip</td><td>Watch out: <code class="k">result = []</code> inside the recursive fn → reset each call</td><td>Use copy methods: <code class="k">+</code>, <code class="k">concat</code>, spread — don't mutate</td></tr>
+  </table>
+  <div class="box rev"><h3>Revision</h3>Need to collect results? Outer function keeps the list, inner helper recurses and appends. Or pure recursion: return [piece] + recurse(rest).</div>
+</section>
+
+<!-- ================= 12 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">12</span>Searching — Linear vs Binary<span class="vid">video #13, #14</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Searching</span> = finding the position of a value in a collection. <b>Linear search</b> checks items one by one from the start — works on <b>any</b> array. Real life: looking for your friend in a queue, person by person.</div>
+  <div class="arrd">
+    <div class="row"><div class="cell dim">7</div><div class="cell dim">2</div><div class="cell dim">9</div><div class="cell g">4</div><div class="cell">6</div><div class="cell">1</div></div>
+    <div class="row idx"><div class="cell">0</div><div class="cell">1</div><div class="cell">2</div><div class="cell">3</div><div class="cell">4</div><div class="cell">5</div></div>
+    <div class="cap">search 4 → check 7 ✗, 2 ✗, 9 ✗, 4 ✓ → return index 3</div>
+  </div>
+  [[code:linear_search]]
+  <table class="t">
+    <tr><th style="width:22%">Point</th><th>Linear search</th><th>Binary search (Ch 7)</th></tr>
+    <tr><td>Needs sorted?</td><td>No</td><td><span class="hl">Yes</span></td></tr>
+    <tr><td>Best</td><td>O(1) — first element</td><td>O(1) — first middle</td></tr>
+    <tr><td>Worst / avg</td><td>O(n)</td><td>O(log n)</td></tr>
+    <tr><td>Space</td><td>O(1)</td><td>O(1) iterative</td></tr>
+    <tr><td>Use when</td><td>Small or unsorted data, search once</td><td>Large sorted data, many searches</td></tr>
+    <tr><td>Built-ins</td><td><code class="k">in</code>, <code class="k">.index()</code> · <code class="k">includes</code>, <code class="k">indexOf</code>, <code class="k">find</code></td><td><code class="k">bisect</code> (Python) · write your own in JS</td></tr>
+  </table>
+  <div class="box mis"><h3>Mistake</h3>Sorting an array (O(n log n)) <b>just to</b> binary-search it once — slower than one linear search (O(n)). Sort first only if you'll search <b>many</b> times. Also: Python <code class="k">.index()</code> <b>throws</b> <code class="k">ValueError</code> when missing; JS <code class="k">indexOf</code> returns -1.</div>
+  <div class="box rev"><h3>Revision</h3>Linear: any order, O(n). Binary: sorted only, O(log n). Return index or -1. Built-ins are linear too.</div>
+</section>
+
+<!-- ================= 13 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">13</span>Bubble Sort + optimisation<span class="vid">video #15, #16</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Bubble sort</span> compares <b>neighbours</b> and swaps them if they're in the wrong order. After each full pass, the <b>largest remaining value "bubbles up"</b> to the end. Real life: bubbles in a soda — the big ones rise to the top.</div>
+  <h2>One pass on [5, 3, 4, 1, 2]</h2>
+  <div class="steps">
+    <div><span class="lbl">5 &gt; 3 swap</span><div class="row"><div class="cell o">3</div><div class="cell o">5</div><div class="cell">4</div><div class="cell">1</div><div class="cell">2</div></div></div>
+    <div><span class="lbl">5 &gt; 4 swap</span><div class="row"><div class="cell">3</div><div class="cell o">4</div><div class="cell o">5</div><div class="cell">1</div><div class="cell">2</div></div></div>
+    <div><span class="lbl">5 &gt; 1 swap</span><div class="row"><div class="cell">3</div><div class="cell">4</div><div class="cell o">1</div><div class="cell o">5</div><div class="cell">2</div></div></div>
+    <div><span class="lbl">5 &gt; 2 swap</span><div class="row"><div class="cell">3</div><div class="cell">4</div><div class="cell">1</div><div class="cell o">2</div><div class="cell g">5</div></div><span style="margin-left:10px">5 is in its final place ✓</span></div>
+  </div>
+  <h2>Basic version (#15)</h2>
+  [[code:bubble]]
+  <h2>Optimised version (#16)</h2>
+  <ul class="pen">
+    <li><b>Shrink the inner loop</b>: after pass i, the last i items are already sorted — don't compare them again.</li>
+    <li><span class="hl">swapped flag</span>: if a whole pass made <b>no swap</b>, the array is sorted → stop early. Nearly-sorted input becomes O(n).</li>
+  </ul>
+  [[code:bubble_opt]]
+  <table class="t">
+    <tr><th style="width:26%">Case</th><th>Basic</th><th>Optimised</th></tr>
+    <tr><td>Best (already sorted)</td><td>O(n²)</td><td><span class="hl">O(n)</span> — one pass, no swaps, break</td></tr>
+    <tr><td>Average / worst</td><td>O(n²)</td><td>O(n²)</td></tr>
+    <tr><td>Space · stable?</td><td colspan="2">O(1) in place · <b>stable</b> (equal items keep their order)</td></tr>
+  </table>
+  <div class="tip">Swap in one line — Python: <code class="k">a[i], a[j] = a[j], a[i]</code> · JS: <code class="k">[a[i], a[j]] = [a[j], a[i]]</code> (old way: a <code class="k">temp</code> variable).</div>
+  <div class="box rev"><h3>Revision</h3>Compare neighbours, swap, largest bubbles to the end each pass. Optimise: inner loop to i, break when no swap. O(n²), best O(n), stable, in place.</div>
+</section>
+
+<!-- ================= 14 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">14</span>Selection Sort<span class="vid">video #17</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Selection sort</span> repeatedly <b>selects the smallest</b> value from the unsorted part and swaps it to the front. The sorted part grows from the <b>left</b>. Real life: picking the shortest student to stand first, then the next shortest…</div>
+  <div class="steps">
+    <div><span class="lbl">min of all = 1</span><div class="row"><div class="cell o">5</div><div class="cell">3</div><div class="cell">4</div><div class="cell p">1</div><div class="cell">2</div></div><span style="margin-left:10px">swap 5 ↔ 1</span></div>
+    <div><span class="lbl">min of rest = 2</span><div class="row"><div class="cell g">1</div><div class="cell o">3</div><div class="cell">4</div><div class="cell">5</div><div class="cell p">2</div></div><span style="margin-left:10px">swap 3 ↔ 2</span></div>
+    <div><span class="lbl">min of rest = 3</span><div class="row"><div class="cell g">1</div><div class="cell g">2</div><div class="cell o">4</div><div class="cell">5</div><div class="cell p">3</div></div><span style="margin-left:10px">swap 4 ↔ 3</span></div>
+    <div><span class="lbl">min of rest = 4</span><div class="row"><div class="cell g">1</div><div class="cell g">2</div><div class="cell g">3</div><div class="cell o">5</div><div class="cell p">4</div></div><span style="margin-left:10px">swap 5 ↔ 4 → sorted ✓</span></div>
+  </div>
+  <p class="cap"><span style="color:var(--green)">green</span> = sorted part · <span style="color:var(--orange)">orange</span> = position to fill · <span style="color:var(--purple)">purple</span> = smallest found</p>
+  [[code:selection]]
+  <table class="t">
+    <tr><th style="width:26%">Point</th><th>Selection sort</th></tr>
+    <tr><td>Time</td><td>O(n²) in <b>all</b> cases — it always scans the whole rest, even if sorted</td></tr>
+    <tr><td>Swaps</td><td>At most n − 1 → good when <span class="hl">writes/swaps are expensive</span></td></tr>
+    <tr><td>Space · stable?</td><td>O(1) in place · <b>not stable</b> (a long swap can jump over an equal value)</td></tr>
+  </table>
+  <div class="box mis"><h3>Mistake</h3>Swapping inside the inner loop every time you see a smaller value — that's not selection sort (and does many more swaps). Track the <b>index</b> of the minimum, swap <b>once</b> after the inner loop.</div>
+  <div class="box rev"><h3>Revision</h3>For each position i: find index of min in i..end, swap it into i. O(n²) always, ≤ n−1 swaps, not stable.</div>
+</section>
+
+<!-- ================= 15 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">15</span>Insertion Sort + sorting summary<span class="vid">video #18</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Definition</h3><span class="hl">Insertion sort</span> builds the sorted part one item at a time: take the next item and <b>insert it into the correct place</b> in the left part by shifting bigger items right. Real life: <b>sorting playing cards</b> in your hand.</div>
+  <div class="steps">
+    <div><span class="lbl">take 3</span><div class="row"><div class="cell g">5</div><div class="cell o">3</div><div class="cell">4</div><div class="cell">1</div><div class="cell">2</div></div><span style="margin-left:10px">shift 5 → insert 3</span></div>
+    <div><span class="lbl">take 4</span><div class="row"><div class="cell g">3</div><div class="cell g">5</div><div class="cell o">4</div><div class="cell">1</div><div class="cell">2</div></div><span style="margin-left:10px">shift 5 → insert 4</span></div>
+    <div><span class="lbl">take 1</span><div class="row"><div class="cell g">3</div><div class="cell g">4</div><div class="cell g">5</div><div class="cell o">1</div><div class="cell">2</div></div><span style="margin-left:10px">shift 5,4,3 → insert 1 at front</span></div>
+    <div><span class="lbl">take 2</span><div class="row"><div class="cell g">1</div><div class="cell g">3</div><div class="cell g">4</div><div class="cell g">5</div><div class="cell o">2</div></div><span style="margin-left:10px">→ [1,2,3,4,5]</span></div>
+  </div>
+  [[code:insertion]]
+  <h2>Sorting summary</h2>
+  <table class="t">
+    <tr><th style="width:18%">Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable</th><th style="width:26%">Remember</th></tr>
+    <tr><td>Bubble (opt.)</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Yes</td><td>Biggest bubbles to the end</td></tr>
+    <tr><td>Selection</td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>No</td><td>Fewest swaps</td></tr>
+    <tr><td>Insertion</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Yes</td><td>Best for <span class="hl">nearly sorted</span> / small / streaming data</td></tr>
+    <tr><td>Built-in</td><td colspan="4">Python <code class="k">sorted()</code>/<code class="k">.sort()</code> &amp; modern JS <code class="k">.sort()</code> use <b>TimSort</b> — O(n log n), stable</td><td>Yes</td><td>Use this in real code</td></tr>
+  </table>
+  <div class="box mis"><h3>JS sort gotcha</h3><code class="k">[10, 1, 5, 100].sort()</code> → <code class="k">[1, 10, 100, 5]</code> 😱 — default sort compares as <b>strings</b>. For numbers always pass a comparator: <code class="k">arr.sort((a, b) =&gt; a - b)</code>. Python's <code class="k">sorted()</code> compares numbers correctly. Both <code class="k">.sort()</code> methods <b>mutate</b>; Python <code class="k">sorted()</code> / JS <code class="k">toSorted()</code> return a new list.</div>
+  <div class="box rev"><h3>Revision</h3>Insertion: take next item, shift bigger ones right, drop it in the gap. O(n²), best O(n), stable. All three basic sorts are O(n²); built-ins are O(n log n).</div>
+</section>
+
+<!-- ================= 16 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">16</span>Maximum Occurring Character<span class="vid">video #19</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Problem</h3>Return the <span class="hl">character that appears the most</span> in a string.<br><code class="k">"javascript"</code> → <code class="k">"a"</code> (2 times) · <code class="k">"aabbbcc"</code> → <code class="k">"b"</code></div>
+  <h2>Frequency counter again</h2>
+  <div class="arrd">
+    <div class="row"><div class="cell">j:1</div><div class="cell g">a:2</div><div class="cell">v:1</div><div class="cell">s:1</div><div class="cell">c:1</div><div class="cell">r:1</div><div class="cell">i:1</div><div class="cell">p:1</div><div class="cell">t:1</div></div>
+    <div class="cap">pass 1: build counts · pass 2: pick the key with the biggest count</div>
+  </div>
+  [[code:max_char]]
+  <ul class="pen">
+    <li>Time <b>O(n)</b>. Space <b>O(k)</b> where k = distinct chars (≤ 26 for lowercase letters → effectively O(1)).</li>
+    <li>Ties: this returns the <b>first</b> char that reached the max (dicts / objects keep insertion order — but JS objects put integer-like keys like "1" first!). Ask the interviewer how to break ties.</li>
+  </ul>
+  <div class="tip">Alternative for only lowercase letters: an array of 26 zeros, index <code class="k">ord(ch) - ord('a')</code> / <code class="k">ch.charCodeAt(0) - 97</code>. Same idea, fixed memory.</div>
+  <div class="box mis"><h3>Mistake</h3>Sorting the string or using <code class="k">s.count(ch)</code> / <code class="k">split(ch).length</code> inside a loop → O(n²). Count once in a map. Also clarify: ignore spaces? case-sensitive?</div>
+  <div class="box rev"><h3>Revision</h3>Count chars in a dict/object → scan for max. O(n). Python one-liner: <code class="k">Counter(s).most_common(1)[0][0]</code>.</div>
+</section>
+
+<!-- ================= 17 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">17</span>Palindrome Check<span class="vid">video #20</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Problem</h3>A <span class="hl">palindrome</span> reads the same forwards and backwards. <code class="k">"madam"</code>, <code class="k">"racecar"</code>, <code class="k">"121"</code> → true · <code class="k">"abca"</code> → false</div>
+  <h2>Way 1 · Reverse and compare — O(n) time, O(n) space</h2>
+  <div class="two">
+    <div class="cw py"><span class="tag py">python</span><pre>s == s[::-1]</pre></div>
+    <div class="cw js"><span class="tag js">javascript</span><pre>s === s.split("").reverse().join("")</pre></div>
+  </div>
+  <h2>Way 2 · Two pointers — O(n) time, O(1) space</h2>
+  <div class="arrd">
+    <div class="row"><div class="cell g">r</div><div class="cell o">a</div><div class="cell p">c</div><div class="cell">e</div><div class="cell p">c</div><div class="cell o">a</div><div class="cell g">r</div></div>
+    <div class="cap">compare the outside pair, move both pointers inward; stop when they meet</div>
+  </div>
+  [[code:palindrome]]
+  <h2>Real interview version — ignore case &amp; symbols</h2>
+  [[code:palindrome_clean]]
+  <div class="box mis"><h3>Mistake</h3><code class="k">str.reverse()</code> doesn't exist in JS (strings have no reverse) → split → reverse → join, or <code class="k">[...s]</code>. In Python <code class="k">reversed(s)</code> returns an iterator, not a string — use <code class="k">s[::-1]</code> or <code class="k">''.join(reversed(s))</code>.</div>
+  <div class="box rev"><h3>Revision</h3>Reverse &amp; compare (easy, O(n) space) or two pointers from both ends (O(1) space). Clean the string first if spaces/case/punctuation should be ignored.</div>
+</section>
+
+<!-- ================= 18 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">18</span>Longest Substring Without Repeating Characters<span class="vid">video #21</span></h1><div class="rule"></div>
+  <div class="box def"><h3>Problem (LeetCode #3 · Medium)</h3>Return the <span class="hl">length of the longest substring with no repeated characters</span>.<br><code class="k">"abcabcbb"</code> → 3 ("abc") · <code class="k">"bbbbb"</code> → 1 · <code class="k">"pwwkew"</code> → 3 ("wke" — "pwke" is a subsequence, not a substring)</div>
+  <h2>Approaches</h2>
+  <table class="t">
+    <tr><th style="width:30%">Approach</th><th>How</th><th style="width:16%">Time</th></tr>
+    <tr><td>Brute force</td><td>Check every substring for duplicates</td><td>O(n³)</td></tr>
+    <tr><td>Sliding window + set</td><td>Grow right; on duplicate, shrink left one by one</td><td>O(n)</td></tr>
+    <tr><td><span class="hl">Sliding window + last-seen map</span> ✓</td><td>On duplicate, <b>jump</b> start past its last position</td><td>O(n)</td></tr>
+  </table>
+  <h2>Variable-size window on "abcabcbb"</h2>
+  <div class="steps">
+    <div><span class="lbl">end=2 · "abc"</span><div class="row"><div class="cell o">a</div><div class="cell o">b</div><div class="cell o">c</div><div class="cell">a</div><div class="cell">b</div><div class="cell">c</div><div class="cell">b</div><div class="cell">b</div></div><span style="margin-left:10px">best = 3</span></div>
+    <div><span class="lbl">end=3 · 'a' seen at 0</span><div class="row"><div class="cell dim">a</div><div class="cell o">b</div><div class="cell o">c</div><div class="cell o">a</div><div class="cell">b</div><div class="cell">c</div><div class="cell">b</div><div class="cell">b</div></div><span style="margin-left:10px">start → 1</span></div>
+    <div><span class="lbl">end=6 · 'b' seen at 4</span><div class="row"><div class="cell dim">a</div><div class="cell dim">b</div><div class="cell dim">c</div><div class="cell dim">a</div><div class="cell dim">b</div><div class="cell o">c</div><div class="cell o">b</div><div class="cell">b</div></div><span style="margin-left:10px">start → 5</span></div>
+    <div><span class="lbl">end=7 · 'b' seen at 6</span><div class="row"><div class="cell dim">a</div><div class="cell dim">b</div><div class="cell dim">c</div><div class="cell dim">a</div><div class="cell dim">b</div><div class="cell dim">c</div><div class="cell dim">b</div><div class="cell o">b</div></div><span style="margin-left:10px">answer 3</span></div>
+  </div>
+  [[code:longest_substring]]
+  <div class="box mis"><h3>Mistake — the "abba" trap</h3>Without the check <code class="k">last_seen[ch] &gt;= start</code>, the window can move <b>backwards</b>: at the last 'a' in "abba", 'a' was seen at 0, which is already outside the window (start = 2). Jumping to 0 + 1 = 1 would wrongly give 3. Only jump if the duplicate is <b>inside</b> the current window (or use <code class="k">start = max(start, seen + 1)</code>).</div>
+  <div class="box rev"><h3>Revision</h3>Variable sliding window: expand end every step; on a duplicate inside the window, move start to last_seen + 1; record last_seen; best = max(best, end − start + 1). O(n) time, O(k) space.</div>
+</section>
+
+<!-- ================= 19 ================= -->
+<section class="page chap">
+  <h1 class="ct"><span class="n">19</span>Python ⇄ JS cheat sheet · Q&amp;A</h1><div class="rule"></div>
+  <table class="t">
+    <tr><th style="width:24%">Task</th><th>Python</th><th>JavaScript</th></tr>
+    <tr><td>Length</td><td><code class="k">len(arr)</code></td><td><code class="k">arr.length</code></td></tr>
+    <tr><td>Loop with index</td><td><code class="k">for i, x in enumerate(arr)</code></td><td><code class="k">arr.forEach((x, i) =&gt; …)</code> / <code class="k">for (let i = 0; …)</code></td></tr>
+    <tr><td>Loop values</td><td><code class="k">for x in arr</code></td><td><code class="k">for (const x of arr)</code> (<b>of</b>, not in!)</td></tr>
+    <tr><td>Count in map</td><td><code class="k">d[x] = d.get(x, 0) + 1</code></td><td><code class="k">d[x] = (d[x] || 0) + 1</code></td></tr>
+    <tr><td>Key exists</td><td><code class="k">x in d</code></td><td><code class="k">x in obj</code> / <code class="k">map.has(x)</code></td></tr>
+    <tr><td>Slice / copy</td><td><code class="k">arr[1:3]</code>, <code class="k">arr[:]</code></td><td><code class="k">arr.slice(1, 3)</code>, <code class="k">[...arr]</code></td></tr>
+    <tr><td>Reverse string</td><td><code class="k">s[::-1]</code></td><td><code class="k">[...s].reverse().join("")</code></td></tr>
+    <tr><td>Sort numbers</td><td><code class="k">sorted(arr)</code> / <code class="k">arr.sort()</code></td><td><code class="k">arr.sort((a, b) =&gt; a - b)</code></td></tr>
+    <tr><td>Swap</td><td><code class="k">a, b = b, a</code></td><td><code class="k">[a, b] = [b, a]</code></td></tr>
+    <tr><td>Infinity</td><td><code class="k">float('inf')</code></td><td><code class="k">Infinity</code></td></tr>
+    <tr><td>Integer division</td><td><code class="k">7 // 2</code> → 3</td><td><code class="k">Math.floor(7 / 2)</code> → 3</td></tr>
+    <tr><td>Equality</td><td><code class="k">==</code></td><td><code class="k">===</code> (always strict)</td></tr>
+    <tr><td>Unique values</td><td><code class="k">len(set(arr))</code></td><td><code class="k">new Set(arr).size</code></td></tr>
+  </table>
+  <h2>Rapid-fire Q&amp;A</h2>
+  <div class="qa">
+    <p class="q">Q. What is Big-O?</p><p class="a"><b>A.</b> How the number of steps (or memory) grows as input size n grows — worst case, constants dropped.</p>
+    <p class="q">Q. O(n) vs O(log n) on 1 million items?</p><p class="a"><b>A.</b> ~1,000,000 steps vs ~20 steps.</p>
+    <p class="q">Q. When do two pointers work?</p><p class="a"><b>A.</b> Usually on sorted arrays or when comparing both ends (pairs, palindrome, in-place dedupe).</p>
+    <p class="q">Q. Frequency counter in one line?</p><p class="a"><b>A.</b> Count items in a dict/object, then compare counts — replaces nested loops, O(n).</p>
+    <p class="q">Q. Fixed vs variable sliding window?</p><p class="a"><b>A.</b> Fixed: size k given (max sum of k). Variable: grows/shrinks by a rule (longest substring without repeats).</p>
+    <p class="q">Q. Why does binary search need sorted data?</p><p class="a"><b>A.</b> Discarding half is only safe if everything on one side is known to be smaller/bigger.</p>
+    <p class="q">Q. Two must-haves of recursion?</p><p class="a"><b>A.</b> A base case and a smaller input on every call (and return the result).</p>
+    <p class="q">Q. Why is naive fib slow and how to fix?</p><p class="a"><b>A.</b> Recomputes the same subproblems → O(2ⁿ). Memoise → O(n).</p>
+    <p class="q">Q. Helper method recursion?</p><p class="a"><b>A.</b> Outer function holds the result, inner recursive helper fills it.</p>
+    <p class="q">Q. Bubble vs selection vs insertion in one line each?</p><p class="a"><b>A.</b> Bubble: swap neighbours, max goes to end. Selection: pick min, swap to front. Insertion: insert next item into sorted left part.</p>
+    <p class="q">Q. Which simple sort for nearly-sorted data?</p><p class="a"><b>A.</b> Insertion sort (O(n) best case). Optimised bubble also O(n) best case.</p>
+    <p class="q">Q. What does stable sort mean?</p><p class="a"><b>A.</b> Equal elements keep their original relative order.</p>
+    <p class="q">Q. Why is <code class="k">[10,1,5].sort()</code> wrong in JS?</p><p class="a"><b>A.</b> Default sort compares strings; pass <code class="k">(a, b) =&gt; a - b</code>.</p>
+    <p class="q">Q. Substring vs subsequence?</p><p class="a"><b>A.</b> Substring = contiguous; subsequence = order kept, gaps allowed.</p>
+  </div>
+  <h2>One-page cheat sheet</h2>
+  <div class="two">
+    <div class="cw"><span class="tag">patterns</span><pre>compare counts   → frequency counter
+sorted + pair    → two pointers
+k consecutive    → fixed window
+longest/shortest → variable window
+sorted + find    → binary search
+repeat subprob   → recursion + memo</pre></div>
+    <div class="cw"><span class="tag">complexities</span><pre>linear search     O(n)
+binary search     O(log n)
+bubble/sel/ins    O(n²)
+built-in sort     O(n log n)
+dict/set lookup   O(1) avg
+naive fib         O(2ⁿ) → memo O(n)</pre></div>
+  </div>
+  <div class="box gbox"><h3>Next step</h3>Beyond this playlist: merge sort &amp; quick sort (O(n log n)), linked lists, stacks &amp; queues, hash maps in depth, trees (BST, traversals), heaps, graphs (BFS/DFS), dynamic programming. Practise each pattern on LeetCode: Two Sum, Valid Anagram, Remove Duplicates from Sorted Array, Maximum Average Subarray I, Binary Search, Valid Palindrome.</div>
+  <p class="end">— End of DSA · keep practising! ✍️ —</p>
+</section>
+
+</body>
+</html>
