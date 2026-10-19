@@ -14,6 +14,7 @@ A personal space for tracking what I'm learning: notes, practice exercises, and 
 
 - [System Design](notes/system-design/System-Design-Notes.pdf): handwritten-style revision notes covering the Gate Smashers System Design playlist (36 lectures). Source HTML: [`system-design-notes.html`](notes/system-design/system-design-notes.html).
 - [DSA in Python & JavaScript](notes/dsa/DSA-Notes-Python-JS.pdf): handwritten-style notes covering Technical Suneja's *DSA in JavaScript* playlist (#1–#21), with every solution in both languages. The code comes from the tested files in [`exercises/dsa/`](exercises/dsa/).
+  - Notebook version: [`DSA-Handwritten-Notes.pdf`](notes/dsa/DSA-Handwritten-Notes.pdf) (ruled paper, handwriting fonts throughout, code in coloured pens).
 
 ## Roadmap
 

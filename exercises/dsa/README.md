@@ -11,7 +11,7 @@ Each solution sits between `@snippet <name>` / `@end` comment markers. After you
 
 ```sh
 pip install pygments
-python3 notes/dsa/build.py          # template + snippets -> dsa-notes.html
+python3 notes/dsa/build.py   # -> dsa-notes.html (typed) + dsa-notes-handwritten.html (notebook)
 ```
 
-Then print `notes/dsa/dsa-notes.html` to PDF (A4, background graphics on), or render it with headless Chromium.
+Then print either HTML file to PDF (A4, background graphics on), or render it with headless Chromium.

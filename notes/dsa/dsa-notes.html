@@ -345,7 +345,7 @@ for x in data:
 <span class="t-w">  </span><span class="t-p">}</span>
 <span class="t-w">  </span><span class="t-k">return</span><span class="t-w"> </span><span class="t-kc">true</span><span class="t-p">;</span>
 <span class="t-p">}</span></pre></div></div>
-  <div class="tip">Python: <code class="k">Counter(a) == Counter(b)</code>. JS has no Counter → memorise <code class="k">freq[ch] = (freq[ch] || 0) + 1</code>.</div>
+  <div class="tip opt">Python: <code class="k">Counter(a) == Counter(b)</code>. JS has no Counter → memorise <code class="k">freq[ch] = (freq[ch] || 0) + 1</code>.</div>
   <div class="box mis"><h3>Mistake</h3>Forgetting the <b>length check</b> first, and checking only "does b's char exist in a" (that says <code class="k">"aaz"</code> and <code class="k">"zza"</code> match). Counts matter, not just presence. Ask the interviewer about <b>case &amp; spaces</b> ("Dormitory" vs "dirty room").</div>
   <div class="box rev"><h3>Revision</h3>Anagram = same chars, same counts. Length check → count first string → decrement with second → any miss = false. O(n).</div>
 </section>

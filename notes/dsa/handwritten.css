@@ -1,0 +1,80 @@
+/* Notebook theme: layered over the template's styles by build.py.
+   Ruled paper, handwriting everywhere (code included), pen-ink colours,
+   wobbly hand-drawn borders. */
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@600;700&display=swap');
+
+:root{
+  --paper:#fdfbf2; --ink:#1c2c5b; --pencil:#7d8496; --rule:#c6d8ee; --margin:#ef9a9a;
+  --wobble:255px 14px 225px 16px / 16px 225px 14px 255px;
+  --wobble2:14px 225px 16px 255px / 225px 16px 255px 14px;
+}
+body{
+  font-family:'Kalam',cursive; font-weight:300; font-size:15px; line-height:1.48; color:var(--ink);
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(90deg, transparent 38px, var(--margin) 38px, var(--margin) 40px, transparent 40px),
+    repeating-linear-gradient(180deg, transparent 0 25px, var(--rule) 25px 26px);
+  background-size:auto, auto;
+}
+.page{ padding-left:52px; }
+b, strong{ font-weight:700; }
+h1.ct{ font-family:'Caveat',cursive; color:#c62840; }
+h1.ct .n{ font-family:'Caveat',cursive; font-size:30px; background:none; color:#c62840; border:3px solid #c62840; border-radius:var(--wobble); }
+.vid{ font-family:'Kalam'; font-weight:400; background:none; color:var(--ink); border:2px solid var(--ink); border-radius:var(--wobble2); }
+.rule{ height:3px; background:none; border-bottom:3px solid #c62840; border-radius:0 0 60% 40% / 0 0 4px 3px; margin:2px 0 12px; }
+h2{ font-family:'Caveat',cursive; color:#5b3cc4; }
+h3{ font-family:'Caveat',cursive; }
+.hl{ background:linear-gradient(100deg, transparent 2%, rgba(255,230,90,.75) 4%, rgba(255,230,90,.6) 94%, transparent 97%); border-radius:4px 8px 5px 9px; }
+
+/* pen-drawn boxes */
+.box{ border-width:2.2px; border-radius:var(--wobble); background:rgba(255,255,255,.45); }
+.def{ background:rgba(123,79,214,.06); } .mis{ background:rgba(214,47,75,.06); }
+.rev{ background:rgba(232,118,43,.07); } .gbox{ background:rgba(31,138,91,.06); }
+.box:nth-of-type(odd){ transform:rotate(-.25deg); } .box:nth-of-type(even){ transform:rotate(.25deg); }
+.tip{ font-family:'Kalam'; background:#fff1a8; border-radius:2px; box-shadow:2px 4px 0 rgba(0,0,0,.07); transform:rotate(-.8deg); }
+
+/* inline code → pen-written, underlined in red */
+code.k{ font-family:'Kalam',cursive; font-weight:400; font-size:14.5px; color:#b0233c; background:none; border:none; border-bottom:1.5px solid rgba(176,35,60,.45); border-radius:0; padding:0 2px; }
+
+/* code cards → written on the page in coloured pens */
+.cw .tag{ font-family:'Caveat',cursive; border-radius:var(--wobble2); }
+pre{
+  font-family:'Kalam',cursive; font-weight:400; font-size:14px; line-height:1.5; color:var(--ink);
+  background:rgba(255,255,255,.55); border:2px solid var(--ink); border-left-width:2px;
+  border-radius:var(--wobble2); padding:14px 16px 10px; tab-size:4;
+}
+.cw.py pre{ border-color:#3776ab; } .cw.js pre{ border-color:#b89a00; }
+.pair pre{ font-size:13px; padding:14px 12px 8px; }
+pre .t-k,pre .t-kd,pre .t-kn,pre .t-kr,pre .t-kc,pre .t-ow,pre .t-kp,pre .kw{ color:#1f4fd1; font-weight:700; }
+pre .t-s,pre .t-s1,pre .t-s2,pre .t-sa,pre .t-sr,pre .t-sd,pre .t-si,pre .t-dl,pre .t-se,pre .t-sb{ color:#178a4c; }
+pre .t-nf,pre .t-nb,pre .t-bp,pre .t-fm{ color:#7b2fbf; }
+pre .t-c,pre .t-c1,pre .t-cm,pre .t-cs,pre .t-ch,pre .c{ color:var(--pencil); font-weight:300; font-style:normal; }
+pre .t-m,pre .t-mi,pre .t-mf,pre .t-il,pre .nu{ color:#c4501a; }
+
+/* tables → ruled by hand */
+table.t{ background:rgba(255,255,255,.5); font-size:14.5px; }
+table.t th{ background:none; color:var(--ink); font-family:'Caveat',cursive; font-size:23px; border:2px solid var(--ink); border-bottom-width:3px; }
+table.t td{ border:1.6px solid var(--ink); }
+table.t td:first-child{ background:rgba(255,241,166,.35); font-weight:400; }
+
+/* array diagrams */
+.cell{ font-family:'Kalam',cursive; font-weight:400; background:rgba(255,255,255,.7); border-width:2px; border-radius:6px 3px 7px 2px; margin-left:-2px; }
+.cell:first-child, .cell:last-child{ border-radius:6px 3px 7px 2px; }
+.cell.g{ background:rgba(31,138,91,.14); } .cell.r{ background:rgba(214,47,75,.12); }
+.cell.o{ background:rgba(232,118,43,.16); } .cell.p{ background:rgba(123,79,214,.13); }
+.steps .lbl, .cap{ color:var(--pencil); font-weight:400; }
+.big{ font-family:'Caveat',cursive; font-size:26px; }
+svg text{ font-family:'Kalam',cursive; }
+
+/* cover */
+.logo{ background:none; border:3px solid var(--ink); border-radius:var(--wobble); box-shadow:none; }
+.logo svg{ stroke:var(--ink); }
+.cover h1{ font-family:'Caveat',cursive; }
+.langs span{ border-radius:var(--wobble2) !important; }
+.byline{ font-family:'Kalam'; border-radius:var(--wobble2); }
+.toc{ font-family:'Kalam'; }
+.qa .q{ font-weight:700; }
+.box{ margin:9px 0; padding:7px 18px 9px; }
+pre{ line-height:1.42; }
+/* tips marked .opt repeat what the code comments say; dropped to keep pages whole */
+.opt{ display:none; }
