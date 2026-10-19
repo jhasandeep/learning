@@ -1,12 +1,13 @@
 'use client'
 
-import { ArrowRight, BookOpen, Bug, Flame, Infinity as InfinityIcon, Layers, Minus, Plus, Target } from 'lucide-react'
+import { ArrowRight, BookOpen, Bug, Flame, Infinity as InfinityIcon, Layers, Minus, Plus, SquareTerminal, Target } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { buttonClass, Card, cx, ProgressBar, Ring } from '@/components/ui'
 import { ALGORITHMS } from '@/data/algorithms'
 import { CAMPAIGN } from '@/data/campaign'
 import { ALL_CARDS } from '@/data/decks'
+import { LANGUAGES } from '@/data/languages'
 import { ENDLESS_COUNT, nextUnsolved } from '@/lib/endless'
 import { dayStreak, levelFromXp, setDailyGoal, useProgress } from '@/lib/progress'
 import { isDue } from '@/lib/srs'
@@ -76,7 +77,7 @@ export function Dashboard() {
         </div>
       </section>
 
-      <section aria-label="Modes" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Modes" className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <ModeCard
           href={nextLevel ? `/campaign/${nextLevel.id}` : '/campaign'}
           icon={<Bug size={20} />} color="var(--accent)" title="Bug Hunt"
@@ -93,6 +94,12 @@ export function Dashboard() {
           href="/flashcards" icon={<Layers size={20} />} color="var(--violet)" title="Flashcards"
           text={`${ALL_CARDS.length} interview questions on system design, DSA, React and JS with spaced repetition.`}
           footer={<span>{due > 0 ? `${due} due today` : 'Nothing due — learn new cards'}</span>}
+        />
+        <ModeCard
+          href="/compiler" icon={<SquareTerminal size={20} />} color="var(--accent)" title="Online compiler"
+          text={`Write and run code in ${LANGUAGES.length} languages — Python, Java, C++, SQL, JS and more. Share with a link.`}
+          footer={<span>{LANGUAGES.filter((l) => l.engine === 'browser').length} run right in your browser</span>}
+          tag="New"
         />
         <ModeCard
           href="/notes" icon={<BookOpen size={20} />} color="var(--good)" title="Revision notes"

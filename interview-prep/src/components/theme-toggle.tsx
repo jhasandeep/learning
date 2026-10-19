@@ -16,13 +16,13 @@ function subscribe(cb: () => void) {
 export function useTheme() {
   return useSyncExternalStore(
     subscribe,
-    () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'),
-    () => 'dark' as const,
+    () => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'),
+    () => 'light' as const,
   )
 }
 
 export function toggleTheme() {
-  const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'
   document.documentElement.dataset.theme = next
   try {
     localStorage.setItem(THEME_KEY, next)

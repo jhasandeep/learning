@@ -1,6 +1,6 @@
 # PrepArena: interview prep by fixing real bugs
 
-A Next.js app for practising DSA the way interviews test it: read a bug report, debug real JavaScript in the browser, run real tests, and learn why it broke. Spaced-repetition flashcards and XP/streak tracking come with it.
+A Next.js app for interview prep: an 18-language online compiler, plus DSA practice the way interviews test it: read a bug report, debug real JavaScript in the browser, run real tests, and learn why it broke. Spaced-repetition flashcards and XP/streak tracking come with it.
 
 It started as a redesign of [Bug Hunter](https://game.myhastech.com/), with a cleaner UI and more of the "learn" side built in.
 
@@ -8,12 +8,13 @@ It started as a redesign of [Bug Hunter](https://game.myhastech.com/), with a cl
 
 | Area | What it does |
 | --- | --- |
+| **Online compiler** | Programiz-style editor for **18 languages**: Python, R, SQL, HTML/CSS, Java, Kotlin, C, C++, C#, JavaScript, TypeScript, Go, Rust, Scala, Dart, Ruby, PHP, Swift. Six of them run **inside the browser** on self-hosted WebAssembly runtimes (Pyodide, webR, sql.js); the rest are compiled on the server through a pluggable runner. It has a stdin box, Run/Stop, time limits, share links, auto-saved drafts, download, a resizable split, R plots, SQL result tables with a sample database, and a live HTML preview with its console. |
 | **Bug Hunt campaign** | 12 hand-written levels in teaching order (off-by-one → two pointers → sliding window → recursion → sorting → a two-bug boss). Each has a story, test cases, three hints that go from a nudge to the exact fix, an explanation and a diff of the fix. |
 | **Endless mode** | 147 bugs injected into 20 classic algorithms by 21 mutation operators (comparison, off-by-one, logic, initial value, arithmetic, wrong function, return value). Every bug is **verified**: it compiles and fails at least one test. Level numbers are stable, so links can be shared. Streaks give bonus XP. |
 | **Code runner** | User code runs in a Web Worker (no DOM access) with a 2-second cut-off for infinite loops. Per-test expected/received output, a console tab for `console.log`, and drafts auto-saved per level. |
 | **Flashcards** | 64 questions (system design, DSA, React, JavaScript) from the revision notes, scheduled with Leitner spaced repetition (1 → 2 → 4 → 8 → 16 → 32 days). Search across all cards, plus a browse-all mode. |
 | **Progress** | XP and levels, day streak, daily goal ring, 18-week activity heatmap, 10 badges, JSON export/import, reset. Everything stays in `localStorage`, so no account is needed. |
-| **UX** | Ctrl/⌘+K command palette (type a number to jump to an Endless level), keyboard shortcuts (`?` lists them), light/dark theme with no flash, mobile layout with a Problem/Code switcher, reduced-motion support. |
+| **UX** | Ctrl/⌘+K command palette (type a number to jump to an Endless level), keyboard shortcuts (`?` lists them), light theme by default (dark is one click away) with no flash, mobile layout with a Problem/Code switcher, reduced-motion support. |
 | **Notes** | The System Design and DSA PDFs from `../notes/` are linked in the app. |
 
 ## Run it
@@ -23,10 +24,40 @@ npm install
 npm run dev        # http://localhost:3000
 npm test           # vitest: content + logic tests
 npm run lint
-npm run build      # all 175 pages are prerendered
+npm run build      # every page is prerendered (one per level, deck and language)
 ```
 
 Node 22.18 or newer is needed, because `build:bank` runs a TypeScript file directly.
+
+## Online compiler
+
+| Language | Runs on | How |
+| --- | --- | --- |
+| Python | browser | Pyodide (CPython → WebAssembly) in a module worker; `input()` reads the stdin box |
+| R | browser | webR, with plots rendered as images |
+| SQL | browser | sql.js (SQLite → WebAssembly) with `customers` / `orders` / `shippings` sample tables and a Reset DB button |
+| HTML/CSS | browser | sandboxed `<iframe>` live preview with its `console.log` piped below |
+| JavaScript, TypeScript | browser | Web Worker; TypeScript is transpiled with sucrase (types are stripped, not checked) |
+| Java, Kotlin, C, C++, C#, Go, Rust, Scala, Dart, Ruby, PHP, Swift | server | `POST /api/run` → Piston, Judge0, or local toolchains (dev only) |
+
+The WebAssembly runtimes are copied from `node_modules` into `public/vendor/` by `scripts/vendor-runtimes.mjs` (on install, dev and build), so no third-party CDN is used. The first Python run downloads about 13 MB and the first R run about 45 MB; after that the browser cache serves them.
+
+Limits: 64 KB of code or input, 64 KB of output, a compile timeout of 20 s and a run timeout of 6 s on the server (5 s for JS, 15 s for Python and 20 s for R in the browser), and 30 runs per minute per IP.
+
+### Running compiled languages
+
+Compiled languages need a code runner. Pick one with environment variables (see `.env.example`):
+
+- **Piston (recommended)** is open source and sandboxes code in isolated containers.
+  ```sh
+  docker run -d --privileged -p 2000:2000 --name piston_api ghcr.io/engineer-man/piston
+  ```
+  Then install the runtimes you want (`gcc`, `java`, `kotlin`, `mono`, `go`, `rust`, `scala`, `dart`, `ruby`, `php`, `swift`) with the package manager in Piston's CLI, as described in the [Piston README](https://github.com/engineer-man/piston).
+  Then set `RUNNER_BACKEND=piston` and `PISTON_URL=http://localhost:2000`.
+- **Judge0**: set `RUNNER_BACKEND=judge0` with `JUDGE0_URL` (and `JUDGE0_KEY` for RapidAPI). Language IDs are looked up from the instance's `/languages` list.
+- **local** (`RUNNER_BACKEND=local`) uses compilers installed on the machine (gcc, javac, go, rustc and so on), with time and output limits but **no sandbox**. It is the default in `npm run dev` and is refused in production unless `ALLOW_UNSAFE_LOCAL_RUNNER=1`. Never expose it publicly.
+
+With no runner configured, the browser languages still work, and compiled languages show a short setup note.
 
 ## How Endless levels are made
 
@@ -43,12 +74,15 @@ To add an algorithm, append it to `algorithms.ts`, run `npm run build:bank`, the
 
 ```
 src/
-  app/            routes: / · /campaign/[id] · /endless/[level] · /flashcards/[deck] · /progress · /notes
+  app/            routes: / · /compiler/[lang] · /campaign/[id] · /endless/[level] · /flashcards/[deck] · /progress · /notes · /api/run
   components/     shell, command palette, play screen, editor, diff view, UI primitives
   data/           campaign levels, algorithm library, verified bug bank, flashcard decks
   lib/            test runner (worker + shared core), mutation engine, SRS, progress store
-scripts/          build-bank.ts
+  lib/run/        in-browser runtimes for the compiler (JS/TS worker, SQLite worker, webR) + dispatcher
+  lib/exec/       server runners: Piston, Judge0, local
+public/runners/   Python worker (static module worker that loads Pyodide)
+scripts/          build-bank.ts, vendor-runtimes.mjs
 tests/            vitest suites
 ```
 
-Built with Next.js 16 (App Router, Cache Components), React 19, Tailwind CSS 4, CodeMirror 6 and lucide icons.
+Built with Next.js 16 (App Router, Cache Components), React 19, Tailwind CSS 4, CodeMirror 6, Pyodide, webR, sql.js and lucide icons.

@@ -1,10 +1,11 @@
 'use client'
 
-import { Bug, Hash, Layers, Moon, Search } from 'lucide-react'
+import { Bug, Hash, Layers, Moon, Search, SquareTerminal } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { CAMPAIGN } from '@/data/campaign'
 import { DECKS } from '@/data/decks'
+import { LANGUAGES } from '@/data/languages'
 import { ENDLESS_COUNT } from '@/lib/endless'
 import { NAV } from './nav'
 import { toggleTheme } from './theme-toggle'
@@ -49,6 +50,7 @@ export function CommandPalette() {
     const all: Item[] = [
       ...NAV.map((n) => ({ id: n.href, label: n.label, hint: 'Page', icon: <n.icon size={16} />, run: go(n.href) })),
       ...CAMPAIGN.map((l, i) => ({ id: l.id, label: `${i + 1}. ${l.title}`, hint: `Campaign · ${l.topic}`, icon: <Bug size={16} />, run: go(`/campaign/${l.id}`) })),
+      ...LANGUAGES.map((l) => ({ id: `compiler-${l.id}`, label: `${l.name} compiler`, hint: `Compiler · ${l.engine === 'browser' ? 'in browser' : 'server'}`, icon: <SquareTerminal size={16} />, run: go(`/compiler/${l.id}`) })),
       ...DECKS.map((d) => ({ id: d.id, label: `${d.title} flashcards`, hint: `${d.cards.length} cards`, icon: <Layers size={16} />, run: go(`/flashcards/${d.id}`) })),
       { id: 'theme', label: 'Toggle light / dark theme', hint: 'Action', icon: <Moon size={16} />, run: toggleTheme },
     ]

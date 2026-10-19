@@ -9,7 +9,7 @@ A personal space for tracking what I'm learning: notes, practice exercises, and 
 | [`notes/`](notes/) | Concept notes, one Markdown file per topic or session. Start from [`notes/_template.md`](notes/_template.md). |
 | [`exercises/`](exercises/) | Practice code and problem solutions, grouped by topic or language. |
 | [`resources/`](resources/) | Links to books, courses, articles and videos worth keeping. |
-| [`interview-prep/`](interview-prep/) | **PrepArena**: a Next.js interview-prep web app (debug real code, endless verified bugs, spaced-repetition flashcards). See its README. |
+| [`interview-prep/`](interview-prep/) | **PrepArena**: a Next.js interview-prep web app — an 18-language online compiler (Programiz-style), debug-the-code DSA levels, endless verified bugs, spaced-repetition flashcards. See its README. |
 
 ## Notes so far
 

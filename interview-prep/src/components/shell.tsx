@@ -12,13 +12,13 @@ import { ThemeToggle } from './theme-toggle'
 import { ToastProvider } from './toast'
 import { cx, Kbd, ProgressBar } from './ui'
 
-function Logo() {
+function Logo({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight">
+    <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight" aria-label="PrepArena home">
       <span className="grid size-8 place-items-center rounded-lg bg-accent/15 text-accent shadow-[0_0_24px_-6px_var(--accent)]">
         <Target size={18} />
       </span>
-      <span>Prep<span className="text-accent">Arena</span></span>
+      {!compact && <span>Prep<span className="text-accent">Arena</span></span>}
     </Link>
   )
 }
@@ -91,12 +91,14 @@ export function Shell({ children }: { children: ReactNode }) {
   const p = useProgress()
   const lv = levelFromXp(p.xp)
   const streak = dayStreak(p.activity, useToday())
+  // Compiler workspaces use the full width: icon-only sidebar, no page padding.
+  const compact = pathname.startsWith('/compiler/')
 
   return (
     <ToastProvider>
       <div className="flex min-h-dvh">
-        <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-6 border-r border-line bg-surface/40 p-4 backdrop-blur md:flex">
-          <div className="px-2 pt-1"><Logo /></div>
+        <aside className={cx('sticky top-0 hidden h-dvh shrink-0 flex-col gap-6 border-r border-line bg-surface/40 backdrop-blur md:flex', compact ? 'w-16 items-center p-2 pt-4' : 'w-60 p-4')}>
+          <div className={compact ? '' : 'px-2 pt-1'}><Logo compact={compact} /></div>
           <nav aria-label="Main" className="flex flex-col gap-1">
             {NAV.map((n) => {
               const active = isActive(pathname, n.href)
@@ -105,18 +107,21 @@ export function Shell({ children }: { children: ReactNode }) {
                   key={n.href}
                   href={n.href}
                   aria-current={active ? 'page' : undefined}
+                  title={compact ? n.label : undefined}
+                  aria-label={compact ? n.label : undefined}
                   className={cx(
-                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition',
+                    'flex items-center gap-3 rounded-lg py-2 text-sm transition',
+                    compact ? 'justify-center px-2' : 'px-3',
                     active ? 'bg-accent/10 font-medium text-accent' : 'text-muted hover:bg-surface-2 hover:text-text',
                   )}
                 >
                   <n.icon size={18} />
-                  {n.label}
+                  {!compact && n.label}
                 </Link>
               )
             })}
           </nav>
-          <div className="mt-auto space-y-3">
+          <div className={cx('mt-auto space-y-3', compact && 'hidden')}>
             <XpCard />
             <button type="button" onClick={() => window.dispatchEvent(new Event('open-shortcuts'))} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-muted hover:bg-surface-2 hover:text-text">
               <Keyboard size={14} /> Shortcuts <span className="ml-auto"><Kbd>?</Kbd></span>
@@ -126,7 +131,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-bg/80 px-4 backdrop-blur md:px-6">
-            <div className="md:hidden"><Logo /></div>
+            <div className="md:hidden"><Logo compact={compact} /></div>
             <button
               type="button"
               onClick={openCommandPalette}
@@ -144,7 +149,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <ThemeToggle />
           </header>
 
-          <main className="flex-1 px-4 pb-24 pt-6 md:px-8 md:pb-10">{children}</main>
+          <main className={compact ? 'flex-1' : 'flex-1 px-4 pb-24 pt-6 md:px-8 md:pb-10'}>{children}</main>
         </div>
       </div>
 
