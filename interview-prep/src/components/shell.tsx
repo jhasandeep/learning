@@ -46,7 +46,7 @@ function ShortcutsDialog() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement
-      const typing = el.closest('input, textarea, [contenteditable="true"], .cm-editor')
+      const typing = el.closest('input, textarea, [contenteditable="true"], .cm-editor, .excalidraw')
       if (e.key === '?' && !typing) setOpen((o) => !o)
       if (e.key === 'Escape') setOpen(false)
     }
@@ -91,8 +91,8 @@ export function Shell({ children }: { children: ReactNode }) {
   const p = useProgress()
   const lv = levelFromXp(p.xp)
   const streak = dayStreak(p.activity, useToday())
-  // Compiler workspaces use the full width: icon-only sidebar, no page padding.
-  const compact = pathname.startsWith('/compiler/')
+  // Compiler workspaces and whiteboards use the full width: icon-only sidebar, no page padding.
+  const compact = pathname.startsWith('/compiler/') || pathname.startsWith('/board/')
 
   return (
     <ToastProvider>

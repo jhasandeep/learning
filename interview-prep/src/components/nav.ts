@@ -1,4 +1,4 @@
-import { BookOpen, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Layers, SquareTerminal } from 'lucide-react'
+import { BookOpen, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Layers, PenTool, SquareTerminal } from 'lucide-react'
 
 export const NAV = [
   { href: '/', label: 'Home', icon: House },
@@ -8,6 +8,7 @@ export const NAV = [
   { href: '/flashcards', label: 'Flashcards', icon: Layers },
   { href: '/progress', label: 'Progress', icon: ChartNoAxesColumn },
   { href: '/notes', label: 'Notes', icon: BookOpen },
+  { href: '/board', label: 'Whiteboard', icon: PenTool },
 ] as const
 
 export function isActive(pathname: string, href: string) {

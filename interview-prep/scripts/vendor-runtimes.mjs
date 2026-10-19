@@ -1,5 +1,6 @@
-// Copies the in-browser language runtimes (Pyodide, webR, sql.js) from
-// node_modules into public/vendor so the compiler is fully self-hosted:
+// Copies the in-browser runtimes (Pyodide, webR, sql.js, plus the whiteboard's
+// Excalidraw fonts and pdf.js worker) from node_modules into public/vendor, so
+// the app is fully self-hosted:
 // no third-party CDN at runtime. Runs on postinstall / predev / prebuild.
 import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -16,6 +17,9 @@ const COPIES = [
   ...['webr.js', 'webr-worker.js', 'R.js', 'R.wasm', 'libRblas.so', 'libRlapack.so', 'vfs'].map((f) => [nm(`webr/dist/${f}`), out(`webr/${f}`)]),
   // sql.js: SQLite compiled to WebAssembly
   ...['sql-wasm-browser.wasm'].map((f) => [nm(`sql.js/dist/${f}`), out(`sqljs/${f}`)]),
+  // Whiteboard: Excalidraw's hand-drawn fonts and the pdf.js worker
+  [nm('@excalidraw/excalidraw/dist/prod/fonts'), out('excalidraw/fonts')],
+  [nm('pdfjs-dist/legacy/build/pdf.worker.min.mjs'), out('pdfjs/pdf.worker.min.mjs')],
 ]
 
 rmSync(out(''), { recursive: true, force: true })
@@ -24,4 +28,4 @@ for (const [from, to] of COPIES) {
   mkdirSync(dirname(to), { recursive: true })
   cpSync(from, to, { recursive: true })
 }
-console.log(`vendored ${COPIES.length} runtime files into public/vendor`)
+console.log(`vendored ${COPIES.length} runtime files and folders into public/vendor`)

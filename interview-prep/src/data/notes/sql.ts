@@ -1,6 +1,7 @@
 import type { NoteTopic } from './types'
 
-const SETUP = `DROP TABLE IF EXISTS emp;
+/** Shared sample tables, prepended so every SQL snippet runs on its own. */
+export const SQL_SETUP = `DROP TABLE IF EXISTS emp;
 DROP TABLE IF EXISTS dept;
 CREATE TABLE dept (id INTEGER PRIMARY KEY, name TEXT NOT NULL);
 CREATE TABLE emp (
@@ -33,7 +34,7 @@ export const sql: NoteTopic = {
       blocks: [
         { type: 'def', text: 'A relational database stores data in ==tables with a fixed schema==, linked by keys, queried with SQL, and protected by ACID transactions (MySQL, PostgreSQL, SQL Server, SQLite).' },
         { type: 'flow', steps: ['FROM / JOIN', 'WHERE', 'GROUP BY', 'HAVING', 'SELECT', 'ORDER BY', 'LIMIT'], caption: 'Logical order SQL runs in — why WHERE can\'t use a SELECT alias' },
-        { type: 'code', lang: 'sql', title: 'Sample tables used below (run me first)', run: true, code: `${SETUP}\nSELECT * FROM emp;` },
+        { type: 'code', lang: 'sql', title: 'Sample tables used below (run me first)', run: true, code: `${SQL_SETUP}\nSELECT * FROM emp;` },
         { type: 'list', items: ['**Primary key**: unique, not null row id. **Foreign key**: references another table\'s key.', '`WHERE` filters rows before grouping; `HAVING` filters groups after.', '`NULL` means unknown: use `IS NULL`, never `= NULL`; `COUNT(col)` skips NULLs, `COUNT(*)` doesn\'t.'] },
       ],
     },
@@ -54,7 +55,7 @@ export const sql: NoteTopic = {
         },
         {
           type: 'code', lang: 'sql', title: 'LEFT JOIN and SELF JOIN', run: true,
-          code: `${SETUP}
+          code: `${SQL_SETUP}
 
 -- every employee with their department (Farah has none)
 SELECT e.name, d.name AS dept
@@ -79,7 +80,7 @@ WHERE e.id IS NULL;`,
       blocks: [
         {
           type: 'code', lang: 'sql', title: 'GROUP BY, HAVING, subquery', run: true,
-          code: `${SETUP}
+          code: `${SQL_SETUP}
 
 SELECT d.name, COUNT(e.id) AS people, AVG(e.salary) AS avg_salary
 FROM dept d
@@ -101,7 +102,7 @@ WHERE salary > (SELECT AVG(salary) FROM emp);`,
         { type: 'def', text: 'Window functions compute ==across related rows without collapsing them== (unlike GROUP BY): `fn() OVER (PARTITION BY … ORDER BY …)`.' },
         {
           type: 'code', lang: 'sql', title: 'Second-highest salary and top earner per department', run: true,
-          code: `${SETUP}
+          code: `${SQL_SETUP}
 
 -- ROW_NUMBER vs RANK vs DENSE_RANK (Ben and Chen tie)
 SELECT name, salary,
@@ -131,7 +132,7 @@ SELECT name, dept_id, salary FROM ranked WHERE r = 1;`,
         { type: 'def', text: 'An **index** (usually a B-tree) lets the database ==find rows without scanning the whole table== — faster reads, slightly slower writes and extra storage.' },
         {
           type: 'code', lang: 'sql', title: 'Composite index and EXPLAIN', run: true,
-          code: `${SETUP}
+          code: `${SQL_SETUP}
 CREATE INDEX idx_emp_dept_salary ON emp (dept_id, salary);
 
 EXPLAIN QUERY PLAN
