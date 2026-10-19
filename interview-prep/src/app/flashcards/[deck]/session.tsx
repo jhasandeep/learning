@@ -8,7 +8,6 @@ import { Button, buttonClass, cx, Kbd, ProgressBar } from '@/components/ui'
 import { DECKS_BY_ID, type Card } from '@/data/decks'
 import { readProgress, recordReview } from '@/lib/progress'
 import { buildSession, dayKey, INTERVAL_DAYS, MAX_BOX, type Grade } from '@/lib/srs'
-import { DECK_COLORS } from '../deck-list'
 
 type Mode = 'due' | 'all'
 
@@ -21,7 +20,7 @@ function intervalLabel(box: number | undefined, grade: Grade): string {
 
 export function Session({ deckId }: { deckId: string }) {
   const deck = DECKS_BY_ID[deckId]
-  const color = DECK_COLORS[deck.color]
+  const color = deck.color
   const toast = useToast()
   const [mode, setMode] = useState<Mode>('due')
   const [queue, setQueue] = useState<Card[] | null>(null)

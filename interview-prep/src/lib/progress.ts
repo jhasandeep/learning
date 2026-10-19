@@ -21,6 +21,8 @@ export interface Progress {
   reviews: number
   activity: Record<string, number>
   dailyGoal: number
+  /** Note topic id → ISO date it was marked as read. */
+  notesRead: Record<string, string>
 }
 
 const KEY = 'prep-arena:progress:v1'
@@ -34,6 +36,7 @@ export const EMPTY: Progress = {
   reviews: 0,
   activity: {},
   dailyGoal: 3,
+  notesRead: {},
 }
 
 let state: Progress = EMPTY
@@ -178,6 +181,16 @@ export function recordReview(cardId: string, grade: Grade): number {
   return gain
 }
 
+export const NOTE_READ_XP = 25
+
+/** Mark a notes topic as read (one-way, so the XP can't be farmed). */
+export function markNoteRead(id: string): number {
+  const p = load()
+  if (p.notesRead[id]) return 0
+  commit(bump({ ...p, notesRead: { ...p.notesRead, [id]: new Date().toISOString() } }, NOTE_READ_XP))
+  return NOTE_READ_XP
+}
+
 export function setDailyGoal(goal: number) {
   commit({ ...load(), dailyGoal: Math.min(20, Math.max(1, Math.round(goal))) })
 }
@@ -213,5 +226,6 @@ export const BADGES: Badge[] = [
   { id: 'cards-50', title: 'Flash Learner', description: 'Review 50 flashcards.', earned: (p) => p.reviews >= 50 },
   { id: 'mastered', title: 'Long-Term Memory', description: 'Move 10 cards to box 4 or higher.', earned: (p) => Object.values(p.cards).filter((c) => c.box >= 4).length >= 10 },
   { id: 'week', title: 'Week Warrior', description: 'Practise 7 days in a row.', earned: (p, { today }) => dayStreak(p.activity, today) >= 7 },
+  { id: 'reader', title: 'Full-Stack Reader', description: 'Mark 10 notes topics as read.', earned: (p) => Object.keys(p.notesRead).length >= 10 },
   { id: 'level-5', title: 'Level 5', description: 'Earn 1,600 XP.', earned: (p) => p.xp >= 1600 },
 ]

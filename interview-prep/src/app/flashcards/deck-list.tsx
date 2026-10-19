@@ -4,17 +4,10 @@ import { ArrowRight, Brain, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { Card, cx, ProgressBar } from '@/components/ui'
-import { ALL_CARDS, DECKS, DECKS_BY_ID, type Deck } from '@/data/decks'
+import { ALL_CARDS, DECKS, DECKS_BY_ID } from '@/data/decks'
 import { useProgress } from '@/lib/progress'
 import { isDue } from '@/lib/srs'
 import { useToday } from '@/lib/today'
-
-export const DECK_COLORS: Record<Deck['color'], string> = {
-  cyan: 'var(--accent)',
-  violet: 'var(--violet)',
-  amber: 'var(--warn)',
-  emerald: 'var(--good)',
-}
 
 export function DeckList() {
   const p = useProgress()
@@ -64,7 +57,7 @@ export function DeckList() {
           const due = d.cards.filter((c) => isDue(p.cards[c.id], today)).length
           const fresh = d.cards.filter((c) => !p.cards[c.id]).length
           const mastered = d.cards.filter((c) => (p.cards[c.id]?.box ?? 0) >= 4).length
-          const color = DECK_COLORS[d.color]
+          const color = d.color
           return (
             <Card key={d.id} className="group flex flex-col p-5 transition hover:border-line-strong">
               <div className="flex items-start gap-3">

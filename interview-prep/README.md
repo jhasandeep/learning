@@ -12,10 +12,10 @@ It started as a redesign of [Bug Hunter](https://game.myhastech.com/), with a cl
 | **Bug Hunt campaign** | 12 hand-written levels in teaching order (off-by-one → two pointers → sliding window → recursion → sorting → a two-bug boss). Each has a story, test cases, three hints that go from a nudge to the exact fix, an explanation and a diff of the fix. |
 | **Endless mode** | 147 bugs injected into 20 classic algorithms by 21 mutation operators (comparison, off-by-one, logic, initial value, arithmetic, wrong function, return value). Every bug is **verified**: it compiles and fails at least one test. Level numbers are stable, so links can be shared. Streaks give bonus XP. |
 | **Code runner** | User code runs in a Web Worker (no DOM access) with a 2-second cut-off for infinite loops. Per-test expected/received output, a console tab for `console.log`, and drafts auto-saved per level. |
-| **Flashcards** | 64 questions (system design, DSA, React, JavaScript) from the revision notes, scheduled with Leitner spaced repetition (1 → 2 → 4 → 8 → 16 → 32 days). Search across all cards, plus a browse-all mode. |
+| **Flashcards** | 179 questions in 16 decks (system design, DSA, plus one deck per full-stack notes topic), scheduled with Leitner spaced repetition (1 → 2 → 4 → 8 → 16 → 32 days). Search across all cards, plus a browse-all mode. |
 | **Progress** | XP and levels, day streak, daily goal ring, 18-week activity heatmap, 10 badges, JSON export/import, reset. Everything stays in `localStorage`, so no account is needed. |
 | **UX** | Ctrl/⌘+K command palette (type a number to jump to an Endless level), keyboard shortcuts (`?` lists them), light theme by default (dark is one click away) with no flash, mobile layout with a Problem/Code switcher, reduced-motion support. |
-| **Notes** | The System Design and DSA PDFs from `../notes/` are linked in the app. |
+| **Full-stack notes** | 14 revision topics at `/notes`: HTML, CSS, JavaScript, TypeScript, React, Next.js, Node.js, Express & REST, auth & web security, SQL, MongoDB, Git, Docker/CI-CD and testing. Each one has definitions, tables, flow diagrams, highlighted code, common mistakes and rapid-fire Q&A. 22 snippets open straight in the compiler with **Run in compiler**. You can switch any topic to a **handwritten** style, print it, or download its handwritten A4 PDF, and mark it as read for XP. Full-text search covers all topics. The System Design and DSA PDF volumes are linked as well. |
 
 ## Run it
 
@@ -24,7 +24,13 @@ npm install
 npm run dev        # http://localhost:3000
 npm test           # vitest: content + logic tests
 npm run lint
-npm run build      # every page is prerendered (one per level, deck and language)
+npm run build      # every page is prerendered (one per level, deck, language and notes topic)
+```
+
+After editing notes, regenerate the handwritten PDFs in `public/notes/`. This needs Playwright and a running `next start` on port 3100:
+
+```sh
+npm run notes:pdf  # optional arg: base URL
 ```
 
 Node 22.18 or newer is needed, because `build:bank` runs a TypeScript file directly.
@@ -76,13 +82,16 @@ To add an algorithm, append it to `algorithms.ts`, run `npm run build:bank`, the
 src/
   app/            routes: / · /compiler/[lang] · /campaign/[id] · /endless/[level] · /flashcards/[deck] · /progress · /notes · /api/run
   components/     shell, command palette, play screen, editor, diff view, UI primitives
+  components/notes/  notes block renderer, Shiki highlighting (build time), code actions
   data/           campaign levels, algorithm library, verified bug bank, flashcard decks
+  data/notes/     one file per full-stack notes topic (typed blocks: def, code, table, flow, mistake…)
   lib/            test runner (worker + shared core), mutation engine, SRS, progress store
   lib/run/        in-browser runtimes for the compiler (JS/TS worker, SQLite worker, webR) + dispatcher
   lib/exec/       server runners: Piston, Judge0, local
 public/runners/   Python worker (static module worker that loads Pyodide)
-scripts/          build-bank.ts, vendor-runtimes.mjs
+public/notes/     PDF volumes + one handwritten PDF per notes topic
+scripts/          build-bank.ts, vendor-runtimes.mjs, export-notes-pdf.mjs
 tests/            vitest suites
 ```
 
-Built with Next.js 16 (App Router, Cache Components), React 19, Tailwind CSS 4, CodeMirror 6, Pyodide, webR, sql.js and lucide icons.
+Built with Next.js 16 (App Router, Cache Components), React 19, Tailwind CSS 4, CodeMirror 6, Shiki, Pyodide, webR, sql.js and lucide icons.

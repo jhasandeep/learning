@@ -1,3 +1,5 @@
+import { NOTE_TOPICS } from './notes'
+
 export interface Card {
   id: string
   q: string
@@ -8,7 +10,8 @@ export interface Deck {
   id: string
   title: string
   description: string
-  color: 'cyan' | 'violet' | 'amber' | 'emerald'
+  /** Any CSS colour. */
+  color: string
   cards: Card[]
 }
 
@@ -19,7 +22,7 @@ function deck(id: string, title: string, description: string, color: Deck['color
 // Rapid-fire interview questions, mostly from the revision notes in
 // notes/system-design and notes/dsa (and the React volume).
 export const DECKS: Deck[] = [
-  deck('system-design', 'System Design', 'Building blocks, data, scaling and real case studies.', 'cyan', [
+  deck('system-design', 'System Design', 'Building blocks, data, scaling and real case studies.', 'var(--accent)', [
     ['What happens when you type a URL and press Enter?', 'DNS lookup (browser → OS → resolver → root → TLD → authoritative) → TCP handshake → TLS handshake → HTTP request → CDN / load balancer → app server → cache → database → response → browser renders (DOM, CSSOM, layout, paint).'],
     ['Load balancer vs reverse proxy?', 'A load balancer spreads traffic across many servers with health checks. A reverse proxy sits in front of servers for SSL termination, caching, compression and security. Every LB is a reverse proxy; not every reverse proxy balances load.'],
     ['Which load-balancing algorithm suits long, uneven requests?', 'Least connections — send each request to the server with the fewest active connections.'],
@@ -42,7 +45,7 @@ export const DECKS: Deck[] = [
     ['How do you prevent double booking (e.g. IRCTC Tatkal)?', 'Atomic conditional update or row lock on the seat inventory (UPDATE … SET available = available − 1 WHERE available > 0), hold the seat during payment, release on timeout. Put a queue / waiting room and rate limits in front.'],
     ['How does Instagram build the home feed?', 'Hybrid fan-out: push new post IDs into followers\' feed lists for normal users (fan-out on write), but pull celebrity posts at read time (fan-out on read) and merge.'],
   ]),
-  deck('dsa', 'DSA Patterns', 'Big-O, the four patterns, recursion and sorting.', 'violet', [
+  deck('dsa', 'DSA Patterns', 'Big-O, the four patterns, recursion and sorting.', 'var(--violet)', [
     ['What is Big-O?', 'How the number of steps (or memory) grows as the input size n grows — worst case, constants dropped, biggest term kept.'],
     ['O(n) vs O(log n) on one million items?', 'About 1,000,000 steps vs about 20 steps.'],
     ['When do two pointers work?', 'Usually on sorted arrays or when comparing both ends — pairs that hit a target, palindromes, in-place de-duplication.'],
@@ -59,7 +62,7 @@ export const DECKS: Deck[] = [
     ['Why is [10, 1, 5].sort() wrong in JavaScript?', 'The default sort compares strings, giving [1, 10, 5]. Pass a comparator: arr.sort((a, b) => a − b).'],
     ['Substring vs subsequence?', 'A substring is contiguous; a subsequence keeps order but may skip characters.'],
   ]),
-  deck('react', 'React', 'Rendering, hooks, state and performance.', 'amber', [
+  deck('react', 'React', 'Rendering, hooks, state and performance.', 'var(--warn)', [
     ['Why is the Virtual DOM fast?', 'It is not magic: React diffs the new element tree against the old one and applies the minimum set of real-DOM changes, batching updates.'],
     ['State vs props?', 'Props come from the parent and are read-only. State is owned by the component and changed with its setter.'],
     ['Why do list items need keys?', 'So React can tell which item is which across renders and keep the right state/DOM. Keys must be stable and unique — not array indexes for reorderable lists.'],
@@ -75,7 +78,7 @@ export const DECKS: Deck[] = [
     ['What are Error Boundaries?', 'Class components with getDerivedStateFromError / componentDidCatch that catch render errors in their children and show a fallback.'],
     ['How do you secure a React app?', 'Avoid dangerouslySetInnerHTML (or sanitise), keep tokens in httpOnly cookies, validate on the server, use HTTPS and a CSP, keep dependencies updated.'],
   ]),
-  deck('javascript', 'JavaScript', 'The language questions every frontend round asks.', 'emerald', [
+  deck('javascript', 'JavaScript', 'The language questions every frontend round asks.', 'var(--good)', [
     ['var vs let vs const?', 'var is function-scoped and hoisted (initialised to undefined). let and const are block-scoped and in the temporal dead zone until declared; const cannot be reassigned (but objects stay mutable).'],
     ['What is a closure?', 'A function that remembers variables from the scope where it was created, even after that scope has returned — used for private state, factories, memoisation.'],
     ['== vs ===?', '=== compares without type conversion. == converts types first ("1" == 1 is true). Use === by default.'],
@@ -92,6 +95,14 @@ export const DECKS: Deck[] = [
     ['map vs forEach?', 'map returns a new array of the callback results; forEach returns undefined and is only for side effects.'],
   ]),
 ]
+
+// Every notes topic contributes its rapid-fire Q&A as a deck, unless a
+// hand-made deck with the same id already exists (React, JavaScript).
+for (const topic of NOTE_TOPICS) {
+  if (!DECKS.some((d) => d.id === topic.id)) {
+    DECKS.push(deck(topic.id, topic.title, topic.tagline, topic.color, topic.qa))
+  }
+}
 
 export const DECKS_BY_ID = Object.fromEntries(DECKS.map((d) => [d.id, d]))
 export const ALL_CARDS = DECKS.flatMap((d) => d.cards.map((c) => ({ ...c, deckId: d.id })))
