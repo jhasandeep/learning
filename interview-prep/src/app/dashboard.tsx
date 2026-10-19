@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, BookOpen, Bug, Flame, Infinity as InfinityIcon, Layers, MessageCircleQuestion, Minus, PenTool, Plus, SquareTerminal, Target } from 'lucide-react'
+import { ArrowRight, BookOpen, Bug, Flame, Infinity as InfinityIcon, Layers, MessageCircleQuestion, Minus, Network, PenTool, Plus, SquareTerminal, Target } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { TechIcon, TechTile } from '@/components/tech-icon'
@@ -83,9 +83,8 @@ export function Dashboard({ techs }: { techs: TechSummary[] }) {
         </div>
       </section>
 
-      <section aria-label="Modes" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Modes" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <ModeCard
-          wide
           href={nextLevel ? `/campaign/${nextLevel.id}` : '/campaign'}
           icon={<Bug size={20} />} color="var(--accent)" title="Bug Hunt"
           text="Hand-made levels that teach one pattern each, ending in a two-bug boss."
@@ -111,7 +110,6 @@ export function Dashboard({ techs }: { techs: TechSummary[] }) {
           href="/questions" icon={<MessageCircleQuestion size={20} />} color="#ea580c" title="Interview questions"
           text={`${totalQuestions} most-asked questions across ${techs.length} technologies, with answers, code and a practice mode.`}
           footer={<><ProgressBar value={totalQuestions ? knownQuestions / totalQuestions : 0} className="w-24" color="var(--good)" /><span>{knownQuestions} known</span></>}
-          tag="New"
         />
         <ModeCard
           href="/notes" icon={<BookOpen size={20} />} color="var(--good)" title="Revision notes"
@@ -122,6 +120,12 @@ export function Dashboard({ techs }: { techs: TechSummary[] }) {
           href="/board" icon={<PenTool size={20} />} color="var(--violet)" title="Whiteboard"
           text="Hand-drawn concept boards for every topic. Present them, annotate PDFs and export to PDF."
           footer={<span>Excalidraw · draw, present, export</span>}
+        />
+        <ModeCard
+          href="/map" icon={<Network size={20} />} color="#0891b2" title="Mind map"
+          text="Every technology, section and key idea on one zoomable map. Open a branch, search, or hide the details to test your recall."
+          footer={<span>Zoom · search · recall mode</span>}
+          tag="New"
         />
       </section>
 
@@ -182,9 +186,9 @@ export function Dashboard({ techs }: { techs: TechSummary[] }) {
   )
 }
 
-function ModeCard({ href, icon, color, title, text, footer, tag, wide }: { href: string; icon: ReactNode; color: string; title: string; text: string; footer: ReactNode; tag?: string; wide?: boolean }) {
+function ModeCard({ href, icon, color, title, text, footer, tag }: { href: string; icon: ReactNode; color: string; title: string; text: string; footer: ReactNode; tag?: string }) {
   return (
-    <Link href={href} className={cx('group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:-translate-y-0.5 hover:border-line-strong', wide && 'lg:col-span-2')}>
+    <Link href={href} className="group relative flex flex-col rounded-2xl border border-line bg-surface p-5 transition hover:-translate-y-0.5 hover:border-line-strong">
       {tag && <span className="absolute right-4 top-4 rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ color, background: `color-mix(in srgb, ${color} 15%, transparent)` }}>{tag}</span>}
       <span className="grid size-10 place-items-center rounded-xl" style={{ color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}>{icon}</span>
       <h2 className="mt-4 font-semibold group-hover:underline">{title}</h2>

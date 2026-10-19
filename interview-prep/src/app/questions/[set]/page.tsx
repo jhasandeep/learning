@@ -1,4 +1,4 @@
-import { BookOpen, ChevronLeft, Download, Flame, Layers, MessageCircleQuestion, PenTool } from 'lucide-react'
+import { BookOpen, ChevronLeft, Download, Flame, Layers, MessageCircleQuestion, Network, PenTool } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -97,6 +97,7 @@ export default async function Page({ params }: PageProps<'/questions/[set]'>) {
               {!cross && <>
                 {set.notesId && <Link href={`/notes/${set.notesId}`} className={buttonClass('secondary', 'sm')}><BookOpen size={14} /> Notes</Link>}
                 {deck && <Link href={`/flashcards/${deck}`} className={buttonClass('secondary', 'sm')}><Layers size={14} /> Flashcards</Link>}
+                <Link href={`/map/${set.id}`} className={buttonClass('secondary', 'sm')}><Network size={14} /> Mind map</Link>
                 {board && <Link href={`/board/${board}`} className={buttonClass('secondary', 'sm')}><PenTool size={14} /> Whiteboard</Link>}
               </>}
             </div>

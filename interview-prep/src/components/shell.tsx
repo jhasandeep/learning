@@ -91,8 +91,8 @@ export function Shell({ children, questionSets }: { children: ReactNode; questio
   const p = useProgress()
   const lv = levelFromXp(p.xp)
   const streak = dayStreak(p.activity, useToday())
-  // Compiler workspaces and whiteboards use the full width: icon-only sidebar, no page padding.
-  const compact = pathname.startsWith('/compiler/') || pathname.startsWith('/board/')
+  // Compiler workspaces, whiteboards and the mind map use the full width: icon-only sidebar, no page padding.
+  const compact = pathname.startsWith('/compiler/') || pathname.startsWith('/board/') || pathname === '/map' || pathname.startsWith('/map/')
 
   return (
     <ToastProvider>
