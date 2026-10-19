@@ -7,7 +7,7 @@ import { Inline } from './inline'
 // Languages the online compiler can run straight from a notes snippet.
 const RUNNABLE = new Set(['javascript', 'typescript', 'sql', 'html', 'python'])
 
-async function CodeBlock({ block }: { block: Extract<Block, { type: 'code' }> }) {
+export async function CodeBlock({ block }: { block: Extract<Block, { type: 'code' }> }) {
   const html = await highlight(block.code, block.lang)
   return (
     <figure className="note-box note-codecard">

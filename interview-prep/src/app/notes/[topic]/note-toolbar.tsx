@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleCheck, Download, Layers, PenLine, PenTool, Printer, SquareTerminal } from 'lucide-react'
+import { CircleCheck, Download, Layers, MessageCircleQuestion, PenLine, PenTool, Printer, SquareTerminal } from 'lucide-react'
 import Link from 'next/link'
 import { useSyncExternalStore } from 'react'
 import { useToast } from '@/components/toast'
@@ -48,6 +48,7 @@ export function NoteToolbar({ topicId, deckId, compilerLang }: { topicId: string
       <a href={`/notes/${topicId}.pdf`} download className={buttonClass('secondary', 'sm')} title="Handwritten A4 PDF of this topic">
         <Download size={14} /> PDF
       </a>
+      <Link href={`/questions/${topicId}`} className={buttonClass('secondary', 'sm')} title="The most asked interview questions for this topic"><MessageCircleQuestion size={14} /> Interview questions</Link>
       <Link href={`/board/${topicId}`} className={buttonClass('secondary', 'sm')} title="This topic as a hand-drawn whiteboard you can draw on and present"><PenTool size={14} /> Whiteboard</Link>
       <Link href={`/flashcards/${deckId}`} className={buttonClass('secondary', 'sm')}><Layers size={14} /> Flashcards</Link>
       {compilerLang && <Link href={`/compiler/${compilerLang}`} className={buttonClass('secondary', 'sm')}><SquareTerminal size={14} /> Compiler</Link>}

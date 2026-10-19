@@ -1,0 +1,12 @@
+/* Print / save as PDF: every answer expanded, no app chrome. */
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+  html, body { background: #fff !important; }
+  aside, header:not(.q-head), nav, .no-print { display: none !important; }
+  main { padding: 0 !important; }
+  .q-card { display: block !important; break-inside: avoid; border-color: #d4d4d8 !important; box-shadow: none !important; margin-bottom: 10px; }
+  .q-card.hidden { display: none !important; }
+  .q-body { display: block !important; }
+  .q-card button svg:last-child { display: none; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

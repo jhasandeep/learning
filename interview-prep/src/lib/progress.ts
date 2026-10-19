@@ -23,7 +23,11 @@ export interface Progress {
   dailyGoal: number
   /** Note topic id → ISO date it was marked as read. */
   notesRead: Record<string, string>
+  /** "<set>/<question id>" → how well you know a most-asked interview question. */
+  questions: Record<string, QuestionStatus>
 }
+
+export type QuestionStatus = 'known' | 'review'
 
 const KEY = 'prep-arena:progress:v1'
 
@@ -37,6 +41,7 @@ export const EMPTY: Progress = {
   activity: {},
   dailyGoal: 3,
   notesRead: {},
+  questions: {},
 }
 
 let state: Progress = EMPTY
@@ -191,6 +196,26 @@ export function markNoteRead(id: string): number {
   return NOTE_READ_XP
 }
 
+export const QUESTION_KNOWN_XP = 5
+
+/**
+ * Marks an interview question as known or to-review. XP is paid only the first
+ * time a question gets any status, and a status is never removed, so toggling
+ * can't farm XP.
+ */
+export function setQuestionStatus(key: string, status: QuestionStatus): number {
+  const p = load()
+  if (p.questions[key] === status) return 0
+  const next = { ...p, questions: { ...p.questions, [key]: status } }
+  if (p.questions[key]) {
+    commit(next) // changing an existing status is free, and isn't daily activity
+    return 0
+  }
+  const gain = status === 'known' ? QUESTION_KNOWN_XP : 0
+  commit(bump(next, gain))
+  return gain
+}
+
 export function setDailyGoal(goal: number) {
   commit({ ...load(), dailyGoal: Math.min(20, Math.max(1, Math.round(goal))) })
 }
@@ -226,6 +251,7 @@ export const BADGES: Badge[] = [
   { id: 'cards-50', title: 'Flash Learner', description: 'Review 50 flashcards.', earned: (p) => p.reviews >= 50 },
   { id: 'mastered', title: 'Long-Term Memory', description: 'Move 10 cards to box 4 or higher.', earned: (p) => Object.values(p.cards).filter((c) => c.box >= 4).length >= 10 },
   { id: 'week', title: 'Week Warrior', description: 'Practise 7 days in a row.', earned: (p, { today }) => dayStreak(p.activity, today) >= 7 },
+  { id: 'interview-ready', title: 'Interview Ready', description: 'Know 100 most-asked interview questions.', earned: (p) => Object.values(p.questions).filter((s) => s === 'known').length >= 100 },
   { id: 'reader', title: 'Full-Stack Reader', description: 'Mark 10 notes topics as read.', earned: (p) => Object.keys(p.notesRead).length >= 10 },
   { id: 'level-5', title: 'Level 5', description: 'Earn 1,600 XP.', earned: (p) => p.xp >= 1600 },
 ]
