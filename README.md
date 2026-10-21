@@ -38,6 +38,7 @@ Track current goals here. Tick items off as you finish them.
 | 2026-10-19 | Online compiler | Programiz-style compiler for 18 languages, light theme by default |
 | 2026-10-19 | Full-stack notes | 14 topics in the app + handwritten PDFs + flashcard decks |
 | 2026-10-19 | Interview questions | ~400 most-asked questions for 16 technologies, with practice mode and PDFs |
+| 2026-10-21 | Interview syntax | 137 snippets to type until memorised; 5/10 min and Auto typing tests |
 | 2026-10-19 | Typing | typing.com-style lessons, timed tests, finger guide, weak-key heatmap |
 | 2026-10-19 | Mind map | Zoomable visual map of all 16 technologies with recall mode |
 | 2026-10-19 | Whiteboard | Excalidraw concept boards for every topic, PDF import/annotate, present, export to PDF |

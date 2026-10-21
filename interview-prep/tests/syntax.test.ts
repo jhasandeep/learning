@@ -30,7 +30,11 @@ function syntaxErrors(code: string, lang: string): string[] {
 }
 
 describe('interview syntax sets', () => {
-  it('found the set files', () => expect(FILES.length).toBeGreaterThan(0))
+  it('registers every set file, once', async () => {
+    const { SYNTAX_SETS, SYNTAX_LOOK } = await import('@/data/syntax')
+    expect(SYNTAX_SETS.map((s) => s.id).sort()).toEqual(FILES.map((f) => f.replace(/\.ts$/, '')).sort())
+    for (const s of SYNTAX_SETS) expect(SYNTAX_LOOK[s.id], s.id).toBeDefined()
+  })
 
   for (const file of FILES) {
     describe(file, () => {

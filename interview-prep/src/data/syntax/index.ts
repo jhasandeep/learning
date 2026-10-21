@@ -1,13 +1,21 @@
 // Interview syntax sets for typing practice, in learning order.
 import { async } from './async'
 import { express } from './express'
+import { javascript } from './javascript'
+import { mongodb } from './mongodb'
 import { nestjs } from './nestjs'
+import { nextjs } from './nextjs'
+import { nodejs } from './nodejs'
+import { python } from './python'
+import { react } from './react'
 import { sql } from './sql'
+import { testing } from './testing'
+import { typescript } from './typescript'
 import type { SyntaxSet } from './types'
 
 export type { SyntaxLang, SyntaxSet, SyntaxSnippet } from './types'
 
-export const SYNTAX_SETS: SyntaxSet[] = [async, express, nestjs, sql]
+export const SYNTAX_SETS: SyntaxSet[] = [javascript, async, typescript, react, nextjs, nodejs, express, nestjs, testing, sql, mongodb, python]
 
 export const SYNTAX_SETS_BY_ID: Record<string, SyntaxSet> = Object.fromEntries(SYNTAX_SETS.map((s) => [s.id, s]))
 

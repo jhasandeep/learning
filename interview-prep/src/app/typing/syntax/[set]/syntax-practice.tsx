@@ -64,12 +64,16 @@ export function SyntaxPractice({ set, look, next }: { set: SyntaxSet; look: { ic
   useEffect(() => {
     if (!done) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') { e.preventDefault(); start(index, mode) }
-      else if (e.key.toLowerCase() === 'm') start(index, 'memory')
-      else if (e.key.toLowerCase() === 'n' && index < set.snippets.length - 1) start(index + 1, 'copy')
+      const k = e.key.toLowerCase()
+      const action = k === 'enter' ? () => start(index, mode) : k === 'm' ? () => start(index, 'memory') : k === 'n' && index < set.snippets.length - 1 ? () => start(index + 1, 'copy') : null
+      if (!action) return
+      // Capture phase + stop: the shortcut key must not also be typed into the new run.
+      e.preventDefault()
+      e.stopPropagation()
+      action()
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
   }, [done, index, mode, start, set.snippets.length])
 
   const peek = () => {
@@ -147,7 +151,7 @@ export function SyntaxPractice({ set, look, next }: { set: SyntaxSet; look: { ic
                 {mode === 'memory' && (
                   <div className="mb-3 flex items-center justify-between gap-2 text-xs text-muted">
                     <span className="flex items-center gap-1.5"><Brain size={14} style={{ color: look.color }} /> Write it from memory. A wrong key shows the right character in red.</span>
-                    <Button size="sm" variant="secondary" onClick={peek} disabled={peeking}><Eye size={14} /> Peek{peeks ? ` (${peeks})` : ''}</Button>
+                    <Button size="sm" variant="secondary" onClick={peek} onMouseDown={(e) => e.preventDefault() /* keep focus in the typing area */} disabled={peeking}><Eye size={14} /> Peek{peeks ? ` (${peeks})` : ''}</Button>
                   </div>
                 )}
                 <TypingArea compact target={session.target} typed={session.typed} lines={Math.min(18, session.target.split('\n').length + 1)} mask={mode === 'memory' && !peeking}
