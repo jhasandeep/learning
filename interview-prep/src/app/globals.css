@@ -161,3 +161,5 @@ body {
 @keyframes typing-blink { 50% { opacity: 0; } }
 .typing-text { --line: 2.4rem; }
 @media (min-width: 640px) { .typing-text { --line: 2.75rem; } }
+.typing-text.typing-compact { --line: 1.75rem; }
+@media (min-width: 640px) { .typing-text.typing-compact { --line: 2rem; } }

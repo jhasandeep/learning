@@ -1,10 +1,11 @@
 'use client'
 
-import { ArrowRight, Code2, Gauge, GraduationCap, Keyboard as KeyboardIcon, Lock, Star, Target, Timer } from 'lucide-react'
+import { ArrowRight, Brain, Code2, Gauge, GraduationCap, Keyboard as KeyboardIcon, Lock, Star, Target, Timer } from 'lucide-react'
 import Link from 'next/link'
+import { TechTile } from '@/components/tech-icon'
 import { Keyboard } from '@/components/typing/keyboard'
 import { keyLabel, Stars, weakKeys } from '@/components/typing/stats-bar'
-import { buttonClass, cx } from '@/components/ui'
+import { buttonClass, cx, ProgressBar } from '@/components/ui'
 import { CHAR_KEY, FINGERS, LESSONS, type Lesson } from '@/data/typing'
 import { useProgress } from '@/lib/progress'
 
@@ -14,7 +15,10 @@ const TRACKS: { id: Lesson['track']; icon: typeof KeyboardIcon; text: string }[]
   { id: 'Code', icon: Code2, text: 'Brackets, operators and symbols, then real JavaScript, Python and SQL.' },
 ]
 
-export function TypingHub() {
+/** An interview-syntax set as shown on the hub (no code, just names and progress keys). */
+export interface SyntaxCard { id: string; title: string; keys: string[]; preview: string[]; icon: string; color: string }
+
+export function TypingHub({ syntax }: { syntax: SyntaxCard[] }) {
   const p = useProgress()
   const t = p.typing
   const best = t.tests.reduce((m, x) => Math.max(m, x.wpm), 0)
@@ -95,6 +99,43 @@ export function TypingHub() {
         )
       })}
 
+      <section id="syntax" aria-labelledby="syntax-title" className="scroll-mt-20">
+        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 id="syntax-title" className="flex items-center gap-2 font-semibold"><Brain size={17} className="text-violet" /> Interview syntax</h2>
+            <p className="text-sm text-muted">The code interviewers ask you to write: type each snippet a few times, then write it from memory.</p>
+          </div>
+          <span className="text-xs text-muted">
+            {syntax.reduce((n, s) => n + s.keys.filter((k) => t.snippets[k]?.memorised).length, 0)}/{syntax.reduce((n, s) => n + s.keys.length, 0)} memorised
+          </span>
+        </div>
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {syntax.map((s) => {
+            const memorised = s.keys.filter((k) => t.snippets[k]?.memorised).length
+            const typed = s.keys.filter((k) => t.snippets[k]).length
+            return (
+              <li key={s.id}>
+                <Link href={`/typing/syntax/${s.id}`} className="lang-card group flex h-full flex-col rounded-2xl border border-line bg-surface p-4 transition hover:-translate-y-0.5" style={{ '--lang': s.color } as React.CSSProperties}>
+                  <div className="relative flex items-center gap-3">
+                    <TechTile id={s.icon} color={s.color} size={42} className="transition group-hover:scale-105" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-semibold">{s.title}</span>
+                      <span className="text-xs text-muted">{s.keys.length} snippets · {typed} typed</span>
+                    </span>
+                    <ArrowRight size={16} className="shrink-0 transition group-hover:translate-x-0.5" style={{ color: s.color }} />
+                  </div>
+                  <p className="relative mt-3 line-clamp-2 text-xs text-muted">{s.preview.join(' · ')}…</p>
+                  <div className="relative mt-auto flex items-center gap-2 pt-3 text-[11px] text-muted">
+                    <ProgressBar value={memorised / s.keys.length} className="flex-1" color="var(--good)" />
+                    {memorised}/{s.keys.length} memorised
+                  </div>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <div className="rounded-3xl border border-line bg-surface p-5">
           <h2 className="font-semibold">Your weakest keys</h2>
@@ -121,7 +162,7 @@ export function TypingHub() {
                 {t.tests.slice(0, 6).map((x) => (
                   <li key={x.at} className="flex items-center gap-3 py-2">
                     <span className="w-14 font-mono font-semibold tabular-nums">{x.wpm}<span className="text-xs font-normal text-muted"> wpm</span></span>
-                    <span className="flex-1 text-xs text-muted">{x.mode.replace('test:', '').replace(':', ' · ')}</span>
+                    <span className="flex-1 text-xs text-muted">{testLabel(x.mode)}</span>
                     <span className={cx('text-xs', x.accuracy >= 95 ? 'text-good' : 'text-muted')}>{x.accuracy}%</span>
                     <span className="w-16 text-right text-xs text-muted">{new Date(x.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                   </li>
@@ -133,6 +174,13 @@ export function TypingHub() {
       </section>
     </div>
   )
+}
+
+/** "test:300s:code" → "5 min · code". */
+function testLabel(mode: string) {
+  const [, len, kind] = mode.split(':')
+  const secs = parseInt(len, 10)
+  return `${len === 'auto' ? 'Auto' : secs >= 60 ? `${secs / 60} min` : `${secs}s`} · ${kind}`
 }
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {

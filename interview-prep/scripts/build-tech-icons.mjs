@@ -16,7 +16,7 @@ const ICONS = {
   kotlin: 'original', c: 'original', cplusplus: 'original', csharp: 'original', javascript: 'original',
   typescript: 'original', go: 'original', rust: 'original', scala: 'original', dart: 'original', ruby: 'original',
   php: 'original', swift: 'original', react: 'original', nextjs: 'original', nodejs: 'original', express: 'original',
-  postgresql: 'original', mongodb: 'original', git: 'original', docker: 'original', jest: 'plain',
+  postgresql: 'original', mongodb: 'original', git: 'original', docker: 'original', jest: 'plain', nestjs: 'original',
 }
 
 rmSync(out, { recursive: true, force: true })

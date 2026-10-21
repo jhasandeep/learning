@@ -9,7 +9,7 @@ import { cx } from '@/components/ui'
  * (so phone keyboards work too). Wrong characters turn red, the caret blinks
  * on the next character, and the view scrolls to keep the current line visible.
  */
-export function TypingArea({ target, typed, onChar, onBack, lines = 3, disabled = false, autoFocus = true }: {
+export function TypingArea({ target, typed, onChar, onBack, lines = 3, disabled = false, autoFocus = true, mask = false, compact = false }: {
   target: string
   typed: string
   onChar: (ch: string) => void
@@ -18,6 +18,10 @@ export function TypingArea({ target, typed, onChar, onBack, lines = 3, disabled 
   lines?: number
   disabled?: boolean
   autoFocus?: boolean
+  /** Memory mode: hide the text not typed yet (a mistake still shows the expected character). */
+  mask?: boolean
+  /** Smaller text so 70-character lines of code fit. */
+  compact?: boolean
 }) {
   const input = useRef<HTMLTextAreaElement>(null)
   const box = useRef<HTMLDivElement>(null)
@@ -72,10 +76,10 @@ export function TypingArea({ target, typed, onChar, onBack, lines = 3, disabled 
       />
       <div
         ref={box}
-        className={cx('typing-text relative overflow-hidden whitespace-pre-wrap break-words px-1 font-mono text-xl leading-[2.4rem] sm:text-2xl sm:leading-[2.75rem]', !focused && !disabled && 'blur-[2px]')}
+        className={cx('typing-text relative overflow-hidden whitespace-pre-wrap break-words px-1 font-mono', compact ? 'typing-compact text-[13px] leading-[1.75rem] sm:text-base sm:leading-[2rem]' : 'text-xl leading-[2.4rem] sm:text-2xl sm:leading-[2.75rem]', !focused && !disabled && 'blur-[2px]')}
         style={{ maxHeight: `calc(${lines} * (var(--line, 2.75rem)))` }}
       >
-        <Chars target={target} typed={typed} />
+        <Chars target={target} typed={typed} mask={mask} />
       </div>
       {!focused && !disabled && (
         <button type="button" onClick={() => input.current?.focus()} className="absolute inset-0 grid place-items-center rounded-xl text-sm font-medium text-muted">
@@ -86,7 +90,7 @@ export function TypingArea({ target, typed, onChar, onBack, lines = 3, disabled 
   )
 }
 
-const Chars = memo(function Chars({ target, typed }: { target: string; typed: string }) {
+const Chars = memo(function Chars({ target, typed, mask }: { target: string; typed: string; mask: boolean }) {
   const out: React.ReactNode[] = []
   for (let i = 0; i < target.length; i++) {
     const t = target[i]
@@ -99,8 +103,8 @@ const Chars = memo(function Chars({ target, typed }: { target: string; typed: st
         className={cx(
           state === 'ok' && 'text-text',
           state === 'bad' && 'rounded-sm bg-bad/20 text-bad',
-          state === 'todo' && 'text-muted/70',
-          state === 'cur' && 'typing-caret text-muted',
+          state === 'todo' && (mask ? 'text-transparent' : 'text-muted/70'),
+          state === 'cur' && (mask ? 'typing-caret text-transparent' : 'typing-caret text-muted'),
           t === '\n' && 'text-[0.7em] opacity-60',
         )}
       >

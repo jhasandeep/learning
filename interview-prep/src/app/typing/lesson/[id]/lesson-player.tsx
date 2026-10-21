@@ -89,7 +89,7 @@ export function LessonPlayer({ lesson, number, total, next, snippets }: { lesson
             { label: 'Progress', value: `${progress}%` },
           ]} />
           <div className="rounded-3xl border border-line bg-surface p-4 sm:p-6">
-            <TypingArea target={session.target} typed={session.typed} lines={lesson.kind === 'code' ? 6 : 3}
+            <TypingArea compact={lesson.kind === 'code'} target={session.target} typed={session.typed} lines={lesson.kind === 'code' ? 6 : 3}
               onChar={(ch) => setSession((s) => typeChar(s, ch, Date.now()))}
               onBack={(word) => setSession((s) => backspace(s, word))} />
           </div>

@@ -45,6 +45,17 @@ export interface TypingProgress {
   tests: TypingResult[]
   /** Physical key → [hits, misses], across all sessions. */
   keys: Record<string, [number, number]>
+  /** Interview syntax: "<set>/<snippet>" → practice record. */
+  snippets: Record<string, SnippetRecord>
+}
+
+export interface SnippetRecord {
+  reps: number
+  bestWpm: number
+  bestAccuracy: number
+  /** Typed from memory at 90%+ accuracy with at most one peek. */
+  memorised: boolean
+  at: string
 }
 
 export type QuestionStatus = 'known' | 'review'
@@ -62,7 +73,7 @@ export const EMPTY: Progress = {
   dailyGoal: 3,
   notesRead: {},
   questions: {},
-  typing: { lessons: {}, tests: [], keys: {} },
+  typing: { lessons: {}, tests: [], keys: {}, snippets: {} },
 }
 
 let state: Progress = EMPTY
@@ -266,10 +277,32 @@ export function recordTypingLesson(id: string, r: { stars: number; wpm: number; 
   return gain
 }
 
-/** Saves a timed test. XP only for a real attempt: 15 s or longer at 80%+ accuracy. */
+export const SNIPPET_FIRST_XP = 5
+export const SNIPPET_MEMORISED_XP = 15
+
+/**
+ * Saves one typing of an interview-syntax snippet. XP: the first time you type
+ * it, and the first time you write it from memory.
+ */
+export function recordSnippet(key: string, r: { wpm: number; accuracy: number; memorised: boolean }, keys: Record<string, [number, number]>): number {
+  const p = load()
+  const prev = p.typing.snippets[key]
+  const gain = (prev ? 0 : SNIPPET_FIRST_XP) + (r.memorised && !prev?.memorised ? SNIPPET_MEMORISED_XP : 0)
+  const rec: SnippetRecord = {
+    reps: (prev?.reps ?? 0) + 1,
+    bestWpm: Math.max(prev?.bestWpm ?? 0, r.wpm),
+    bestAccuracy: Math.max(prev?.bestAccuracy ?? 0, r.accuracy),
+    memorised: Boolean(prev?.memorised || r.memorised),
+    at: new Date().toISOString(),
+  }
+  commit(bump({ ...p, typing: { ...p.typing, snippets: { ...p.typing.snippets, [key]: rec }, keys: mergeKeys(p.typing.keys, keys) } }, gain))
+  return gain
+}
+
+/** Saves a timed test. XP only for a real attempt (15 s+ at 80%+ accuracy), 5 XP a minute for long tests. */
 export function recordTypingTest(r: Omit<TypingResult, 'at'>, keys: Record<string, [number, number]>): number {
   const p = load()
-  const gain = r.seconds >= 15 && r.accuracy >= 80 ? TYPING_TEST_XP : 0
+  const gain = r.seconds >= 15 && r.accuracy >= 80 ? Math.max(TYPING_TEST_XP, Math.round(r.seconds / 60) * 5) : 0
   const tests = [{ ...r, at: new Date().toISOString() }, ...p.typing.tests].slice(0, MAX_TESTS)
   commit(bump({ ...p, typing: { ...p.typing, tests, keys: mergeKeys(p.typing.keys, keys) } }, gain))
   return gain
@@ -310,6 +343,7 @@ export const BADGES: Badge[] = [
   { id: 'cards-50', title: 'Flash Learner', description: 'Review 50 flashcards.', earned: (p) => p.reviews >= 50 },
   { id: 'mastered', title: 'Long-Term Memory', description: 'Move 10 cards to box 4 or higher.', earned: (p) => Object.values(p.cards).filter((c) => c.box >= 4).length >= 10 },
   { id: 'week', title: 'Week Warrior', description: 'Practise 7 days in a row.', earned: (p, { today }) => dayStreak(p.activity, today) >= 7 },
+  { id: 'syntax-memory', title: 'Syntax by Heart', description: 'Write 25 interview snippets from memory.', earned: (p) => Object.values(p.typing.snippets).filter((s) => s.memorised).length >= 25 },
   { id: 'touch-typist', title: 'Touch Typist', description: 'Type 40 WPM at 95% accuracy in a timed test.', earned: (p) => p.typing.tests.some((t) => t.wpm >= 40 && t.accuracy >= 95) },
   { id: 'interview-ready', title: 'Interview Ready', description: 'Know 100 most-asked interview questions.', earned: (p) => Object.values(p.questions).filter((s) => s === 'known').length >= 100 },
   { id: 'reader', title: 'Full-Stack Reader', description: 'Mark 10 notes topics as read.', earned: (p) => Object.keys(p.notesRead).length >= 10 },
