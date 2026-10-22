@@ -16,3 +16,10 @@ export async function highlight(code: string, lang: string): Promise<string> {
   const resolved = ALIAS[lang] ?? lang
   return h.codeToHtml(code, { lang: (LANGS as readonly string[]).includes(resolved) ? resolved : 'text', theme: 'github-dark' })
 }
+
+/** The same highlighting, one HTML string per source line (for clickable lines). */
+export async function highlightLines(code: string, lang: string): Promise<string[]> {
+  const html = await highlight(code, lang)
+  const inner = html.slice(html.indexOf('<code>') + 6, html.lastIndexOf('</code>'))
+  return inner.split('\n').map((l) => l.replace(/^<span class="line">/, '').replace(/<\/span>$/, ''))
+}

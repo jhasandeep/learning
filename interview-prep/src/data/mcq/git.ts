@@ -1,0 +1,131 @@
+import type { McqSet } from './types'
+
+export const git: McqSet = {
+  id: 'git',
+  questions: [
+    {
+      id: 'fetch-pull',
+      q: '`git fetch` vs `git pull`?',
+      choices: [
+        '`fetch` only downloads; `pull` also integrates',
+        '`pull` only downloads; `fetch` also merges into your branch',
+        'They are identical',
+        '`fetch` uploads your commits; `pull` downloads theirs',
+      ],
+      explain: '`fetch` is always safe; inspect with `git log HEAD..origin/main`, then integrate deliberately.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'merge-rebase',
+      q: 'What does `git rebase main` do on a feature branch?',
+      choices: [
+        'Replays your commits on top of `main`',
+        'Creates a merge commit that joins the two branches',
+        'Deletes the feature branch once it is up to date',
+        'Pushes the branch',
+      ],
+      explain: 'Rebasing rewrites history (new hashes) for a linear log, so never rebase commits others have already pulled.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'reset-revert',
+      q: 'A bad commit is already pushed to a shared `main`. How do you undo it?',
+      choices: ['`git revert <sha>`', '`git reset --hard HEAD~1` and force-push', '`git checkout <sha>`', '`git commit --amend`'],
+      explain: '`revert` adds a new commit that undoes the change without rewriting shared history. `reset` + force-push breaks everyone else\'s clones.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'staging',
+      q: 'What does `git add` do?',
+      choices: [
+        'Stages changes for the next commit',
+        'Creates a commit from the files you name',
+        'Uploads the files to the remote repository',
+        'Starts tracking a remote branch',
+      ],
+      explain: 'The staging area lets you commit only part of your work; `git add -p` stages single hunks.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'reset-soft',
+      q: 'What does `git reset --soft HEAD~1` do?',
+      choices: [
+        'Undoes the commit, keeps changes staged',
+        'Deletes the commit and its changes',
+        'Undoes the last commit and unstages its changes',
+        'Reverts the last commit with a new commit',
+      ],
+      explain: '`--soft` keeps them staged, `--mixed` (the default) keeps them unstaged, `--hard` throws them away.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'stash',
+      q: 'You need to switch branches but have half-done work you do not want to commit. Use…',
+      choices: ['`git stash` (then `git stash pop` later)', '`git reset --hard`', '`git clean -fd`', '`git branch -D`'],
+      explain: 'Stash shelves working changes; add `-u` to include untracked files.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'detached',
+      q: 'What is a "detached HEAD"?',
+      choices: [
+        'HEAD points at a commit, not a branch',
+        'The repository has no commits yet',
+        'The remote repository cannot be reached',
+        'The current branch has no upstream set',
+      ],
+      explain: 'New commits there are not on any branch; create one with `git switch -c name` to keep them.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'reflog',
+      q: 'You ran `git reset --hard` and lost commits. What can find them?',
+      choices: ['`git reflog`', '`git log`', '`git status`', 'Nothing, they are gone'],
+      explain: 'The reflog records where HEAD has been, so you can `git reset --hard <sha>` back. Unreachable commits survive until garbage collection.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'gitignore',
+      q: 'You added `.env` to `.gitignore` but Git still tracks it. Why?',
+      choices: [
+        'It\'s already tracked; `git rm --cached .env`',
+        'The pattern must be written as `*.env` instead',
+        '`.gitignore` only takes effect',
+        'Git always tracks hidden files, whatever the pattern',
+      ],
+      explain: 'Already-tracked files stay tracked. And if it held secrets, rotate them: they are in history.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'cherry-pick',
+      q: 'What does `git cherry-pick <sha>` do?',
+      choices: [
+        'Copies that commit onto the current branch',
+        'Checks out that commit in a detached HEAD',
+        'Deletes that commit from the branch history',
+        'Merges the whole branch that the commit is on',
+      ],
+      explain: 'Handy for back-porting a fix to a release branch.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'force-lease',
+      q: 'Why prefer `git push --force-with-lease` over `--force`?',
+      choices: [
+        'It won\'t overwrite commits you haven\'t fetched',
+        'It is faster, because it skips the remote checks',
+        'It also pushes every tag along with the branch',
+        'It creates a backup branch before overwriting',
+      ],
+      explain: 'Plain `--force` silently discards a teammate\'s commits.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'bisect',
+      q: 'Which command finds the commit that introduced a bug by binary search?',
+      choices: ['`git bisect`', '`git blame`', '`git log -S`', '`git diff`'],
+      explain: 'Mark one good and one bad commit; Git checks out the midpoint until it finds the culprit (`git bisect run` automates it with a test).',
+      difficulty: 'Medium',
+    },
+  ],
+}

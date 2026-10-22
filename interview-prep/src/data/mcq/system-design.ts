@@ -1,0 +1,131 @@
+import type { McqSet } from './types'
+
+export const systemDesign: McqSet = {
+  id: 'system-design',
+  questions: [
+    {
+      id: 'horizontal',
+      q: 'Horizontal scaling means…',
+      choices: [
+        'Adding more machines',
+        'Upgrading to a bigger machine with more CPU and RAM',
+        'Adding more columns',
+        'Caching more data in each server\'s memory',
+      ],
+      explain: 'Vertical scaling is the bigger machine. Horizontal needs stateless servers.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'stateless',
+      q: 'Why should web servers behind a load balancer be stateless?',
+      choices: [
+        'So any server can serve any request',
+        'So each server uses less CPU and memory',
+        'Because load balancers cannot forward cookies',
+        'So the app can run without a database',
+      ],
+      explain: 'Keep sessions in a shared store (Redis) or in signed tokens, not in one server\'s memory.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'cap',
+      q: 'During a network partition, the CAP theorem says a distributed store must choose between…',
+      choices: ['Consistency and availability', 'Consistency and partition tolerance', 'Availability and latency', 'Speed and durability'],
+      explain: 'Partitions happen, so the real choice is: refuse some requests (CP) or answer with possibly stale data (AP).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'cache-aside',
+      q: 'In the cache-aside pattern, on a cache miss the application…',
+      choices: [
+        'Reads the database, then fills the cache',
+        'Returns an error and lets the client retry later',
+        'Waits for the cache to load the value by itself',
+        'Writes a placeholder to the database',
+      ],
+      explain: 'On writes, update the DB and invalidate (delete) the cache key. Add TTLs to bound staleness.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'cdn',
+      q: 'What does a CDN mainly improve?',
+      choices: [
+        'Latency for static content',
+        'Database writes',
+        'Security of the application servers',
+        'Consistency between database replicas',
+      ],
+      explain: 'It also absorbs traffic spikes and some DDoS.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'sharding',
+      q: 'Sharding a database means…',
+      choices: [
+        'Splitting rows across databases by a key',
+        'Copying the whole database onto read replicas',
+        'Adding indexes to every column',
+        'Moving the data from SQL to a NoSQL store',
+      ],
+      explain: 'A bad shard key (like a timestamp) creates hot spots. Replication copies data for availability and reads.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'consistent-hashing',
+      q: 'Why use consistent hashing to map keys to cache servers?',
+      choices: [
+        'Adding a server only moves ~1/N of keys',
+        'It is faster to compute than `hash(key) % N`',
+        'It spreads load evenly without virtual nodes',
+        'It encrypts keys before they are stored',
+      ],
+      explain: 'With `hash % N`, changing N remaps almost every key and empties the cache.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'queue',
+      q: 'Why put a message queue between an upload service and a video encoder?',
+      choices: [
+        'Decoupling, absorbing spikes, retries',
+        'It makes each video encode run faster',
+        'It reduces how much storage the videos use',
+        'It guarantees each video is encoded exactly once',
+      ],
+      explain: 'Most queues deliver at least once, so consumers should be idempotent.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'rate-limit',
+      q: 'Which algorithm allows short bursts but limits the average rate?',
+      choices: ['Token bucket', 'Fixed window counter', 'Round robin', 'Least connections'],
+      explain: 'Tokens refill at a steady rate up to a bucket size. Round robin and least connections are load-balancing strategies.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'read-replicas',
+      q: 'A read-heavy app (100:1 reads to writes) is slow on its database. A good first step?',
+      choices: ['Add caching and read replicas', 'Shard immediately', 'Switch to a bigger primary only', 'Remove indexes'],
+      explain: 'Replicas scale reads; be aware of replication lag (read-your-own-writes from the primary).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'idempotency',
+      q: 'A payment request times out and the client retries. What prevents a double charge?',
+      choices: [
+        'An idempotency key',
+        'A longer timeout on the client\'s request',
+        'Sending the request over HTTPS',
+        'Using PUT',
+      ],
+      explain: 'The server returns the original result for a repeated key.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'websocket',
+      q: 'Which fits a chat app best for pushing messages to clients?',
+      choices: ['WebSockets', 'Polling every 30 seconds', 'Email', 'A cron job'],
+      explain: 'A persistent two-way connection. Server-Sent Events suit one-way feeds.',
+      difficulty: 'Easy',
+    },
+  ],
+}

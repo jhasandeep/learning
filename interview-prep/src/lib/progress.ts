@@ -28,6 +28,25 @@ export interface Progress {
   /** MongoDB playground lesson id → ISO date its challenge was solved. */
   mongoLessons: Record<string, string>
   typing: TypingProgress
+  /** Multiple-choice: "<set>/<question>" → ISO date it was first answered correctly. */
+  mcq: Record<string, string>
+  /** Multiple-choice: set id (or "mixed") → best finished quiz. */
+  quizzes: Record<string, QuizResult>
+  /** Find the mistake: "<set>/<bug>" → how it was found. */
+  spot: Record<string, SpotResult>
+}
+
+export interface QuizResult {
+  score: number
+  total: number
+  at: string
+}
+
+export interface SpotResult {
+  at: string
+  /** Wrong lines clicked before the right one. */
+  misses: number
+  revealed: boolean
 }
 
 export interface TypingResult {
@@ -77,6 +96,9 @@ export const EMPTY: Progress = {
   questions: {},
   mongoLessons: {},
   typing: { lessons: {}, tests: [], keys: {}, snippets: {} },
+  mcq: {},
+  quizzes: {},
+  spot: {},
 }
 
 let state: Progress = EMPTY
@@ -321,6 +343,39 @@ export function recordTypingTest(r: Omit<TypingResult, 'at'>, keys: Record<strin
   return gain
 }
 
+export const MCQ_CORRECT_XP = 2
+
+/** Saves one multiple-choice answer. XP only the first time a question is answered correctly. */
+export function recordMcqAnswer(key: string, correct: boolean): number {
+  const p = load()
+  if (!correct || p.mcq[key]) return 0
+  commit(bump({ ...p, mcq: { ...p.mcq, [key]: new Date().toISOString() } }, MCQ_CORRECT_XP))
+  return MCQ_CORRECT_XP
+}
+
+/** Saves a finished quiz if it beats the best score (by percentage). No XP: answers already paid. */
+export function recordQuiz(id: string, score: number, total: number): boolean {
+  const p = load()
+  const prev = p.quizzes[id]
+  if (prev && prev.score / prev.total >= score / total) return false
+  commit({ ...p, quizzes: { ...p.quizzes, [id]: { score, total, at: new Date().toISOString() } } })
+  return true
+}
+
+export function spotXp(misses: number, revealed: boolean): number {
+  if (revealed) return 0
+  return misses === 0 ? 15 : misses === 1 ? 10 : 5
+}
+
+/** Saves a found mistake. XP the first time only, so replays can't farm it. */
+export function recordSpot(key: string, misses: number, revealed: boolean): number {
+  const p = load()
+  if (p.spot[key]) return 0
+  const gain = spotXp(misses, revealed)
+  commit(bump({ ...p, spot: { ...p.spot, [key]: { at: new Date().toISOString(), misses, revealed } } }, gain))
+  return gain
+}
+
 export function setDailyGoal(goal: number) {
   commit({ ...load(), dailyGoal: Math.min(20, Math.max(1, Math.round(goal))) })
 }
@@ -358,6 +413,8 @@ export const BADGES: Badge[] = [
   { id: 'week', title: 'Week Warrior', description: 'Practise 7 days in a row.', earned: (p, { today }) => dayStreak(p.activity, today) >= 7 },
   { id: 'syntax-memory', title: 'Syntax by Heart', description: 'Write 25 interview snippets from memory.', earned: (p) => Object.values(p.typing.snippets).filter((s) => s.memorised).length >= 25 },
   { id: 'touch-typist', title: 'Touch Typist', description: 'Type 40 WPM at 95% accuracy in a timed test.', earned: (p) => p.typing.tests.some((t) => t.wpm >= 40 && t.accuracy >= 95) },
+  { id: 'quiz-whiz', title: 'Quiz Whiz', description: 'Answer 100 multiple-choice questions correctly.', earned: (p) => Object.keys(p.mcq).length >= 100 },
+  { id: 'eagle-eye', title: 'Eagle Eye', description: 'Find 25 mistakes in the technology bug hunts without revealing them.', earned: (p) => Object.values(p.spot).filter((s) => !s.revealed).length >= 25 },
   { id: 'interview-ready', title: 'Interview Ready', description: 'Know 100 most-asked interview questions.', earned: (p) => Object.values(p.questions).filter((s) => s === 'known').length >= 100 },
   { id: 'reader', title: 'Full-Stack Reader', description: 'Mark 10 notes topics as read.', earned: (p) => Object.keys(p.notesRead).length >= 10 },
   { id: 'level-5', title: 'Level 5', description: 'Earn 1,600 XP.', earned: (p) => p.xp >= 1600 },

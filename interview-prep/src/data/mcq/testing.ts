@@ -1,0 +1,137 @@
+import type { McqSet } from './types'
+
+export const testing: McqSet = {
+  id: 'testing',
+  questions: [
+    {
+      id: 'pyramid',
+      q: 'The testing pyramid recommends…',
+      choices: [
+        'Many unit, fewer integration, few E2E',
+        'Mostly end-to-end tests',
+        'Equal numbers of unit, integration and E2E tests',
+        'Manual testing for anything that has a user interface',
+      ],
+      explain: 'Unit tests are fast and precise; E2E tests are slow and flaky but test the real thing.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'tobe-toequal',
+      q: '`expect({ a: 1 }).toBe({ a: 1 })`…',
+      choices: [
+        'fails: use `toEqual`',
+        'passes',
+        'throws a syntax error, because objects can\'t be compared',
+        'passes, but only when the test file runs in strict mode',
+      ],
+      explain: '`toBe` uses `Object.is`. `toEqual` compares structure recursively; `toStrictEqual` also checks `undefined` properties and classes.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'async-test',
+      q: 'Why can this test pass even when `fetchUser` is broken?',
+      code: { lang: 'javascript', code: "test('loads user', () => {\n  fetchUser(1).then((u) => {\n    expect(u.name).toBe('Ada')\n  })\n})" },
+      choices: [
+        'The promise isn\'t awaited, so the test ends first',
+        '`toBe` cannot compare strings, so it is skipped',
+        '`then` swallows every error thrown inside it',
+        'Jest and Vitest tests cannot run async code',
+      ],
+      explain: 'Make the test `async` and `await` the call (or `return` the promise).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'mock-stub',
+      q: 'What is a mock for?',
+      choices: [
+        'Replacing a dependency you control and inspect',
+        'Running the tests in parallel across workers',
+        'Measuring which lines the tests have covered',
+        'Generating random input data for the tests',
+      ],
+      explain: 'E.g. `vi.fn()` / `jest.fn()`; assert with `toHaveBeenCalledWith`. Over-mocking tests the mocks instead of the code.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'rtl-query',
+      q: 'Which React Testing Library query is preferred?',
+      choices: ["`getByRole('button', { name: /save/i })`", "`container.querySelector('.btn')`", "`getByTestId('save-btn')`", "`getByClassName('btn')`"],
+      explain: 'Query the way users and assistive tech find things. Test ids are a last resort.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'findby',
+      q: 'Text appears after a fetch. Which query waits for it?',
+      choices: ["`await screen.findByText('Done')`", "`screen.getByText('Done')`", "`screen.queryByText('Done')`", "`screen.debug()`"],
+      explain: '`findBy*` returns a promise and retries; `getBy*` throws immediately; `queryBy*` returns null (good for asserting absence).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'coverage',
+      q: '100% line coverage means…',
+      choices: [
+        'Every line ran, not that it was checked',
+        'The code has no bugs left in it',
+        'Every branch and edge case has a test',
+        'The test suite runs in under a minute',
+      ],
+      explain: 'Coverage finds untested code; it does not prove the assertions are meaningful.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'aaa',
+      q: 'What is the Arrange-Act-Assert pattern?',
+      choices: [
+        'Set up, act, then check the result',
+        'Test, refactor, then repeat the cycle',
+        'Write the assertion before anything else',
+        'A naming convention for test files',
+      ],
+      explain: 'One clear act per test keeps failures easy to read.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'tdd',
+      q: 'The TDD cycle is…',
+      choices: [
+        'Red → Green → Refactor',
+        'Code → Test → Deploy',
+        'Green → Red → Refactor, starting from passing tests',
+        'Write the code first and every test at the end',
+      ],
+      explain: 'A failing test first proves the test can fail.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'flaky',
+      q: 'A test fails one run in twenty. A likely cause?',
+      choices: [
+        'Shared state or timing',
+        'The test file has grown too long to run reliably',
+        'Using `toEqual` instead of `toBe` for objects',
+        'The test makes too many assertions at once',
+      ],
+      explain: 'Fake timers, mocked network, fresh state in `beforeEach`, and waiting on conditions instead of sleeps.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'fake-timers',
+      q: 'How do you test a debounce of 500 ms without waiting?',
+      choices: [
+        'Fake timers, advanced by 500 ms',
+        'Set the debounce delay to 0',
+        'Wrap the whole test body in a `setTimeout` of 500 ms',
+        'Skip it: timers can\'t be tested reliably',
+      ],
+      explain: '`vi.useFakeTimers()` then `vi.advanceTimersByTime(500)` (Jest has the same API).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'e2e',
+      q: 'Which tool runs end-to-end tests in a real browser?',
+      choices: ['Playwright', 'Vitest', 'ESLint', 'Supertest'],
+      explain: 'Cypress is the other common choice. Supertest tests HTTP handlers without a browser.',
+      difficulty: 'Easy',
+    },
+  ],
+}

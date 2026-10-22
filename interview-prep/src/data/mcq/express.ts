@@ -1,0 +1,126 @@
+import type { McqSet } from './types'
+
+export const express: McqSet = {
+  id: 'express',
+  questions: [
+    {
+      id: 'next',
+      q: 'What does calling `next()` in middleware do?',
+      choices: [
+        'Hands over to the next matching handler',
+        'Sends the response',
+        'Skips straight to the error-handling middleware',
+        'Restarts the request from the first middleware',
+      ],
+      explain: 'Forget both `next()` and a response and the request hangs. `next(err)` jumps to the error-handling middleware.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'error-mw',
+      q: 'How does Express recognise error-handling middleware?',
+      choices: [
+        'It takes four parameters',
+        'It is named `errorHandler` or ends with `Error`',
+        'It is registered with `app.error()` instead of `app.use()`',
+        'It is registered first',
+      ],
+      explain: 'The arity is what matters, so keep all four parameters even if `next` is unused. Register it after the routes.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'order',
+      q: 'Why does `req.body` come back `undefined` in a POST handler?',
+      choices: [
+        'The JSON parser isn\'t registered before the route',
+        'POST requests never carry a body in Express',
+        '`req.body` is only filled for HTML form submissions',
+        'The route handler must be marked `async` to read the body',
+      ],
+      explain: 'Middleware runs in registration order. `app.use(express.json())` must come before the routes that read JSON.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'status-created',
+      q: 'Which status code fits a successful `POST /users` that creates a user?',
+      choices: ['201 Created', '200 OK', '204 No Content', '202 Accepted'],
+      explain: '201 plus the new resource (and often a `Location` header). 204 is for success with no body, 202 for work queued for later.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'idempotent',
+      q: 'Which HTTP method is NOT idempotent?',
+      choices: ['POST', 'PUT', 'DELETE', 'GET'],
+      explain: 'Repeating a PUT or DELETE leaves the same state; repeating a POST usually creates another resource. Use an idempotency key to make retries safe.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'params-query',
+      q: 'For `GET /users/42?sort=name` on route `/users/:id`, where are `42` and `name`?',
+      choices: ['`req.params.id` and `req.query.sort`', '`req.query.id` and `req.params.sort`', '`req.body.id` and `req.query.sort`', 'Both in `req.params`'],
+      explain: 'Path parameters are in `req.params`, the query string in `req.query`; both are strings.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'auth-status',
+      q: 'A logged-in user requests another user\'s private data. Which status?',
+      choices: ['403 Forbidden', '401 Unauthorized', '404 Not Found, always', '400 Bad Request'],
+      explain: '401 means "not authenticated" (no or bad credentials); 403 means "authenticated but not allowed". Some APIs return 404 to hide that the resource exists.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'router',
+      q: 'What is `express.Router()` for?',
+      choices: [
+        'A mountable group of routes',
+        'Starting a second server',
+        'Client-side routing in the browser, like React Router',
+        'Load balancing requests across several app instances',
+      ],
+      explain: '`app.use("/api/users", usersRouter)` mounts the group at a prefix.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'async-errors',
+      q: 'In Express 4, what happens when an `async` handler throws?',
+      choices: [
+        'It never reaches the error handler unless you call `next(err)`',
+        'Express catches it and responds with a 500 automatically',
+        'The process restarts because the error is uncaught',
+        'Express retries the handler once before giving up',
+      ],
+      explain: 'Express 4 does not await handlers; wrap them or use a helper. Express 5 forwards rejected promises to `next` automatically.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'rest-naming',
+      q: 'Which URL is the most RESTful for deleting order 7?',
+      choices: ['`DELETE /orders/7`', '`POST /deleteOrder?id=7`', '`GET /orders/7/delete`', '`DELETE /order/delete/7`'],
+      explain: 'Nouns for resources, the HTTP method for the action. GET must never change data.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'cors',
+      q: 'Your React app on `localhost:5173` gets a CORS error calling your API on `localhost:3000`. Where is the fix?',
+      choices: [
+        'On the API: allow that origin',
+        'In React: set `mode: \'no-cors\'` on the fetch call',
+        'Turn off CORS in the browser\'s developer settings',
+        'Use POST instead of GET',
+      ],
+      explain: 'CORS is the server opting in to cross-origin reads. `mode: "no-cors"` just gives you an unreadable opaque response.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'pagination',
+      q: 'Which pagination stays correct when rows are inserted while a user pages through?',
+      choices: [
+        'Cursor (keyset) pagination: `?after=<id>`',
+        'Offset pagination: `?page=3&limit=20`',
+        'Return every row and page through them on the client',
+        'Random sampling of rows on each request',
+      ],
+      explain: 'Offsets shift when rows are added, so items get skipped or repeated, and large offsets are slow. A cursor continues from a known row.',
+      difficulty: 'Hard',
+    },
+  ],
+}
