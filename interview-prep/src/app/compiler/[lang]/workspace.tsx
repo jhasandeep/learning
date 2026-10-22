@@ -9,7 +9,8 @@ import { RUN_EVENT } from '@/components/editor-events'
 import { LangIcon } from '@/components/lang-icon'
 import { useToast } from '@/components/toast'
 import { Button, cx, Kbd } from '@/components/ui'
-import { LANGUAGES_BY_ID } from '@/data/languages'
+import { LANGUAGES_BY_ID, type ServerLang } from '@/data/languages'
+import { ONLINE_SERVICE } from '@/lib/exec/public'
 import type { RunSummary, SqlItem, SqlSchemaTable, Stream } from '@/lib/run/protocol'
 import { decodeShare, encodeShare } from '@/lib/share'
 import { LangRail } from './lang-rail'
@@ -113,7 +114,8 @@ export function Workspace({ langId }: { langId: string }) {
   useEffect(() => {
     if (lang.engine !== 'server') return
     let cancelled = false
-    fetch('/api/run').then((r) => r.json()).then((d) => { if (!cancelled) setServer(d) }).catch(() => { if (!cancelled) setServer({ configured: false, reason: 'Could not reach the server.' }) })
+    // Without an /api/run route (e.g. a static host) the browser calls the online compilers itself.
+    fetch('/api/run').then((r) => r.json()).then((d) => { if (!cancelled) setServer(d) }).catch(() => { if (!cancelled) setServer({ configured: true, backend: 'online' }) })
     return () => { cancelled = true }
   }, [lang.engine])
 
@@ -272,9 +274,9 @@ export function Workspace({ langId }: { langId: string }) {
               <span className="hidden md:inline"><LangIcon lang={lang} size={28} /></span>
               <span className="truncate">{lang.name} Online Compiler</span>
             </h1>
-            <span className={cx('hidden items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] lg:inline-flex', lang.engine === 'browser' ? 'border-good/40 text-good' : 'border-violet/40 text-violet')} title={lang.engine === 'browser' ? 'Runs entirely in your browser — nothing is sent to a server' : 'Compiled and run on the server'}>
+            <span className={cx('hidden items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] lg:inline-flex', lang.engine === 'browser' ? 'border-good/40 text-good' : 'border-violet/40 text-violet')} title={lang.engine === 'browser' ? 'Runs entirely in your browser — nothing is sent to a server' : server?.backend === 'online' ? `Compiled and run by the free ${ONLINE_SERVICE[lang.runtime as ServerLang]} service (your code is sent there)` : 'Compiled and run on the server'}>
               {lang.engine === 'browser' ? <Zap size={11} /> : <Server size={11} />}
-              {lang.engine === 'browser' ? 'in browser' : server?.backend ? `server · ${server.backend}` : 'server'}
+              {lang.engine === 'browser' ? 'in browser' : server?.backend === 'online' ? 'online compiler' : server?.backend ? `server · ${server.backend}` : 'server'}
             </span>
             <div className="ml-auto flex items-center gap-0.5">
               <IconButton label="Smaller text" onClick={() => setFontSize((f) => Math.max(11, f - 1))}><Minus size={15} /></IconButton>
@@ -319,6 +321,11 @@ export function Workspace({ langId }: { langId: string }) {
             </div>
           </div>
 
+          {lang.engine === 'server' && server?.backend === 'online' && (
+            <p className="mx-3 mt-2 text-[11px] text-muted">
+              Runs on the free <a className="underline hover:text-text" href={ONLINE_SERVICE[lang.runtime as ServerLang] === 'Wandbox' ? 'https://wandbox.org' : 'https://godbolt.org'} target="_blank" rel="noopener noreferrer">{ONLINE_SERVICE[lang.runtime as ServerLang]}</a> service, so no setup is needed. Your code and input are sent there; don&apos;t paste secrets.
+            </p>
+          )}
           {lang.engine === 'server' && server && !server.configured && (
             <div className="m-3 rounded-xl border border-warn/40 bg-warn/10 p-3 text-sm">
               <b className="text-warn">Server runner not configured.</b> <span className="text-muted">{server.reason} See the README section “Running compiled languages”.</span>

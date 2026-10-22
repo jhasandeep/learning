@@ -19,31 +19,60 @@ async function transpileTs(code: string): Promise<string> {
   return transform(code, { transforms: ['typescript'], disableESTransforms: true }).code
 }
 
-async function runOnServer(language: ServerLang, code: string, stdin: string, handlers: RunHandlers): Promise<RunSummary> {
-  serverAbort = new AbortController()
-  handlers.onLoading?.('Compiling and running on the server…')
+/** Shows a runner's result in the output panel. */
+function report(data: RunResult, handlers: RunHandlers): RunSummary {
+  if (data.compileOutput) handlers.onOutput('stderr', data.compileOutput.endsWith('\n') ? data.compileOutput : `${data.compileOutput}\n`)
+  if (data.stdout) handlers.onOutput('stdout', data.stdout)
+  if (data.stderr) handlers.onOutput('stderr', data.stderr)
+  return { exitCode: data.exitCode, ms: data.timeMs, signal: data.signal === 'TIMEOUT' ? 'TIMEOUT' : null }
+}
+
+/**
+ * No usable /api/run (a static host, or the server is down): call the free
+ * online compilers straight from the browser instead.
+ */
+async function runInBrowserOnline(language: ServerLang, code: string, stdin: string, handlers: RunHandlers, signal: AbortSignal): Promise<RunSummary> {
+  handlers.onLoading?.('Compiling and running online…')
+  const { publicBackend, ONLINE_SERVICE } = await import('@/lib/exec/public')
+  const backend = publicBackend((input, init) => fetch(input, { ...init, signal }))
   try {
-    const res = await fetch('/api/run', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ language, code, stdin }),
-      signal: serverAbort.signal,
-    })
-    const data = (await res.json()) as RunResult & { error?: string }
+    return report(await backend.run({ language, code, stdin }), handlers)
+  } catch (err) {
+    if (signal.aborted) return { exitCode: null, ms: 0, signal: 'STOPPED' }
+    handlers.onOutput('system', `Could not reach the online compiler (${ONLINE_SERVICE[language]}): ${err instanceof Error ? err.message : String(err)}. Check your internet connection, or set up your own runner (Piston or Judge0, see the README).\n`)
+    return { exitCode: null, ms: 0, signal: null }
+  }
+}
+
+async function runOnServer(language: ServerLang, code: string, stdin: string, handlers: RunHandlers): Promise<RunSummary> {
+  const abort = new AbortController()
+  serverAbort = abort
+  handlers.onLoading?.('Compiling and running…')
+  try {
+    let res: Response
+    let data: (RunResult & { error?: string }) | null = null
+    try {
+      res = await fetch('/api/run', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ language, code, stdin }),
+        signal: abort.signal,
+      })
+      data = res.headers.get('content-type')?.includes('json') ? await res.json() : null
+    } catch {
+      if (abort.signal.aborted) return { exitCode: null, ms: 0, signal: 'STOPPED' }
+      return await runInBrowserOnline(language, code, stdin, handlers, abort.signal)
+    }
+    // No API route here (a static host answers 404/405, or HTML instead of JSON), or the
+    // server could not reach its runner (502): the browser calls the online compilers itself.
+    if (!data || res.status === 404 || res.status === 405 || res.status === 502) return await runInBrowserOnline(language, code, stdin, handlers, abort.signal)
     if (!res.ok || data.error) {
       handlers.onOutput('system', `${data.error ?? `Server error (HTTP ${res.status})`}\n`)
       return { exitCode: null, ms: 0, signal: null }
     }
-    if (data.compileOutput) handlers.onOutput('stderr', data.compileOutput.endsWith('\n') ? data.compileOutput : `${data.compileOutput}\n`)
-    if (data.stdout) handlers.onOutput('stdout', data.stdout)
-    if (data.stderr) handlers.onOutput('stderr', data.stderr)
-    return { exitCode: data.exitCode, ms: data.timeMs, signal: data.signal === 'TIMEOUT' ? 'TIMEOUT' : null }
-  } catch (err) {
-    if (serverAbort.signal.aborted) return { exitCode: null, ms: 0, signal: 'STOPPED' }
-    handlers.onOutput('system', `Could not reach the code runner: ${err instanceof Error ? err.message : String(err)}\n`)
-    return { exitCode: null, ms: 0, signal: null }
+    return report(data, handlers)
   } finally {
-    serverAbort = null
+    if (serverAbort === abort) serverAbort = null
   }
 }
 

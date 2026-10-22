@@ -8,7 +8,7 @@ It started as a redesign of [Bug Hunter](https://game.myhastech.com/), with a cl
 
 | Area | What it does |
 | --- | --- |
-| **Online compiler** | Programiz-style editor for **18 languages**, picked by their logos: Python, R, SQL, HTML/CSS, Java, Kotlin, C, C++, C#, JavaScript, TypeScript, Go, Rust, Scala, Dart, Ruby, PHP, Swift. Six of them run **inside the browser** on self-hosted WebAssembly runtimes (Pyodide, webR, sql.js); the rest are compiled on the server through a pluggable runner. It has a stdin box, Run/Stop, time limits, share links, auto-saved drafts, download, a resizable split, R plots, SQL result tables with a sample database, and a live HTML preview with its console. |
+| **Online compiler** | Programiz-style editor for **18 languages**, picked by their logos: Python, R, SQL, HTML/CSS, Java, Kotlin, C, C++, C#, JavaScript, TypeScript, Go, Rust, Scala, Dart, Ruby, PHP, Swift. Six of them run **inside the browser** on self-hosted WebAssembly runtimes (Pyodide, webR, sql.js); the rest are compiled by the free **Wandbox** and **Compiler Explorer** services with no setup (or by your own Piston/Judge0 runner). It has a stdin box, Run/Stop, time limits, share links, auto-saved drafts, download, a resizable split, R plots, SQL result tables with a sample database, and a live HTML preview with its console. |
 | **Bug Hunt campaign** | 12 hand-written levels in teaching order (off-by-one → two pointers → sliding window → recursion → sorting → a two-bug boss). Each has a story, test cases, three hints that go from a nudge to the exact fix, an explanation and a diff of the fix. |
 | **Find the mistake** | The Bug Hunt page has a **By technology** tab: 96 short snippets (6 per technology, from HTML and CSS to Docker, Git and system-design docs), each with exactly one wrong line. Click the line you think is wrong; a wrong guess shakes, two unlock a hint (a three-line range), and you can reveal the answer. Then you see why and a diff of the fix. XP goes by how few guesses you needed. The tests parse every JavaScript/TypeScript/JSX snippet, check the SQL fixes, and run the algorithm bugs to prove each fix works and each bug really fails. |
 | **Endless mode** | 147 bugs injected into 20 classic algorithms by 21 mutation operators (comparison, off-by-one, logic, initial value, arithmetic, wrong function, return value). Every bug is **verified**: it compiles and fails at least one test. Level numbers are stable, so links can be shared. Streaks give bonus XP. |
@@ -51,7 +51,7 @@ Node 22.18 or newer is needed, because `build:bank` runs a TypeScript file direc
 | SQL | browser | sql.js (SQLite → WebAssembly) with `customers` / `orders` / `shippings` sample tables and a Reset DB button |
 | HTML/CSS | browser | sandboxed `<iframe>` live preview with its `console.log` piped below |
 | JavaScript, TypeScript | browser | Web Worker; TypeScript is transpiled with sucrase (types are stripped, not checked) |
-| Java, Kotlin, C, C++, C#, Go, Rust, Scala, Dart, Ruby, PHP, Swift | server | `POST /api/run` → Piston, Judge0, or local toolchains (dev only) |
+| Java, Kotlin, C, C++, C#, Go, Rust, Scala, Dart, Ruby, PHP, Swift | online / server | Wandbox and Compiler Explorer by default (through `POST /api/run`, or straight from the browser); or your own Piston, Judge0 or local toolchains |
 
 The WebAssembly runtimes, the whiteboard's Excalidraw fonts and the pdf.js worker are copied from `node_modules` into `public/vendor/` by `scripts/vendor-runtimes.mjs` (on install, dev and build), so no third-party CDN is used. The first Python run downloads about 13 MB and the first R run about 45 MB; after that the browser cache serves them.
 
@@ -59,7 +59,9 @@ Limits: 64 KB of code or input, 64 KB of output, a compile timeout of 20 s and a
 
 ### Running compiled languages
 
-Compiled languages need a code runner. Pick one with environment variables (see `.env.example`):
+**They work with no setup.** By default the 12 compiled languages run on free public compilers: [Wandbox](https://wandbox.org) for C, C++, Java, C#, Go, Rust, Scala, Ruby, PHP and Swift, and [Compiler Explorer](https://godbolt.org) for Kotlin and Dart (`src/lib/exec/public.ts`). The `/api/run` route relays the code. If that route is missing (for example on a static host) or the server can't reach the services, the browser calls them itself. Java and Scala get a small `prog` launcher class added, because Wandbox compiles them as `prog.java` / `prog.scala`. If Wandbox retires a compiler version, the runner switches to the newest one for that language.
+
+Two caveats: your code and input are sent to those services (the compiler page says so), and they are shared, best-effort services with their own limits. For private or heavy use, run your own runner with environment variables (see `.env.example`):
 
 - **Piston (recommended)** is open source and sandboxes code in isolated containers.
   ```sh
@@ -68,9 +70,10 @@ Compiled languages need a code runner. Pick one with environment variables (see 
   Then install the runtimes you want (`gcc`, `java`, `kotlin`, `mono`, `go`, `rust`, `scala`, `dart`, `ruby`, `php`, `swift`) with the package manager in Piston's CLI, as described in the [Piston README](https://github.com/engineer-man/piston).
   Then set `RUNNER_BACKEND=piston` and `PISTON_URL=http://localhost:2000`.
 - **Judge0**: set `RUNNER_BACKEND=judge0` with `JUDGE0_URL` (and `JUDGE0_KEY` for RapidAPI). Language IDs are looked up from the instance's `/languages` list.
-- **local** (`RUNNER_BACKEND=local`) uses compilers installed on the machine (gcc, javac, go, rustc and so on), with time and output limits but **no sandbox**. It is the default in `npm run dev` and is refused in production unless `ALLOW_UNSAFE_LOCAL_RUNNER=1`. Never expose it publicly.
+- **local** (`RUNNER_BACKEND=local`) uses compilers installed on the machine (gcc, javac, go, rustc and so on), with time and output limits but **no sandbox**. It is refused in production unless `ALLOW_UNSAFE_LOCAL_RUNNER=1`. Never expose it publicly.
+- **none** (`RUNNER_BACKEND=none`) turns compiled languages off.
 
-With no runner configured, the browser languages still work, and compiled languages show a short setup note.
+Piston's free public API closed in February 2026, so self-hosting it is the only Piston option.
 
 ## How Endless levels are made
 
