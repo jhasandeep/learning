@@ -1,4 +1,4 @@
-import { BookOpen, ChevronLeft, Download, Flame, Layers, MessageCircleQuestion, Network, PenTool } from 'lucide-react'
+import { BookOpen, Bug, ChevronLeft, Download, Flame, Layers, ListChecks, MessageCircleQuestion, Network, PenTool } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -9,7 +9,9 @@ import { TechTile } from '@/components/tech-icon'
 import { buttonClass } from '@/components/ui'
 import { BOARDS_BY_ID } from '@/data/boards'
 import { DECKS } from '@/data/decks'
+import { MCQ_BY_ID } from '@/data/mcq'
 import { QUESTION_SETS, QUESTION_SETS_BY_ID, questionKey, questionText, type Question, type QuestionTech } from '@/data/questions'
+import { SPOT_BY_ID } from '@/data/spot'
 import { QuestionBrowser, type QuestionItem } from '../question-browser'
 import '../../notes/notes.css'
 import '../questions.css'
@@ -96,6 +98,8 @@ export default async function Page({ params }: PageProps<'/questions/[set]'>) {
               <a href={`/notes/questions/${id}.pdf`} download className={buttonClass('secondary', 'sm')} title="Every question with its answer, as an A4 PDF"><Download size={14} /> PDF</a>
               {!cross && <>
                 {set.notesId && <Link href={`/notes/${set.notesId}`} className={buttonClass('secondary', 'sm')}><BookOpen size={14} /> Notes</Link>}
+                {MCQ_BY_ID[set.id] && <Link href={`/quiz/${set.id}`} className={buttonClass('secondary', 'sm')}><ListChecks size={14} /> Quiz</Link>}
+                {SPOT_BY_ID[set.id] && <Link href={`/campaign/tech/${set.id}`} className={buttonClass('secondary', 'sm')}><Bug size={14} /> Find the mistake</Link>}
                 {deck && <Link href={`/flashcards/${deck}`} className={buttonClass('secondary', 'sm')}><Layers size={14} /> Flashcards</Link>}
                 <Link href={`/map/${set.id}`} className={buttonClass('secondary', 'sm')}><Network size={14} /> Mind map</Link>
                 {board && <Link href={`/board/${board}`} className={buttonClass('secondary', 'sm')}><PenTool size={14} /> Whiteboard</Link>}

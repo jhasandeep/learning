@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, EyeOff, Maximize, Minimize, Minus, Plus, Scan, Search, X } from 'lucide-react'
+import { ArrowUpRight, ChevronLeft, ChevronRight, Eye, EyeOff, Maximize, Minimize, Minus, PencilLine, Plus, Scan, Search, X } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { Inline } from '@/components/notes/inline'
@@ -306,6 +306,9 @@ export function MindMap({ root, initial }: { root: MapNode; initial: Preset }) {
         <button type="button" className={cx(btn, recall && 'border-violet/50 bg-violet/10 text-violet')} aria-pressed={recall} onClick={() => { setRecall((r) => !r); setRevealed(new Set()) }} title="Hide the details and test your memory: click a card to reveal it">
           {recall ? <EyeOff size={14} /> : <Eye size={14} />} Recall
         </button>
+        <Link href={root.kind === 'tech' && root.tech ? `/map/create#from=${root.tech}` : '/map/create'} className={cx(btn, 'border-accent/40 text-accent')} title={root.kind === 'tech' ? 'Start your own map from this technology' : 'Build your own mind map'}>
+          <PencilLine size={14} /> {root.kind === 'tech' ? 'Make my own' : 'Create mind map'}
+        </Link>
         <div className="ml-auto flex items-center gap-1">
           <button type="button" className={btn} onClick={() => zoomCenter(0.8)} aria-label="Zoom out"><Minus size={14} /></button>
           <span className="w-12 text-center text-xs tabular-nums text-muted">{Math.round(view.k * 100)}%</span>

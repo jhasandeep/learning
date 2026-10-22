@@ -1,0 +1,141 @@
+import type { McqSet } from './types'
+
+export const docker: McqSet = {
+  id: 'docker',
+  questions: [
+    {
+      id: 'image-container',
+      q: 'Image vs container?',
+      choices: [
+        'An image is a template; a container runs it',
+        'They are the same thing',
+        'A container is the template; an image is a running copy',
+        'An image is a virtual machine; a container is its disk',
+      ],
+      explain: 'Like a class and its objects: many containers can run from one image, each with its own writable layer.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'vm',
+      q: 'How do containers differ from virtual machines?',
+      choices: [
+        'Containers share the host kernel',
+        'Each container boots its own copy of the kernel',
+        'Virtual machines start faster',
+        'Containers cannot run normal Linux software',
+      ],
+      explain: 'Sharing the kernel makes containers light and fast to start, with weaker isolation than a VM.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'layer-cache',
+      q: 'Why copy `package.json` and run `npm ci` before `COPY . .`?',
+      choices: [
+        'So the install layer stays cached',
+        'Because npm needs an empty folder to install into',
+        'Because it makes the final image much smaller',
+        'Docker requires that order',
+      ],
+      explain: 'Each instruction is a cached layer; a change invalidates it and every layer after it. Source changes often, dependencies rarely.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'multi-stage',
+      q: 'What is a multi-stage build for?',
+      choices: [
+        'Shipping only the build output in a small image',
+        'Running several containers from one Dockerfile',
+        'Building the same image for several CPU types',
+        'Sharing the build cache between machines',
+      ],
+      explain: 'Compilers, dev dependencies and source stay in the build stage; `COPY --from=build` takes just what is needed.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'volume',
+      q: 'Where should a Postgres container keep its data so it survives `docker rm`?',
+      choices: [
+        'In a named volume',
+        'In the container\'s writable layer, which is kept',
+        'In an environment variable set on the container',
+        'Inside the image',
+      ],
+      explain: 'The writable layer is deleted with the container. Volumes live independently.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'cmd-entrypoint',
+      q: '`CMD` vs `ENTRYPOINT`?',
+      choices: [
+        '`ENTRYPOINT` is the command; `CMD` its default arguments',
+        '`CMD` runs at build time; `ENTRYPOINT` runs at start-up',
+        'They are identical; `CMD` is the older name',
+        '`ENTRYPOINT` runs only on the first start of a container',
+      ],
+      explain: '`RUN` is the build-time instruction. Use the exec form (`["node", "server.js"]`) so the process gets signals.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'localhost',
+      q: 'In Docker Compose, how does the `api` service reach the `db` service?',
+      choices: ['By the hostname `db`', 'Via `localhost`', 'Via the host machine\'s IP only', 'They cannot talk to each other'],
+      explain: 'Compose puts services on a shared network with DNS names equal to the service names. Inside a container, `localhost` is that container itself.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'ports',
+      q: 'What does `-p 8080:3000` mean?',
+      choices: [
+        'Host 8080 → container 3000',
+        'Container port 8080 is forwarded to host port 3000',
+        'Both ports, 8080 and 3000',
+        'The container accepts up to 3000 connections on 8080',
+      ],
+      explain: 'Format is `HOST:CONTAINER`. Your app must also listen on `0.0.0.0`, not `127.0.0.1`, inside the container.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'dockerignore',
+      q: 'What should `.dockerignore` usually include?',
+      choices: ['`node_modules`, `.git` and `.env`', 'The `Dockerfile`', '`package.json`', 'Nothing'],
+      explain: 'It shrinks the build context, speeds builds, and stops secrets from being copied into the image.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'ci-cd',
+      q: 'Continuous Delivery means…',
+      choices: [
+        'Every passing change is releasable; deploying is a click',
+        'Every commit is deployed to production automatically',
+        'Everyone merges their code into `main` once a day',
+        'The whole test suite runs every night on a schedule',
+      ],
+      explain: 'Continuous Deployment removes the manual step. Continuous Integration is merging and testing often.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'root',
+      q: 'Why add `USER node` to a Node Dockerfile?',
+      choices: [
+        'To avoid running as root',
+        'npm requires it',
+        'Because it makes the image build faster',
+        'Because it is needed to expose the app\'s port',
+      ],
+      explain: 'If the app is compromised, a non-root user limits what the attacker can do.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'tag-latest',
+      q: 'Why avoid deploying the `:latest` tag?',
+      choices: [
+        'It moves, so deploys aren\'t reproducible',
+        'It always points at the oldest image',
+        'Registries refuse to pull images tagged `latest`',
+        'It is only available for Windows-based images',
+      ],
+      explain: 'Tag by commit SHA or version so rollbacks are exact.',
+      difficulty: 'Hard',
+    },
+  ],
+}

@@ -1,0 +1,127 @@
+import type { McqSet } from './types'
+
+export const nodejs: McqSet = {
+  id: 'nodejs',
+  questions: [
+    {
+      id: 'single-thread',
+      q: 'How does Node.js handle many connections on one JavaScript thread?',
+      choices: [
+        'Non-blocking I/O and an event loop',
+        'It starts a new operating-system thread for every request',
+        'It forks a separate child process',
+        'It queues requests and handles each one to completion in turn',
+      ],
+      explain: 'While a database or file read is in flight, the thread serves other callbacks. CPU-heavy work, though, blocks everyone.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'next-tick',
+      q: 'What logs first?',
+      code: { lang: 'javascript', code: "setTimeout(() => console.log('timeout'), 0)\nPromise.resolve().then(() => console.log('promise'))\nprocess.nextTick(() => console.log('tick'))" },
+      choices: ['`tick`', '`promise`', '`timeout`', 'The order is random'],
+      explain: 'The `nextTick` queue runs before promise microtasks, and both run before timers. Output: tick, promise, timeout.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'cpu-work',
+      q: 'An endpoint hashes a 1 GB file synchronously. What happens to other requests?',
+      choices: ['They all wait until it finishes', 'They run on other threads', 'Node pauses the hash to serve them', 'They are rejected with 503'],
+      explain: 'Synchronous CPU work blocks the event loop. Move it to `worker_threads`, a child process, or a job queue.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'streams',
+      q: 'Why stream a large file to the response instead of `readFile` then `send`?',
+      choices: [
+        'Low memory, and bytes flow right away',
+        'Streams are the only way Node can send binary data',
+        '`readFile` cannot read files larger than a few megabytes',
+        'Streaming compresses the file',
+      ],
+      explain: '`createReadStream(path).pipe(res)` (or `pipeline`) sends chunks with backpressure; `readFile` loads the whole file into memory first.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'esm-cjs',
+      q: 'Which is the ES module syntax?',
+      choices: ["`import fs from 'node:fs'`", "`const fs = require('fs')`", "`module.exports = fs`", "`exports.fs = fs`"],
+      explain: 'ESM uses `import`/`export` (with `"type": "module"` or `.mjs`); CommonJS uses `require` and `module.exports`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'unhandled',
+      q: 'In current Node versions, what does an unhandled promise rejection do by default?',
+      choices: ['Crashes the process', 'Logs a warning and continues', 'Is silently ignored', 'Retries the promise'],
+      explain: 'Since Node 15, `--unhandled-rejections=throw` is the default. Always `await` inside `try/catch` or add `.catch()`.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'event-emitter',
+      q: 'What does `emitter.once("ready", fn)` do?',
+      choices: [
+        'Runs `fn` for the first "ready" only',
+        'Emits the "ready" event once, straight away',
+        'Runs `fn` immediately',
+        'Prevents "ready" from being emitted more than once',
+      ],
+      explain: '`on` keeps listening; `once` auto-removes after one call. Forgetting `off`/`removeListener` with `on` is a common memory leak.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'env',
+      q: 'Where should a database password come from?',
+      choices: [
+        'The environment or a secrets manager',
+        'Hard-coded in the source',
+        'A config file committed to git next to the code',
+        'The query string of the requests that need it',
+      ],
+      explain: 'Config in the environment (12-factor). Commit a `.env.example` without real values.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'cluster',
+      q: 'How can one Node server use all 8 CPU cores?',
+      choices: [
+        'Run several processes (cluster, PM2, containers)',
+        'Set `UV_THREADPOOL_SIZE=8` so JavaScript runs on 8 threads',
+        'Use `async` functions',
+        'Nothing: one Node process already uses every core',
+      ],
+      explain: 'One Node process runs JavaScript on one core. The libuv thread pool only handles certain I/O (fs, dns, crypto).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'buffer',
+      q: 'What is a `Buffer`?',
+      choices: [
+        'A chunk of raw binary memory',
+        'A queue of incoming requests waiting for the event loop',
+        'An in-memory cache',
+        'A readable stream that only holds UTF-8 strings',
+      ],
+      explain: 'Buffers (a subclass of `Uint8Array`) hold bytes from files, sockets and crypto, outside the string encoding.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'promisify',
+      q: 'What is the modern way to read a file without callbacks?',
+      choices: ["`await readFile(path, 'utf8')` from `node:fs/promises`", '`fs.readFileSync` inside `async`', '`new Promise(fs.readFile)`', '`fs.read().then()`'],
+      explain: 'The `fs/promises` API returns promises. `readFileSync` blocks the event loop even inside an `async` function.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'graceful',
+      q: 'What should a server do on `SIGTERM`?',
+      choices: [
+        'Stop accepting, finish in-flight work, then exit',
+        'Exit immediately with code 0',
+        'Ignore it: only SIGKILL actually stops the process',
+        'Restart itself in place without closing connections',
+      ],
+      explain: 'Orchestrators like Kubernetes send SIGTERM before killing a pod. A graceful shutdown avoids dropped requests.',
+      difficulty: 'Medium',
+    },
+  ],
+}

@@ -1,0 +1,96 @@
+import type { McqSet } from './types'
+
+export const dsa: McqSet = {
+  id: 'dsa',
+  questions: [
+    {
+      id: 'binary-search',
+      q: 'Time complexity of binary search on a sorted array?',
+      choices: ['O(log n)', 'O(n)', 'O(1)', 'O(n log n)'],
+      explain: 'Each step halves the search space.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'hash-lookup',
+      q: 'Average time to look up a key in a hash map?',
+      choices: ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'],
+      explain: 'Worst case is O(n) when many keys collide, but a good hash function keeps it constant on average.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'stack',
+      q: 'Which data structure checks balanced parentheses?',
+      choices: ['Stack', 'Queue', 'Heap', 'Hash set'],
+      explain: 'Push each opener; on a closer, pop and check that it matches. The stack must be empty at the end.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'bfs',
+      q: 'Shortest path (fewest edges) in an unweighted graph?',
+      choices: ['BFS', 'DFS', 'Dijkstra with negative weights', 'Binary search'],
+      explain: 'BFS explores level by level. With non-negative weights, use Dijkstra.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'two-sum',
+      q: 'Best time complexity for Two Sum on an unsorted array?',
+      choices: ['O(n) with a hash map', 'O(n log n) with sorting, always better', 'O(n²) is the best possible', 'O(log n)'],
+      explain: 'For each number, check whether `target - x` is already in the map, then store `x`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'sliding-window',
+      q: 'Longest substring without repeating characters is a classic…',
+      choices: ['Sliding window problem', 'Binary search problem', 'Graph problem', 'Heap problem'],
+      explain: 'Grow the right edge; when a repeat enters, move the left edge past the earlier copy. O(n).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'heap-topk',
+      q: 'Best way to find the k largest of n numbers when k is small?',
+      choices: ['A min-heap of size k: O(n log k)', 'Sort everything: always best', 'A max-heap of size n, then pop k: O(1)', 'Two pointers'],
+      explain: 'Keep the k largest so far; the heap\'s top is the smallest of them, to compare each new number against.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'quicksort',
+      q: 'Worst-case time of quicksort?',
+      choices: ['O(n²)', 'O(n log n)', 'O(n)', 'O(log n)'],
+      explain: 'When the pivot is always the smallest or largest (e.g. sorted input with a first-element pivot). Average is O(n log n); random pivots make the worst case unlikely.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'stable-sort',
+      q: 'Which sort is stable?',
+      choices: ['Merge sort', 'Quicksort (typical in-place)', 'Heapsort', 'Selection sort'],
+      explain: 'Stable means equal keys keep their original order, which matters when sorting by several fields in turn.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'bst-inorder',
+      q: 'An in-order traversal of a binary search tree visits the keys…',
+      choices: ['In sorted order', 'In insertion order', 'Level by level', 'In reverse order'],
+      explain: 'Left subtree, node, right subtree. That is also how to validate a BST.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'memo',
+      q: 'Naive recursive Fibonacci is O(2ⁿ). With memoisation it becomes…',
+      choices: ['O(n)', 'O(log n)', 'O(n²)', 'Still O(2ⁿ)'],
+      explain: 'Each value from 0 to n is computed once and cached.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'linked-list-cycle',
+      q: 'How do you detect a cycle in a linked list with O(1) extra space?',
+      choices: [
+        'Fast and slow pointers',
+        'A hash set of visited nodes',
+        'Sort the list',
+        'Recursion with a depth counter',
+      ],
+      explain: 'The fast pointer moves two steps, the slow one step; they meet only if there is a cycle. A hash set works but uses O(n) space.',
+      difficulty: 'Medium',
+    },
+  ],
+}
