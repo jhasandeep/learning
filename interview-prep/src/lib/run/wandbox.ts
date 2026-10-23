@@ -52,11 +52,42 @@ export function pickCompiler(list: WandboxCompiler[], lang: ServerLang): string 
 
 let compilers: Promise<WandboxCompiler[]> | null = null
 
-function loadCompilers(signal: AbortSignal): Promise<WandboxCompiler[]> {
+// The compiler list is large and rarely changes, so keep a slimmed copy in
+// localStorage: after the first visit, Run no longer waits to download it.
+const CACHE_KEY = 'prep-arena:wandbox:compilers'
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000
+
+function readCache(): WandboxCompiler[] | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const { at, list } = JSON.parse(raw) as { at: number; list: WandboxCompiler[] }
+    return Date.now() - at < CACHE_TTL_MS && Array.isArray(list) && list.length > 0 ? list : null
+  } catch {
+    return null
+  }
+}
+
+function writeCache(list: WandboxCompiler[]) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), list }))
+  } catch {
+    // storage full or blocked: just fetch again next time
+  }
+}
+
+function loadCompilers(signal?: AbortSignal): Promise<WandboxCompiler[]> {
+  const cached = compilers ? null : readCache()
+  if (cached) compilers = Promise.resolve(cached)
   compilers ??= fetch(`${API}/list.json`, { signal })
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`)
       return r.json() as Promise<WandboxCompiler[]>
+    })
+    .then((full) => {
+      const list = full.map(({ name, language, version }) => ({ name, language, version }))
+      writeCache(list)
+      return list
     })
     .catch((err) => {
       compilers = null // try again next time
@@ -65,9 +96,19 @@ function loadCompilers(signal: AbortSignal): Promise<WandboxCompiler[]> {
   return compilers
 }
 
+/** Starts downloading the compiler list in the background (call when a compiled-language page opens). */
+export function prefetchWandbox() {
+  loadCompilers().catch(() => {})
+}
+
 /** For tests: forget the cached compiler list. */
 export function resetWandboxCache() {
   compilers = null
+  try {
+    localStorage.removeItem(CACHE_KEY)
+  } catch {
+    // no storage in this environment
+  }
 }
 
 const nl = (s: string) => (s.endsWith('\n') ? s : `${s}\n`)

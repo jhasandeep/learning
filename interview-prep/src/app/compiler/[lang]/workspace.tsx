@@ -11,7 +11,7 @@ import { useToast } from '@/components/toast'
 import { Button, cx, Kbd } from '@/components/ui'
 import { LANGUAGES_BY_ID } from '@/data/languages'
 import type { MongoCollectionInfo, MongoStep, RunSummary, SqlItem, SqlSchemaTable, Stream } from '@/lib/run/protocol'
-import { WANDBOX_LANGUAGE } from '@/lib/run/wandbox'
+import { prefetchWandbox, WANDBOX_LANGUAGE } from '@/lib/run/wandbox'
 import { decodeShare, encodeShare } from '@/lib/share'
 import { LangRail } from './lang-rail'
 import { MongoLearn } from './mongo-learn'
@@ -117,6 +117,10 @@ export function Workspace({ langId }: { langId: string }) {
     })
     return () => cancelAnimationFrame(id)
   }, [lang.id, toast, updateCode, updateStdin])
+
+  useEffect(() => {
+    if (online) prefetchWandbox()
+  }, [online])
 
   useEffect(() => {
     if (lang.engine !== 'server') return
