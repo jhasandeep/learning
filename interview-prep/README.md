@@ -51,7 +51,7 @@ Node 22.18 or newer is needed, because `build:bank` runs a TypeScript file direc
 | HTML/CSS | browser | sandboxed `<iframe>` live preview with its `console.log` piped below |
 | JavaScript, TypeScript | browser | Web Worker; TypeScript is transpiled with sucrase (types are stripped, not checked) |
 | C, C++, Java, C#, Go, Rust, Scala, Ruby, PHP, Swift | online, from the browser | The page calls the public [Wandbox](https://wandbox.org) API directly (CORS-enabled, no key, **no backend needed**). It picks the newest released compiler from Wandbox's list (`src/lib/run/wandbox.ts`) |
-| Kotlin, Dart (and any of the above if Wandbox is unreachable) | server | `POST /api/run` → Piston, Judge0, or local toolchains (dev only). Needs a runner configured; see below |
+| Any compiled language, once a runner is configured; Kotlin and Dart always | server | `POST /api/run` → Piston, Judge0, or local toolchains (dev only). Used first when configured; see below |
 
 The WebAssembly runtimes, the whiteboard's Excalidraw fonts and the pdf.js worker are copied from `node_modules` into `public/vendor/` by `scripts/vendor-runtimes.mjs` (on install, dev and build), so no third-party CDN is used. The first Python run downloads about 13 MB and the first R run about 45 MB; after that the browser cache serves them.
 
@@ -59,7 +59,7 @@ Limits: 64 KB of code or input, 64 KB of output, a compile timeout of 20 s and a
 
 ### Running compiled languages
 
-Most compiled languages already work with **no setup**, because the browser talks to Wandbox itself. Your code is sent to that public service, and it can be slow, rate-limited or change its rules. The server runner below is only needed for Kotlin and Dart, or as a fallback when Wandbox cannot be reached.
+Most compiled languages already work with **no setup**, because the browser talks to Wandbox itself. Your code is sent to that public service, and it can be slow, rate-limited or change its rules. If you configure a server runner below, the app uses **it first** (it is faster and covers Kotlin and Dart too) and keeps Wandbox as the fallback when no runner is set.
 
 Compiled languages need a code runner. Pick one with environment variables (see `.env.example`):
 

@@ -24,22 +24,40 @@ async function transpileTs(code: string): Promise<string> {
   return transform(code, { transforms: ['typescript'], disableESTransforms: true }).code
 }
 
-/** Compiled languages: the online compiler (Wandbox) straight from the browser, then the server runner as a fallback. */
+interface ServerStatus { configured: boolean; backend?: string }
+let serverStatus: Promise<ServerStatus> | null = null
+
+/** What /api/run is set up with (Piston, Judge0, local...). Asked once per page load. */
+function getServerStatus(signal: AbortSignal): Promise<ServerStatus> {
+  serverStatus ??= fetch('/api/run', { signal })
+    .then((r) => r.json() as Promise<ServerStatus>)
+    .catch(() => {
+      serverStatus = null // maybe just offline: ask again next time
+      return { configured: false }
+    })
+  return serverStatus
+}
+
+/**
+ * Compiled languages. A real runner you set up (Piston or Judge0, via RUNNER_BACKEND) is used first because it is the
+ * fastest. Without one, the public Wandbox API is called straight from the browser; the dev-only "local" runner
+ * (no sandbox) is just the last resort.
+ */
 async function runCompiled(language: ServerLang, code: string, stdin: string, handlers: RunHandlers): Promise<RunSummary> {
   serverAbort = new AbortController()
   const signal = serverAbort.signal
   try {
+    const server = await getServerStatus(signal)
+    if (server.configured && server.backend !== 'local') return await runOnServer(language, code, stdin, handlers, signal)
+    let reason = `${language} needs a server runner, and none is configured. See the README section “Running compiled languages”.`
     if (WANDBOX_LANGUAGE[language]) {
       const online = await runWandbox(language, code, stdin, handlers, signal)
       if ('summary' in online) return online.summary
-      // Offline, blocked or missing: use the server runner if there is one.
-      const configured = await fetch('/api/run', { signal }).then((r) => r.json() as Promise<{ configured?: boolean }>).then((d) => d.configured === true, () => false)
-      if (!configured) {
-        handlers.onOutput('system', `${online.unavailable}\nNo server runner is configured either, so this language cannot run right now. Check your connection and try again.\n`)
-        return { exitCode: null, ms: 0, signal: null }
-      }
+      reason = online.unavailable
     }
-    return await runOnServer(language, code, stdin, handlers, signal)
+    if (server.configured) return await runOnServer(language, code, stdin, handlers, signal)
+    handlers.onOutput('system', `${reason}\nNo server runner is configured either, so this language cannot run right now. Check your connection and try again.\n`)
+    return { exitCode: null, ms: 0, signal: null }
   } finally {
     serverAbort = null
   }
