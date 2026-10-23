@@ -11,6 +11,7 @@ import { useToast } from '@/components/toast'
 import { Button, cx, Kbd } from '@/components/ui'
 import { LANGUAGES_BY_ID } from '@/data/languages'
 import type { MongoCollectionInfo, MongoStep, RunSummary, SqlItem, SqlSchemaTable, Stream } from '@/lib/run/protocol'
+import { WANDBOX_LANGUAGE } from '@/lib/run/wandbox'
 import { decodeShare, encodeShare } from '@/lib/share'
 import { LangRail } from './lang-rail'
 import { MongoLearn } from './mongo-learn'
@@ -63,6 +64,8 @@ export function Workspace({ langId }: { langId: string }) {
   const isWeb = lang.runtime === 'web'
   const isSql = lang.runtime === 'sql'
   const isMongo = lang.runtime === 'mongodb'
+  // Compiled languages run on Wandbox straight from the browser, so they need no server of ours.
+  const online = lang.engine === 'server' && lang.runtime in WANDBOX_LANGUAGE
   const toast = useToast()
 
   const [code, setCode] = useState(() => initialCode(lang.id, lang.template))
@@ -281,9 +284,9 @@ export function Workspace({ langId }: { langId: string }) {
               <span className="hidden md:inline"><LangIcon lang={lang} size={28} /></span>
               <span className="truncate">{lang.name} Online Compiler</span>
             </h1>
-            <span className={cx('hidden items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] lg:inline-flex', lang.engine === 'browser' ? 'border-good/40 text-good' : 'border-violet/40 text-violet')} title={lang.engine === 'browser' ? 'Runs entirely in your browser — nothing is sent to a server' : 'Compiled and run on the server'}>
+            <span className={cx('hidden items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] lg:inline-flex', lang.engine === 'browser' ? 'border-good/40 text-good' : 'border-violet/40 text-violet')} title={lang.engine === 'browser' ? 'Runs entirely in your browser — nothing is sent to a server' : online ? 'Compiled and run by the public Wandbox service, called straight from your browser' : 'Compiled and run on the server'}>
               {lang.engine === 'browser' ? <Zap size={11} /> : <Server size={11} />}
-              {lang.engine === 'browser' ? 'in browser' : server?.backend ? `server · ${server.backend}` : 'server'}
+              {lang.engine === 'browser' ? 'in browser' : online ? 'online · Wandbox' : server?.backend ? `server · ${server.backend}` : 'server'}
             </span>
             <div className="ml-auto flex items-center gap-0.5">
               <IconButton label="Smaller text" onClick={() => setFontSize((f) => Math.max(11, f - 1))}><Minus size={15} /></IconButton>
@@ -338,7 +341,7 @@ export function Workspace({ langId }: { langId: string }) {
             </div>
           </div>
 
-          {lang.engine === 'server' && server && !server.configured && (
+          {lang.engine === 'server' && !online && server && !server.configured && (
             <div className="m-3 rounded-xl border border-warn/40 bg-warn/10 p-3 text-sm">
               <b className="text-warn">Server runner not configured.</b> <span className="text-muted">{server.reason} See the README section “Running compiled languages”.</span>
             </div>

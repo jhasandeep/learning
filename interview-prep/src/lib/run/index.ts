@@ -2,6 +2,7 @@ import type { Language, ServerLang } from '@/data/languages'
 import type { RunResult } from '@/lib/exec/types'
 import type { MongoCheckResult, RunHandlers, RunSummary } from './protocol'
 import { runR, stopR } from './r'
+import { runWandbox, WANDBOX_LANGUAGE } from './wandbox'
 import { WorkerRunner } from './worker-runner'
 
 // One entry point for the compiler UI: picks the right engine per language.
@@ -23,15 +24,35 @@ async function transpileTs(code: string): Promise<string> {
   return transform(code, { transforms: ['typescript'], disableESTransforms: true }).code
 }
 
-async function runOnServer(language: ServerLang, code: string, stdin: string, handlers: RunHandlers): Promise<RunSummary> {
+/** Compiled languages: the online compiler (Wandbox) straight from the browser, then the server runner as a fallback. */
+async function runCompiled(language: ServerLang, code: string, stdin: string, handlers: RunHandlers): Promise<RunSummary> {
   serverAbort = new AbortController()
+  const signal = serverAbort.signal
+  try {
+    if (WANDBOX_LANGUAGE[language]) {
+      const online = await runWandbox(language, code, stdin, handlers, signal)
+      if ('summary' in online) return online.summary
+      // Offline, blocked or missing: use the server runner if there is one.
+      const configured = await fetch('/api/run', { signal }).then((r) => r.json() as Promise<{ configured?: boolean }>).then((d) => d.configured === true, () => false)
+      if (!configured) {
+        handlers.onOutput('system', `${online.unavailable}\nNo server runner is configured either, so this language cannot run right now. Check your connection and try again.\n`)
+        return { exitCode: null, ms: 0, signal: null }
+      }
+    }
+    return await runOnServer(language, code, stdin, handlers, signal)
+  } finally {
+    serverAbort = null
+  }
+}
+
+async function runOnServer(language: ServerLang, code: string, stdin: string, handlers: RunHandlers, abort: AbortSignal): Promise<RunSummary> {
   handlers.onLoading?.('Compiling and running on the server…')
   try {
     const res = await fetch('/api/run', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ language, code, stdin }),
-      signal: serverAbort.signal,
+      signal: abort,
     })
     const data = (await res.json()) as RunResult & { error?: string }
     if (!res.ok || data.error) {
@@ -43,11 +64,9 @@ async function runOnServer(language: ServerLang, code: string, stdin: string, ha
     if (data.stderr) handlers.onOutput('stderr', data.stderr)
     return { exitCode: data.exitCode, ms: data.timeMs, signal: data.signal === 'TIMEOUT' ? 'TIMEOUT' : null }
   } catch (err) {
-    if (serverAbort.signal.aborted) return { exitCode: null, ms: 0, signal: 'STOPPED' }
+    if (abort.aborted) return { exitCode: null, ms: 0, signal: 'STOPPED' }
     handlers.onOutput('system', `Could not reach the code runner: ${err instanceof Error ? err.message : String(err)}\n`)
     return { exitCode: null, ms: 0, signal: null }
-  } finally {
-    serverAbort = null
   }
 }
 
@@ -76,7 +95,7 @@ export async function runCode(lang: Language, code: string, stdin: string, handl
     case 'web':
       throw new Error('HTML runs in the preview iframe, not through runCode')
     default:
-      return runOnServer(lang.runtime, code, stdin, handlers)
+      return runCompiled(lang.runtime, code, stdin, handlers)
   }
 }
 
