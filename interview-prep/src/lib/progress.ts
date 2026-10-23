@@ -25,6 +25,8 @@ export interface Progress {
   notesRead: Record<string, string>
   /** "<set>/<question id>" → how well you know a most-asked interview question. */
   questions: Record<string, QuestionStatus>
+  /** MongoDB playground lesson id → ISO date its challenge was solved. */
+  mongoLessons: Record<string, string>
   typing: TypingProgress
 }
 
@@ -73,6 +75,7 @@ export const EMPTY: Progress = {
   dailyGoal: 3,
   notesRead: {},
   questions: {},
+  mongoLessons: {},
   typing: { lessons: {}, tests: [], keys: {}, snippets: {} },
 }
 
@@ -227,6 +230,16 @@ export function markNoteRead(id: string): number {
   if (p.notesRead[id]) return 0
   commit(bump({ ...p, notesRead: { ...p.notesRead, [id]: new Date().toISOString() } }, NOTE_READ_XP))
   return NOTE_READ_XP
+}
+
+export const MONGO_LESSON_XP = 30
+
+/** Records a solved MongoDB lesson challenge (one-way, so the XP can't be farmed). */
+export function markMongoLessonDone(id: string): number {
+  const p = load()
+  if (p.mongoLessons[id]) return 0
+  commit(bump({ ...p, mongoLessons: { ...p.mongoLessons, [id]: new Date().toISOString() } }, MONGO_LESSON_XP))
+  return MONGO_LESSON_XP
 }
 
 export const QUESTION_KNOWN_XP = 5

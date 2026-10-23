@@ -1,6 +1,6 @@
 import type { Language, ServerLang } from '@/data/languages'
 import type { RunResult } from '@/lib/exec/types'
-import type { RunHandlers, RunSummary } from './protocol'
+import type { MongoCheckResult, RunHandlers, RunSummary } from './protocol'
 import { runR, stopR } from './r'
 import { WorkerRunner } from './worker-runner'
 
@@ -11,6 +11,10 @@ const js = new WorkerRunner(() => new Worker(new URL('./js.worker.ts', import.me
 const PYTHON_WORKER = '/runners/python-worker.mjs'
 const python = new WorkerRunner(() => new Worker(PYTHON_WORKER, { type: 'module' }), 15_000)
 const sql = new WorkerRunner(() => new Worker(new URL('./sql.worker.ts', import.meta.url), { type: 'module' }), 10_000)
+
+const mongo = new WorkerRunner(() => new Worker(new URL('./mongo.worker.ts', import.meta.url), { type: 'module' }), 10_000)
+// Challenge checks get their own worker so a runaway answer cannot kill the playground's database.
+const mongoCheck = new WorkerRunner(() => new Worker(new URL('./mongo.worker.ts', import.meta.url), { type: 'module' }), 10_000)
 
 let serverAbort: AbortController | null = null
 
@@ -65,6 +69,8 @@ export async function runCode(lang: Language, code: string, stdin: string, handl
       return python.run({ code, stdin }, handlers)
     case 'sql':
       return sql.run({ code, stdin: '' }, handlers)
+    case 'mongodb':
+      return mongo.run({ code, stdin: '' }, handlers)
     case 'r':
       return runR(code, handlers)
     case 'web':
@@ -78,8 +84,21 @@ export function resetSqlDatabase(handlers: RunHandlers): Promise<RunSummary> {
   return sql.run({ code: '', stdin: '', action: 'reset' }, handlers)
 }
 
+export function resetMongoDatabase(handlers: RunHandlers): Promise<RunSummary> {
+  return mongo.run({ code: '', stdin: '', action: 'reset' }, handlers)
+}
+
+/** Runs the learner's MongoDB code against a lesson's reference solution. */
+export async function checkMongo(code: string, challenge: { solution: string; verify?: string; ordered?: boolean }): Promise<MongoCheckResult> {
+  let result: MongoCheckResult = { pass: false, detail: 'The check did not finish.' }
+  const summary = await mongoCheck.run({ code, stdin: '', action: 'check', payload: JSON.stringify(challenge) }, { onOutput: () => {}, onCheck: (r) => { result = r } })
+  if (summary.signal === 'TIMEOUT') return { pass: false, detail: 'Your code took too long (is there an infinite loop?).' }
+  return result
+}
+
 export function stopAll() {
   js.stop()
+  mongo.stop()
   python.stop()
   sql.stop()
   stopR()

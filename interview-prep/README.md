@@ -8,7 +8,7 @@ It started as a redesign of [Bug Hunter](https://game.myhastech.com/), with a cl
 
 | Area | What it does |
 | --- | --- |
-| **Online compiler** | Programiz-style editor for **18 languages**, picked by their logos: Python, R, SQL, HTML/CSS, Java, Kotlin, C, C++, C#, JavaScript, TypeScript, Go, Rust, Scala, Dart, Ruby, PHP, Swift. Six of them run **inside the browser** on self-hosted WebAssembly runtimes (Pyodide, webR, sql.js); the rest are compiled on the server through a pluggable runner. It has a stdin box, Run/Stop, time limits, share links, auto-saved drafts, download, a resizable split, R plots, SQL result tables with a sample database, and a live HTML preview with its console. |
+| **Online compiler** | Programiz-style editor for **18 languages**, picked by their logos: Python, R, SQL, HTML/CSS, Java, Kotlin, C, C++, C#, JavaScript, TypeScript, Go, Rust, Scala, Dart, Ruby, PHP, Swift. Six of them run **inside the browser** on self-hosted WebAssembly runtimes (Pyodide, webR, sql.js); the rest are compiled on the server through a pluggable runner. A **MongoDB playground** is added on top: an in-browser mongosh-style shell (find, aggregate, insert/update/delete, indexes, `$lookup`) on a sample `shop` database, with a **Learn** tab of 12 guided lessons whose challenges are checked automatically. It has a stdin box, Run/Stop, time limits, share links, auto-saved drafts, download, a resizable split, R plots, SQL result tables with a sample database, and a live HTML preview with its console. |
 | **Bug Hunt campaign** | 12 hand-written levels in teaching order (off-by-one → two pointers → sliding window → recursion → sorting → a two-bug boss). Each has a story, test cases, three hints that go from a nudge to the exact fix, an explanation and a diff of the fix. |
 | **Endless mode** | 147 bugs injected into 20 classic algorithms by 21 mutation operators (comparison, off-by-one, logic, initial value, arithmetic, wrong function, return value). Every bug is **verified**: it compiles and fails at least one test. Level numbers are stable, so links can be shared. Streaks give bonus XP. |
 | **Code runner** | User code runs in a Web Worker (no DOM access) with a 2-second cut-off for infinite loops. Per-test expected/received output, a console tab for `console.log`, and drafts auto-saved per level. |
@@ -47,6 +47,7 @@ Node 22.18 or newer is needed, because `build:bank` runs a TypeScript file direc
 | Python | browser | Pyodide (CPython → WebAssembly) in a module worker; `input()` reads the stdin box |
 | R | browser | webR, with plots rendered as images |
 | SQL | browser | sql.js (SQLite → WebAssembly) with `customers` / `orders` / `shippings` sample tables and a Reset DB button |
+| MongoDB | browser | [mingo](https://github.com/kofrasa/mingo) (MongoDB's query language for in-memory objects) behind a small mongosh-style shell in a Web Worker (`src/lib/run/mongo-engine.ts`). Sample `shop` database (`customers`, `products`, `orders`), state kept between runs, Reset DB button |
 | HTML/CSS | browser | sandboxed `<iframe>` live preview with its `console.log` piped below |
 | JavaScript, TypeScript | browser | Web Worker; TypeScript is transpiled with sucrase (types are stripped, not checked) |
 | Java, Kotlin, C, C++, C#, Go, Rust, Scala, Dart, Ruby, PHP, Swift | server | `POST /api/run` → Piston, Judge0, or local toolchains (dev only) |
@@ -103,3 +104,9 @@ tests/            vitest suites
 ```
 
 Built with Next.js 16 (App Router, Cache Components), React 19, Tailwind CSS 4, CodeMirror 6, Shiki, Excalidraw, pdf.js, pdf-lib, Pyodide, webR, sql.js and lucide icons.
+
+### MongoDB playground
+
+Open `/compiler/mongodb`. Write mongosh-style JavaScript: `db.customers.find({ country: "India" })`, `db.orders.aggregate([...])`, `insertOne/insertMany`, `updateOne/updateMany` (with `$set`, `$inc`, `$push`, upsert...), `deleteOne/deleteMany`, `createIndex`, `explain()`, plus `const`, functions, loops, `print()`, `ObjectId()` and `ISODate()`. Each statement prints its own result card, and data persists between runs until **Reset DB**. It is an emulation, not a real `mongod`: there is no server, transactions, change streams, `$out`/`$merge` or full index behaviour (`explain()` is a simplified plan).
+
+The **Learn** tab has 12 lessons (documents, filters, projection and sorting, inserts, updates, arrays, deletes, aggregation, `$unwind`, `$lookup`, indexes). Each has an example you can load or run and a challenge. **Check my answer** runs your code and a reference solution on identical fresh databases and compares the results (the data afterwards, for writes), so any correct answer passes. Solved lessons are stored in the progress store and earn XP. Lessons live in `src/data/mongo-lessons.ts`; `tests/mongo.test.ts` runs every example and solution.

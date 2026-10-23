@@ -9,7 +9,7 @@ type Spec = { logo: string } | { lucide: LucideIcon }
 
 /** Compiler language id → logo. */
 const LANGS: Record<string, string> = {
-  python: 'python', r: 'r', sql: 'sqlite', html: 'html5', java: 'java', kotlin: 'kotlin', c: 'c', cpp: 'cplusplus',
+  python: 'python', r: 'r', sql: 'sqlite', mongodb: 'mongodb', html: 'html5', java: 'java', kotlin: 'kotlin', c: 'c', cpp: 'cplusplus',
   csharp: 'csharp', javascript: 'javascript', typescript: 'typescript', go: 'go', rust: 'rust', scala: 'scala',
   dart: 'dart', ruby: 'ruby', php: 'php', swift: 'swift',
 }
