@@ -32,6 +32,16 @@ export interface Progress {
   quizzes: Record<string, QuizResult>
   /** Find the mistake: "<set>/<bug>" → how it was found. */
   spot: Record<string, SpotResult>
+  /** Learn: "<track>/<step>" → how the step was completed. */
+  learn: Record<string, LearnResult>
+}
+
+export interface LearnResult {
+  at: string
+  /** Hints opened before passing. */
+  hints: number
+  /** The solution was shown before passing. */
+  solution: boolean
 }
 
 export interface QuizResult {
@@ -96,6 +106,7 @@ export const EMPTY: Progress = {
   mcq: {},
   quizzes: {},
   spot: {},
+  learn: {},
 }
 
 let state: Progress = EMPTY
@@ -363,6 +374,19 @@ export function recordSpot(key: string, misses: number, revealed: boolean): numb
   return gain
 }
 
+export function learnXp(hints: number, solution: boolean): number {
+  return solution ? 5 : Math.max(10, 20 - 5 * hints)
+}
+
+/** Saves a completed Learn step. XP the first time only. */
+export function recordLearnStep(key: string, hints: number, solution: boolean): number {
+  const p = load()
+  if (p.learn[key]) return 0
+  const gain = learnXp(hints, solution)
+  commit(bump({ ...p, learn: { ...p.learn, [key]: { at: new Date().toISOString(), hints, solution } } }, gain))
+  return gain
+}
+
 export function setDailyGoal(goal: number) {
   commit({ ...load(), dailyGoal: Math.min(20, Math.max(1, Math.round(goal))) })
 }
@@ -400,6 +424,7 @@ export const BADGES: Badge[] = [
   { id: 'week', title: 'Week Warrior', description: 'Practise 7 days in a row.', earned: (p, { today }) => dayStreak(p.activity, today) >= 7 },
   { id: 'syntax-memory', title: 'Syntax by Heart', description: 'Write 25 interview snippets from memory.', earned: (p) => Object.values(p.typing.snippets).filter((s) => s.memorised).length >= 25 },
   { id: 'touch-typist', title: 'Touch Typist', description: 'Type 40 WPM at 95% accuracy in a timed test.', earned: (p) => p.typing.tests.some((t) => t.wpm >= 40 && t.accuracy >= 95) },
+  { id: 'step-by-step', title: 'Step by Step', description: 'Complete 25 Learn steps.', earned: (p) => Object.keys(p.learn).length >= 25 },
   { id: 'quiz-whiz', title: 'Quiz Whiz', description: 'Answer 100 multiple-choice questions correctly.', earned: (p) => Object.keys(p.mcq).length >= 100 },
   { id: 'eagle-eye', title: 'Eagle Eye', description: 'Find 25 mistakes in the technology bug hunts without revealing them.', earned: (p) => Object.values(p.spot).filter((s) => !s.revealed).length >= 25 },
   { id: 'interview-ready', title: 'Interview Ready', description: 'Know 100 most-asked interview questions.', earned: (p) => Object.values(p.questions).filter((s) => s === 'known').length >= 100 },

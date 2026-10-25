@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, BookOpen, Bug, Flame, Infinity as InfinityIcon, Layers, MessageCircleQuestion, Minus, Network, PenTool, Plus, SquareTerminal, Target } from 'lucide-react'
+import { ArrowRight, BookOpen, Bug, Flame, GraduationCap, Infinity as InfinityIcon, Layers, MessageCircleQuestion, Minus, Network, PenTool, Plus, SquareTerminal, Target } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { TechIcon, TechTile } from '@/components/tech-icon'
@@ -17,7 +17,7 @@ import { useToday } from '@/lib/today'
 /** One technology on the home page (built on the server from the question sets). */
 export interface TechSummary { id: string; title: string; short: string; color: string; badge: string; questions: number; keys: string[]; notes: boolean }
 
-export function Dashboard({ techs }: { techs: TechSummary[] }) {
+export function Dashboard({ techs, learn }: { techs: TechSummary[]; learn: { tracks: number; steps: number } }) {
   const p = useProgress()
   const today = useToday()
   const lv = levelFromXp(p.xp)
@@ -85,6 +85,12 @@ export function Dashboard({ techs }: { techs: TechSummary[] }) {
 
       <section aria-label="Modes" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <ModeCard
+          href="/learn" icon={<GraduationCap size={20} />} color="var(--good)" title="Learn to code"
+          text={`${learn.steps} step-by-step coding lessons across ${learn.tracks} technologies, checked instantly in your browser.`}
+          footer={<><ProgressBar value={Object.keys(p.learn).length / learn.steps} className="w-24" color="var(--good)" /><span>{Object.keys(p.learn).length}/{learn.steps} steps</span></>}
+          tag="New"
+        />
+        <ModeCard
           href={nextLevel ? `/campaign/${nextLevel.id}` : '/campaign'}
           icon={<Bug size={20} />} color="var(--accent)" title="Bug Hunt"
           text="Hand-made levels that teach one pattern each, ending in a two-bug boss."
@@ -125,7 +131,6 @@ export function Dashboard({ techs }: { techs: TechSummary[] }) {
           href="/map" icon={<Network size={20} />} color="#0891b2" title="Mind map"
           text="Every technology, section and key idea on one zoomable map. Open a branch, search, or hide the details to test your recall."
           footer={<span>Zoom · search · recall mode</span>}
-          tag="New"
         />
       </section>
 
