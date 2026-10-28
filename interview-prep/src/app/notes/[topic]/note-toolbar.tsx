@@ -45,7 +45,7 @@ function toggleHand() {
   } catch {}
 }
 
-export function NoteToolbar({ topicId, deckId, compilerLang }: { topicId: string; deckId: string; compilerLang?: string }) {
+export function NoteToolbar({ topicId, deckId, compilerLang, hasQuestions = true }: { topicId: string; deckId: string; compilerLang?: string; hasQuestions?: boolean }) {
   const hand = useHand()
   const simple = useSimple()
   const p = useProgress()
@@ -66,7 +66,7 @@ export function NoteToolbar({ topicId, deckId, compilerLang }: { topicId: string
       <a href={`/notes/${topicId}.pdf`} download className={buttonClass('secondary', 'sm')} title="Handwritten A4 PDF of this topic">
         <Download size={14} /> PDF
       </a>
-      <Link href={`/questions/${topicId}`} className={buttonClass('secondary', 'sm')} title="The most asked interview questions for this topic"><MessageCircleQuestion size={14} /> Interview questions</Link>
+      {hasQuestions && <Link href={`/questions/${topicId}`} className={buttonClass('secondary', 'sm')} title="The most asked interview questions for this topic"><MessageCircleQuestion size={14} /> Interview questions</Link>}
       <Link href={`/map/${topicId}`} className={buttonClass('secondary', 'sm')} title="Every idea in this topic on one zoomable map"><Network size={14} /> Mind map</Link>
       <Link href={`/board/${topicId}`} className={buttonClass('secondary', 'sm')} title="This topic as a hand-drawn whiteboard you can draw on and present"><PenTool size={14} /> Whiteboard</Link>
       <Link href={`/flashcards/${deckId}`} className={buttonClass('secondary', 'sm')}><Layers size={14} /> Flashcards</Link>

@@ -17,6 +17,8 @@ export type Block =
   | { type: 'mistake'; title?: string; text: string }
   | { type: 'tip'; text: string }
   | { type: 'revision'; text: string }
+  /** One-line takeaway at the end of a section. */
+  | { type: 'recap'; text: string }
 
 export interface AnalogyStep {
   icon: string

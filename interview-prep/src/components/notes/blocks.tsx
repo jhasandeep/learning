@@ -103,6 +103,13 @@ export function Blocks({ blocks }: { blocks: Block[] }) {
             )
           case 'tip':
             return <div key={i} className="note-box note-tip"><Inline text={b.text} /></div>
+          case 'recap':
+            return (
+              <div key={i} className="note-box note-recap">
+                <span className="note-recap-icon" aria-hidden>✅</span>
+                <p><strong>Remember:</strong> <Inline text={b.text} /></p>
+              </div>
+            )
           case 'revision':
             return (
               <div key={i} className="note-box note-revision">

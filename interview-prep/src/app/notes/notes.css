@@ -22,6 +22,10 @@
 .note-tip { background: #fef3c7; color: #3b2f0b; padding: .8rem 1.1rem; border-radius: 6px; box-shadow: 2px 3px 0 rgba(0,0,0,.06); transform: rotate(-.3deg); }
 [data-theme="dark"] .note-tip { background: #3f3313; color: #fde68a; }
 
+.note-recap { display: flex; align-items: flex-start; gap: .7rem; padding: .7rem 1rem; border: 2px dashed var(--good); background: color-mix(in srgb, var(--good) 8%, var(--surface)); }
+.note-recap p { margin: 0; }
+.note-recap strong { color: var(--good); }
+.note-recap-icon { font-size: 1.2rem; line-height: 1.6; }
 .note-list { margin: .6rem 0; padding-left: 0; list-style: none; }
 .note-list li { position: relative; padding-left: 1.4rem; margin: .3rem 0; }
 .note-list li::before { content: ""; position: absolute; left: .35rem; top: .7em; width: .4rem; height: .4rem; border-radius: 99px; background: var(--accent); }

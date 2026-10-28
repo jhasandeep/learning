@@ -1,4 +1,5 @@
 import { SECTION_ANALOGIES } from './analogies'
+import { SECTION_RECAPS } from './recaps'
 import { css } from './css'
 import { django } from './django'
 import { docker } from './docker'
@@ -28,14 +29,20 @@ const ALL_TOPICS: NoteTopic[] = [
   git, docker, testing,
 ]
 
-/** Adds each section's "think of it like..." story (unless the section already has one) right after its opening block. */
+/** Adds each section's "think of it like..." story after its opening block and a one-line recap at its end. */
 export const NOTE_TOPICS: NoteTopic[] = ALL_TOPICS.map((t) => ({
   ...t,
   sections: t.sections.map((s) => {
-    const story = SECTION_ANALOGIES[`${t.id}/${s.id}`]
-    if (!story || s.blocks.some((b) => b.type === 'analogy')) return s
-    const at = s.blocks[0] && (s.blocks[0].type === 'def' || s.blocks[0].type === 'p') ? 1 : 0
-    return { ...s, blocks: [...s.blocks.slice(0, at), story, ...s.blocks.slice(at)] }
+    const key = `${t.id}/${s.id}`
+    const story = SECTION_ANALOGIES[key]
+    const recap = SECTION_RECAPS[key]
+    let blocks = s.blocks
+    if (story && !blocks.some((b) => b.type === 'analogy')) {
+      const at = blocks[0] && (blocks[0].type === 'def' || blocks[0].type === 'p') ? 1 : 0
+      blocks = [...blocks.slice(0, at), story, ...blocks.slice(at)]
+    }
+    if (recap) blocks = [...blocks, { type: 'recap', text: recap }]
+    return { ...s, blocks }
   }),
 }))
 

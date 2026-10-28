@@ -136,6 +136,8 @@ function block(b: Board, input: Block, x: number, y: number): number {
       return callout(b, x, y, 'Tip', block.text, C.green, C.greenBg)
     case 'revision':
       return callout(b, x, y, 'Revise', block.text, C.yellow, C.yellowBg, true)
+    case 'recap':
+      return callout(b, x, y, 'Remember', block.text, C.green, C.greenBg)
     case 'list':
     case 'steps': {
       let h = 0

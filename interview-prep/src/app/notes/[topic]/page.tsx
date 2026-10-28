@@ -1,11 +1,14 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Layers, ListChecks, MessageCircleQuestion } from 'lucide-react'
 import type { Metadata } from 'next'
 import { Caveat, Patrick_Hand } from 'next/font/google'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Blocks } from '@/components/notes/blocks'
+import { buttonClass } from '@/components/ui'
 import { TechIcon, TechTile } from '@/components/tech-icon'
+import { MCQ_BY_ID } from '@/data/mcq'
 import { NOTE_TOPICS, NOTE_TOPICS_BY_ID, topicText } from '@/data/notes'
+import { QUESTION_SETS_BY_ID } from '@/data/questions'
 import { NoteOutline, QaList, ReadingProgress } from './note-reader'
 import { HAND_SCRIPT, NoteToolbar } from './note-toolbar'
 import '../notes.css'
@@ -58,7 +61,7 @@ export default async function Page({ params }: PageProps<'/notes/[topic]'>) {
             </div>
             <p className="mt-2 text-muted">{topic.tagline}</p>
             <p className="no-print mt-1 text-xs text-muted">{topic.sections.length} sections · about {minutes} min read · {topic.qa.length} practice questions</p>
-            <div className="mt-4"><NoteToolbar topicId={topic.id} deckId={topic.id} compilerLang={COMPILER_FOR[topic.id]} /></div>
+            <div className="mt-4"><NoteToolbar topicId={topic.id} deckId={topic.id} compilerLang={COMPILER_FOR[topic.id]} hasQuestions={Boolean(QUESTION_SETS_BY_ID[topic.id])} /></div>
           </header>
 
           {topic.sections.map((s, i) => (
@@ -72,6 +75,17 @@ export default async function Page({ params }: PageProps<'/notes/[topic]'>) {
             <h2 className="note-h2"><span className="num" style={{ background: topic.color }}>{topic.sections.length + 1}</span>Rapid-fire Q&amp;A</h2>
             <QaList items={topic.qa} />
           </section>
+
+          <aside className="no-print note-box mt-10 rounded-2xl border border-line bg-surface p-5">
+            <p className="text-lg font-bold">Finished {topic.title}? Test yourself</p>
+            <p className="mt-1 text-sm text-muted">Remembering beats re-reading: answer from memory, then check.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {MCQ_BY_ID[topic.id] && <Link href={`/quiz/${topic.id}`} className={buttonClass('primary')}><ListChecks size={16} /> Take the quiz</Link>}
+              <Link href={`/flashcards/${topic.id}`} className={buttonClass('secondary')}><Layers size={16} /> Flashcards</Link>
+              {QUESTION_SETS_BY_ID[topic.id] && <Link href={`/questions/${topic.id}`} className={buttonClass('secondary')}><MessageCircleQuestion size={16} /> Interview questions</Link>}
+              <a href="#qa" className={buttonClass('secondary')}>Rapid-fire Q&amp;A</a>
+            </div>
+          </aside>
 
           <nav aria-label="More notes" className="no-print mt-10 grid gap-3 border-t border-line pt-6 sm:grid-cols-2">
             {prev ? (
