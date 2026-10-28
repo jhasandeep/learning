@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleCheck, Download, Layers, MessageCircleQuestion, Network, PenLine, PenTool, Printer, SquareTerminal } from 'lucide-react'
+import { CircleCheck, Download, Lightbulb, Layers, MessageCircleQuestion, Network, PenLine, PenTool, Printer, SquareTerminal } from 'lucide-react'
 import Link from 'next/link'
 import { useSyncExternalStore } from 'react'
 import { useToast } from '@/components/toast'
@@ -8,18 +8,32 @@ import { Button, buttonClass, cx } from '@/components/ui'
 import { markNoteRead, useProgress } from '@/lib/progress'
 
 const HAND_KEY = 'prep-arena:notes:hand'
+const SIMPLE_KEY = 'prep-arena:notes:simple'
 
 /** Applies the saved "handwritten" preference before paint (see the topic page). */
-export const HAND_SCRIPT = `(function(){try{if(localStorage.getItem("${HAND_KEY}")==="1")document.documentElement.setAttribute("data-notes-hand","1")}catch(e){}})()`
+export const HAND_SCRIPT = `(function(){try{var d=document.documentElement;if(localStorage.getItem("${HAND_KEY}")==="1")d.setAttribute("data-notes-hand","1");if(localStorage.getItem("${SIMPLE_KEY}")==="1")d.setAttribute("data-notes-simple","1")}catch(e){}})()`
 
 function subscribe(cb: () => void) {
   const obs = new MutationObserver(cb)
-  obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-notes-hand'] })
+  obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-notes-hand', 'data-notes-simple'] })
   return () => obs.disconnect()
 }
 
 function useHand() {
   return useSyncExternalStore(subscribe, () => document.documentElement.dataset.notesHand === '1', () => false)
+}
+
+function useSimple() {
+  return useSyncExternalStore(subscribe, () => document.documentElement.dataset.notesSimple === '1', () => false)
+}
+
+function toggleSimple() {
+  const on = document.documentElement.dataset.notesSimple !== '1'
+  if (on) document.documentElement.dataset.notesSimple = '1'
+  else delete document.documentElement.dataset.notesSimple
+  try {
+    localStorage.setItem(SIMPLE_KEY, on ? '1' : '0')
+  } catch {}
 }
 
 function toggleHand() {
@@ -33,12 +47,16 @@ function toggleHand() {
 
 export function NoteToolbar({ topicId, deckId, compilerLang }: { topicId: string; deckId: string; compilerLang?: string }) {
   const hand = useHand()
+  const simple = useSimple()
   const p = useProgress()
   const toast = useToast()
   const read = Boolean(p.notesRead[topicId])
 
   return (
     <div className="no-print flex flex-wrap items-center gap-2">
+      <Button size="sm" onClick={toggleSimple} aria-pressed={simple} title="Hide code and tables: just the ideas, analogies and key points">
+        <Lightbulb size={14} /> {simple ? 'Simple view: on' : 'Simple view'}
+      </Button>
       <Button size="sm" onClick={toggleHand} aria-pressed={hand} title="Switch between the app style and the handwritten notes style">
         <PenLine size={14} /> {hand ? 'Handwritten: on' : 'Handwritten'}
       </Button>

@@ -1,7 +1,8 @@
 /* Revision-notes reader. Three looks: the normal app style, a handwritten
    "series" style (matches the PDF volumes), and a print/PDF layout. */
 
-.note-article { font-size: 16px; line-height: 1.7; }
+.note-article { font-size: 17px; line-height: 1.75; }
+.note-article .note-p, .note-article .note-list, .note-article .note-steps { max-width: 68ch; }
 .note-section { scroll-margin-top: 5rem; padding-top: .5rem; }
 .note-h2 { display: flex; align-items: center; gap: .75rem; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; margin: 2.2rem 0 .8rem; }
 .note-h2 .num { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 999px; color: #fff; font-size: 1rem; flex: none; }
@@ -67,9 +68,15 @@
 [data-notes-hand="1"] .note-analogy { background: #fffdf6; }
 [data-notes-hand="1"] .note-analogy-title { font-family: var(--font-hand-title), cursive; font-size: 1.5rem; }
 [data-notes-hand="1"] .note-analogy-text { font-size: 15px; color: #3a4258; }
-.note-qa dt { font-weight: 700; color: var(--bad); margin-top: .9rem; }
-.note-qa dd { margin: .15rem 0 0; }
-.note-qa dd::before { content: "A. "; font-weight: 700; color: var(--good); }
+.note-qa-item { margin-top: .6rem; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+.note-qa-q { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 1rem; text-align: left; padding: .7rem 1rem; font-weight: 700; color: var(--bad); cursor: pointer; }
+.note-qa-q:hover { background: var(--surface-2); }
+.note-qa-hint { flex: none; font-size: .75rem; font-weight: 600; color: var(--accent); }
+.note-qa-a { display: none; margin: 0; padding: .2rem 1rem .8rem; }
+.note-qa-a::before { content: "A. "; font-weight: 700; color: var(--good); }
+.note-qa-item[data-open="1"] .note-qa-a { display: block; }
+/* Simple view: only the ideas (analogies, definitions, tips); code and tables are hidden. */
+[data-notes-simple="1"] .note-detail { display: none; }
 
 /* ---------- handwritten "series" look (matches the PDF volumes) ---------- */
 [data-notes-hand="1"] .note-article {
@@ -103,6 +110,9 @@
 
 /* ---------- print / save as PDF ---------- */
 @media print {
+  .note-qa-a { display: block !important; }
+  .note-detail { display: block !important; }
+  .note-qa-hint { display: none; }
   @page { size: A4; margin: 12mm 11mm; }
   html, body { background: #fff !important; }
   aside, header:not(.note-head):not(.q-head), nav, .no-print { display: none !important; }
