@@ -49,6 +49,24 @@
 .note-flow-arrow { color: var(--bad); flex: none; }
 .note-caption { margin-top: .5rem; text-align: center; font-size: 13px; color: var(--muted); }
 
+.note-analogy { padding: 1rem; background: var(--surface); }
+.note-analogy-title { margin: 0 0 .8rem; text-align: center; font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em; }
+.note-analogy-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.note-analogy-step { position: relative; display: flex; flex-direction: column; align-items: center; gap: .2rem; text-align: center; border: 2px solid var(--tone); background: color-mix(in srgb, var(--tone) 11%, var(--surface)); border-radius: 16px; padding: 1.1rem .7rem .8rem; }
+.note-analogy-step[data-tone="0"] { --tone: #ec6f8c; }
+.note-analogy-step[data-tone="1"] { --tone: #3b82f6; }
+.note-analogy-step[data-tone="2"] { --tone: #f59e0b; }
+.note-analogy-step[data-tone="3"] { --tone: #10b981; }
+.note-analogy-num { position: absolute; top: -.7rem; left: .7rem; display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--tone); color: #fff; font-size: .8rem; font-weight: 800; }
+.note-analogy-icon { font-size: 2.1rem; line-height: 1.1; }
+.note-analogy-who { font-weight: 800; font-size: .95rem; }
+.note-analogy-tech { font-size: .72rem; font-weight: 700; padding: .05rem .5rem; border-radius: 999px; background: var(--tone); color: #fff; }
+.note-analogy-text { font-size: .85rem; line-height: 1.35; color: var(--muted); margin-top: .15rem; }
+.note-analogy-arrow { display: none; position: absolute; right: -1.05rem; top: 50%; transform: translateY(-50%); color: var(--bad); background: var(--surface); border-radius: 999px; z-index: 1; }
+@media (min-width: 900px) { .note-analogy-steps { grid-template-columns: repeat(4, 1fr); } .note-analogy-step:not(:last-child) .note-analogy-arrow { display: block; } }
+[data-notes-hand="1"] .note-analogy { background: #fffdf6; }
+[data-notes-hand="1"] .note-analogy-title { font-family: var(--font-hand-title), cursive; font-size: 1.5rem; }
+[data-notes-hand="1"] .note-analogy-text { font-size: 15px; color: #3a4258; }
 .note-qa dt { font-weight: 700; color: var(--bad); margin-top: .9rem; }
 .note-qa dd { margin: .15rem 0 0; }
 .note-qa dd::before { content: "A. "; font-weight: 700; color: var(--good); }

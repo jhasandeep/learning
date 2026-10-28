@@ -13,6 +13,7 @@ export const mongodb: NoteTopic = {
       title: 'Documents and collections',
       blocks: [
         { type: 'def', text: '**MongoDB** is a document database: ==JSON-like documents (BSON) in collections==, with a flexible schema, rich queries, aggregation pipelines and horizontal scaling (sharding).' },
+        { type: 'analogy', title: 'Think of MongoDB like a filing cabinet of folders', steps: [{ icon: '🗄️', who: 'Cabinet', tech: 'Database', text: 'Holds every drawer' }, { icon: '🗂️', who: 'Drawer', tech: 'Collection', text: 'One drawer per type, like users' }, { icon: '📄', who: 'Folder with any papers', tech: 'Document', text: 'Flexible JSON-like record' }, { icon: '🔎', who: 'Label on the folder', tech: 'Index', text: 'Find a folder without opening them all' }] },
         {
           type: 'table', head: ['SQL', 'MongoDB'],
           rows: [['database', 'database'], ['table', 'collection'], ['row', 'document'], ['column', 'field'], ['JOIN', '`$lookup` / embedding'], ['primary key', '`_id` (ObjectId)']],

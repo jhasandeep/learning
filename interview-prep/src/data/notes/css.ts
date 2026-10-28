@@ -13,6 +13,7 @@ export const css: NoteTopic = {
       title: 'Cascade and specificity',
       blocks: [
         { type: 'def', text: '**CSS** styles HTML. When several rules target the same element, the browser picks one by ==origin & !important → specificity → source order==.' },
+        { type: 'analogy', title: 'Think of CSS like dressing up a mannequin', steps: [{ icon: '🧍', who: 'Mannequin', tech: 'HTML element', text: 'Plain content with no style yet' }, { icon: '📋', who: 'Stylist\'s brief', tech: 'Selector', text: 'Says which mannequin gets which outfit' }, { icon: '👗', who: 'Outfit', tech: 'Declarations', text: 'color, font, padding, border...' }, { icon: '📱', who: 'Different shops', tech: 'Media queries', text: 'The same outfit adapts to phone or desktop' }] },
         {
           type: 'table', head: ['Selector', 'Specificity (a, b, c)'],
           rows: [

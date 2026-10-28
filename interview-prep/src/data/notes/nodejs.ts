@@ -13,6 +13,7 @@ export const nodejs: NoteTopic = {
       title: 'What Node.js is',
       blocks: [
         { type: 'def', text: '**Node.js** is a JavaScript runtime built on ==V8 + libuv==. It runs JS outside the browser with a single-threaded event loop and non-blocking I/O, so one process can serve many concurrent connections.' },
+        { type: 'analogy', title: 'Think of Node.js like one fast waiter', steps: [{ icon: '🙋', who: 'Customer', tech: 'Request', text: 'Many customers arrive at once' }, { icon: '🧑‍🍳', who: 'One waiter', tech: 'Event loop', text: 'Takes every order without waiting at the kitchen' }, { icon: '👨‍🍳', who: 'Kitchen staff', tech: 'libuv / thread pool', text: 'Cook slow dishes (files, DB) in the background' }, { icon: '🍽️', who: 'Bell rings', tech: 'Callback', text: 'Waiter delivers the food when it is ready' }] },
         { type: 'flow', steps: ['Request', 'Event loop (1 JS thread)', 'libuv: OS async I/O + thread pool (fs, crypto, dns)', 'Callback queued', 'Response'] },
         { type: 'list', items: ['Great for I/O-heavy work: APIs, real-time apps, proxies.', 'Bad at long CPU work on the main thread (image processing, big loops) — it blocks every request. Use `worker_threads` or a separate service.'] },
       ],

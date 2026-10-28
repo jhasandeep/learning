@@ -119,7 +119,12 @@ function callout(b: Board, x: number, y: number, title: string, body: string, st
   return h
 }
 
-function block(b: Board, block: Block, x: number, y: number): number {
+function block(b: Board, input: Block, x: number, y: number): number {
+  // On the whiteboard an analogy is a flow of its steps, captioned with its title.
+  const block: Exclude<Block, { type: 'analogy' }> =
+    input.type === 'analogy'
+      ? { type: 'flow', steps: input.steps.map((st) => `${st.icon} ${st.who} (${st.tech}): ${st.text}`), caption: input.title }
+      : input
   switch (block.type) {
     case 'p':
       return b.text(x, y, wrap(plain(block.text), chars(W, 20))).h

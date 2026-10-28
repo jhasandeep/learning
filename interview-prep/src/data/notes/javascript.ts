@@ -13,6 +13,7 @@ export const javascript: NoteTopic = {
       title: 'Types, equality and copying',
       blocks: [
         { type: 'def', text: 'JavaScript is ==dynamically typed== and single-threaded. 7 primitives: `string`, `number`, `bigint`, `boolean`, `undefined`, `null`, `symbol` — everything else is an **object** (arrays and functions too).' },
+        { type: 'analogy', title: 'Think of the event loop like a restaurant waiter', steps: [{ icon: '🙋', who: 'Customer', tech: 'Event / user click', text: 'Asks for something' }, { icon: '🧑‍🍳', who: 'One chef', tech: 'Call stack', text: 'Cooks one dish at a time' }, { icon: '🛎️', who: 'Waiter with a notepad', tech: 'Task queue', text: 'Collects orders and serves them in order' }, { icon: '🍽️', who: 'Food delivered', tech: 'Callback / Promise', text: 'Runs when the kitchen is free' }] },
         {
           type: 'code', lang: 'javascript', title: 'Equality, typeof and copies', run: true,
           code: `console.log(1 == '1', 1 === '1')   // true false: == converts types

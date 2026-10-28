@@ -14,7 +14,7 @@ import { testing } from './testing'
 import { typescript } from './typescript'
 import type { NoteCategory, NoteTopic } from './types'
 
-export type { Block, NoteCategory, NoteSection, NoteTopic } from './types'
+export type { AnalogyStep, Block, NoteCategory, NoteSection, NoteTopic } from './types'
 
 /** Full-stack curriculum order. */
 export const NOTE_TOPICS: NoteTopic[] = [
@@ -38,6 +38,7 @@ export function topicText(t: NoteTopic): string {
       if ('items' in b) parts.push(...b.items)
       if (b.type === 'table') parts.push(...b.head, ...b.rows.flat())
       if (b.type === 'flow') parts.push(...b.steps)
+      if (b.type === 'analogy') parts.push(b.title, ...b.steps.flatMap((x) => [x.who, x.tech, x.text]))
       if (b.type === 'code') parts.push(b.title ?? '', b.code)
     }
   }

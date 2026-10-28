@@ -75,6 +75,25 @@ export function Blocks({ blocks }: { blocks: Block[] }) {
                 {b.caption && <figcaption className="note-caption">{b.caption}</figcaption>}
               </figure>
             )
+          case 'analogy':
+            return (
+              <figure key={i} className="note-box note-analogy">
+                <p className="note-analogy-title">{b.title}</p>
+                <ol className="note-analogy-steps">
+                  {b.steps.map((st, j) => (
+                    <li key={j} className="note-analogy-step" data-tone={j % 4}>
+                      <span className="note-analogy-num">{j + 1}</span>
+                      <span className="note-analogy-icon" aria-hidden>{st.icon}</span>
+                      <span className="note-analogy-who">{st.who}</span>
+                      <span className="note-analogy-tech">{st.tech}</span>
+                      <span className="note-analogy-text"><Inline text={st.text} /></span>
+                      {j < b.steps.length - 1 && <ArrowRight size={18} className="note-analogy-arrow" aria-hidden />}
+                    </li>
+                  ))}
+                </ol>
+                {b.caption && <figcaption className="note-caption">{b.caption}</figcaption>}
+              </figure>
+            )
           case 'mistake':
             return (
               <div key={i} className="note-box note-mistake">

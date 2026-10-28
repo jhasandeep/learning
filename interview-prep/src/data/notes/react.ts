@@ -13,6 +13,7 @@ export const react: NoteTopic = {
       title: 'What React does',
       blocks: [
         { type: 'def', text: '**React** is a library for building UIs from ==components== — functions that return what the UI should look like for the current data. `UI = f(state)`.' },
+        { type: 'analogy', title: 'Think of React like a restaurant menu board', steps: [{ icon: '📝', who: 'Chef changes a dish', tech: 'State / props', text: 'Something in the data changes' }, { icon: '🖊️', who: 'Updates the board', tech: 'Re-render', text: 'React builds a new description' }, { icon: '🔍', who: 'Compares old and new', tech: 'Virtual DOM diff', text: 'Finds only what changed' }, { icon: '👀', who: 'Diners see the update', tech: 'DOM commit', text: 'Only the changed line is rewritten' }] },
         { type: 'flow', steps: ['State / props change', 'Component re-renders', 'New element tree', 'Reconcile (diff)', 'Commit minimal DOM changes'] },
         { type: 'list', items: ['**Declarative**: describe the result, React works out the DOM updates.', '**One-way data flow**: props go down, events go up through callbacks.', '**Reconciliation**: different element type → replace the subtree; same type → update props; lists are matched by `key`.'] },
       ],

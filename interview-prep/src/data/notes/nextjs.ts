@@ -13,6 +13,7 @@ export const nextjs: NoteTopic = {
       title: 'What Next.js adds to React',
       blocks: [
         { type: 'def', text: '**Next.js** is a React framework: ==file-based routing, server rendering, data fetching, caching, API routes, image/font optimisation and bundling== in one tool.' },
+        { type: 'analogy', title: 'Think of Next.js like a restaurant with prep cooks', steps: [{ icon: '🙋', who: 'Customer', tech: 'Browser request', text: 'Asks for a page' }, { icon: '🥗', who: 'Prepared in advance', tech: 'Static / SSG', text: 'Ready instantly from the cache' }, { icon: '🍳', who: 'Cooked to order', tech: 'Server rendering', text: 'Server builds the page with fresh data' }, { icon: '🍽️', who: 'Served + seasoned', tech: 'Hydration', text: 'HTML arrives, then JS makes it interactive' }] },
         {
           type: 'code', lang: 'text', title: 'App Router file conventions',
           code: `app/

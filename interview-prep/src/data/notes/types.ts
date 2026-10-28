@@ -12,9 +12,20 @@ export type Block =
   | { type: 'code'; lang: string; title?: string; code: string; run?: boolean }
   | { type: 'table'; head: string[]; rows: string[][] }
   | { type: 'flow'; steps: string[]; caption?: string }
+  /** "Think of X like a Y": a numbered story where each step maps a real-world role to the tech term. */
+  | { type: 'analogy'; title: string; steps: AnalogyStep[]; caption?: string }
   | { type: 'mistake'; title?: string; text: string }
   | { type: 'tip'; text: string }
   | { type: 'revision'; text: string }
+
+export interface AnalogyStep {
+  icon: string
+  /** The real-world role, e.g. "Customer (You)". */
+  who: string
+  /** The tech term it stands for, e.g. "Browser". */
+  tech: string
+  text: string
+}
 
 export interface NoteSection {
   id: string

@@ -13,6 +13,7 @@ export const html: NoteTopic = {
       title: 'What is HTML?',
       blocks: [
         { type: 'def', text: '**HTML** (HyperText Markup Language) describes the ==structure and meaning== of a web page using elements (tags). The browser parses it into the **DOM** tree, CSS styles that tree and JavaScript makes it interactive.' },
+        { type: 'analogy', title: 'Think of an HTML page like building a house', steps: [{ icon: '🏗️', who: 'Architect', tech: 'HTML', text: 'Draws the structure: rooms, doors, windows' }, { icon: '🎨', who: 'Interior designer', tech: 'CSS', text: 'Colours, layout and style of every room' }, { icon: '⚡', who: 'Electrician', tech: 'JavaScript', text: 'Makes lights and doors respond when used' }, { icon: '🏠', who: 'Finished house', tech: 'Rendered page', text: 'The browser puts it all together for the visitor' }] },
         { type: 'flow', steps: ['HTML text', 'Parser', 'DOM tree', '+ CSSOM', 'Render tree', 'Layout', 'Paint'], caption: 'How a page becomes pixels (the critical rendering path)' },
         {
           type: 'code', lang: 'html', title: 'Minimal valid page', run: true,
