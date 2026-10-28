@@ -20,11 +20,11 @@ const TOPICS: Record<string, Spec> = {
   react: { logo: 'react' }, nextjs: { logo: 'nextjs' }, nodejs: { logo: 'nodejs' }, express: { logo: 'express' },
   security: { lucide: ShieldCheck }, sql: { logo: 'postgresql' }, mongodb: { logo: 'mongodb' }, git: { logo: 'git' },
   docker: { logo: 'docker' }, testing: { logo: 'jest' }, 'system-design': { lucide: Network }, dsa: { lucide: Binary },
-  nestjs: { logo: 'nestjs' }, python: { logo: 'python' },
+  nestjs: { logo: 'nestjs' }, python: { logo: 'python' }, django: { logo: 'django' }, fastapi: { logo: 'fastapi' },
 }
 
 /** Logos drawn in black: inverted on dark backgrounds (globals.css .tech-ink). */
-const INK = new Set(['rust', 'nextjs', 'express'])
+const INK = new Set(['rust', 'nextjs', 'express', 'django'])
 
 export type TechKind = 'lang' | 'topic'
 

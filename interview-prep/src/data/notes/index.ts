@@ -1,12 +1,15 @@
 import { css } from './css'
+import { django } from './django'
 import { docker } from './docker'
 import { express } from './express'
+import { fastapi } from './fastapi'
 import { git } from './git'
 import { html } from './html'
 import { javascript } from './javascript'
 import { mongodb } from './mongodb'
 import { nextjs } from './nextjs'
 import { nodejs } from './nodejs'
+import { python } from './python'
 import { react } from './react'
 import { security } from './security'
 import { sql } from './sql'
@@ -19,7 +22,7 @@ export type { AnalogyStep, Block, NoteCategory, NoteSection, NoteTopic } from '.
 /** Full-stack curriculum order. */
 export const NOTE_TOPICS: NoteTopic[] = [
   html, css, javascript, typescript, react, nextjs,
-  nodejs, express, security,
+  nodejs, express, python, django, fastapi, security,
   sql, mongodb,
   git, docker, testing,
 ]
