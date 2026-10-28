@@ -1,3 +1,4 @@
+import { SECTION_ANALOGIES } from './analogies'
 import { css } from './css'
 import { django } from './django'
 import { docker } from './docker'
@@ -20,12 +21,23 @@ import type { NoteCategory, NoteTopic } from './types'
 export type { AnalogyStep, Block, NoteCategory, NoteSection, NoteTopic } from './types'
 
 /** Full-stack curriculum order. */
-export const NOTE_TOPICS: NoteTopic[] = [
+const ALL_TOPICS: NoteTopic[] = [
   html, css, javascript, typescript, react, nextjs,
   nodejs, express, python, django, fastapi, security,
   sql, mongodb,
   git, docker, testing,
 ]
+
+/** Adds each section's "think of it like..." story (unless the section already has one) right after its opening block. */
+export const NOTE_TOPICS: NoteTopic[] = ALL_TOPICS.map((t) => ({
+  ...t,
+  sections: t.sections.map((s) => {
+    const story = SECTION_ANALOGIES[`${t.id}/${s.id}`]
+    if (!story || s.blocks.some((b) => b.type === 'analogy')) return s
+    const at = s.blocks[0] && (s.blocks[0].type === 'def' || s.blocks[0].type === 'p') ? 1 : 0
+    return { ...s, blocks: [...s.blocks.slice(0, at), story, ...s.blocks.slice(at)] }
+  }),
+}))
 
 export const NOTE_TOPICS_BY_ID = Object.fromEntries(NOTE_TOPICS.map((t) => [t.id, t]))
 
