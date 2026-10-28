@@ -27,6 +27,8 @@ export interface Progress {
   questions: Record<string, QuestionStatus>
   /** MongoDB playground lesson id → ISO date its challenge was solved. */
   mongoLessons: Record<string, string>
+  /** "<tech>/<task id>" → ISO date the task was completed. */
+  tasks: Record<string, string>
   typing: TypingProgress
   /** Multiple-choice: "<set>/<question>" → ISO date it was first answered correctly. */
   mcq: Record<string, string>
@@ -95,6 +97,7 @@ export const EMPTY: Progress = {
   notesRead: {},
   questions: {},
   mongoLessons: {},
+  tasks: {},
   typing: { lessons: {}, tests: [], keys: {}, snippets: {} },
   mcq: {},
   quizzes: {},
@@ -252,6 +255,17 @@ export function markNoteRead(id: string): number {
   if (p.notesRead[id]) return 0
   commit(bump({ ...p, notesRead: { ...p.notesRead, [id]: new Date().toISOString() } }, NOTE_READ_XP))
   return NOTE_READ_XP
+}
+
+export const TASK_XP = 20
+
+/** Marks a hands-on task complete (once). Returns the XP gained: 0 when it was already done. */
+export function markTaskDone(key: string, hintsUsed: number, revealed: boolean): number {
+  const p = load()
+  if (p.tasks[key]) return 0
+  const gain = revealed ? Math.round(TASK_XP / 4) : Math.max(5, TASK_XP - hintsUsed * 5)
+  commit(bump({ ...p, tasks: { ...p.tasks, [key]: new Date().toISOString() } }, gain))
+  return gain
 }
 
 export const MONGO_LESSON_XP = 30

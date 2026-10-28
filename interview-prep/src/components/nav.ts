@@ -1,8 +1,9 @@
-import { BookOpen, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Keyboard, Layers, ListChecks, MessageCircleQuestion, Network, PenTool, SquareTerminal } from 'lucide-react'
+import { BookOpen, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Keyboard, Layers, ListTodo, ListChecks, MessageCircleQuestion, Network, PenTool, SquareTerminal } from 'lucide-react'
 
 export const NAV = [
   { href: '/', label: 'Home', icon: House },
   { href: '/compiler', label: 'Compiler', icon: SquareTerminal },
+  { href: '/tasks', label: 'Tasks', icon: ListTodo },
   { href: '/campaign', label: 'Bug Hunt', icon: Bug },
   { href: '/endless', label: 'Endless', icon: InfinityIcon },
   { href: '/flashcards', label: 'Flashcards', icon: Layers },

@@ -43,6 +43,8 @@ function languageExtension(id: string): Extension {
     case 'ruby': return StreamLanguage.define(ruby)
     case 'php': return php({ plain: false })
     case 'swift': return StreamLanguage.define(swift)
+    case 'text': return []
+    case 'jsx': return javascript({ jsx: true })
     default: return javascript()
   }
 }
