@@ -168,3 +168,9 @@ body {
 @keyframes spot-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .spot-shake { animation: spot-shake 0.3s ease; }
 @media (prefers-reduced-motion: reduce) { .spot-shake { animation: none; } }
+
+@media print {
+  .cheat .cheat-sheet { break-inside: avoid-page; border-radius: 0; }
+  .cheat .cheat-group { break-inside: avoid; }
+  .cheat { max-width: none; }
+}

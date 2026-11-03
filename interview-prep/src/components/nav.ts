@@ -1,4 +1,4 @@
-import { BookOpen, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Keyboard, Layers, ListTodo, ListChecks, MessageCircleQuestion, Network, PenTool, SquareTerminal } from 'lucide-react'
+import { BookOpen, ClipboardList, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Keyboard, Layers, ListTodo, ListChecks, MessageCircleQuestion, Network, PenTool, SquareTerminal } from 'lucide-react'
 
 export const NAV = [
   { href: '/', label: 'Home', icon: House },
@@ -12,6 +12,7 @@ export const NAV = [
   { href: '/questions', label: 'Questions', icon: MessageCircleQuestion },
   { href: '/quiz', label: 'Quiz', icon: ListChecks },
   { href: '/notes', label: 'Notes', icon: BookOpen },
+  { href: '/cheatsheet', label: 'Cheat sheet', icon: ClipboardList },
   { href: '/map', label: 'Mind map', icon: Network },
   { href: '/board', label: 'Whiteboard', icon: PenTool },
 ] as const
