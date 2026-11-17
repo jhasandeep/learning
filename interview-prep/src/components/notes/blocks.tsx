@@ -10,7 +10,7 @@ const RUNNABLE = new Set(['javascript', 'typescript', 'sql', 'html', 'python'])
 export async function CodeBlock({ block }: { block: Extract<Block, { type: 'code' }> }) {
   const html = await highlight(block.code, block.lang)
   return (
-    <figure className="note-box note-codecard">
+    <figure className="note-box note-codecard note-detail">
       <figcaption className="flex items-center justify-between gap-2 border-b border-white/10 px-4 py-2">
         <span className="note-tag">{block.title ?? block.lang}</span>
         <CodeActions code={block.code} runLang={block.run && RUNNABLE.has(block.lang) ? block.lang : undefined} />
@@ -50,7 +50,7 @@ export function Blocks({ blocks }: { blocks: Block[] }) {
             return <CodeBlock key={i} block={b} />
           case 'table':
             return (
-              <div key={i} className="note-box overflow-x-auto">
+              <div key={i} className="note-box note-detail overflow-x-auto">
                 <table className="note-table">
                   <thead><tr>{b.head.map((h, j) => <th key={j}><Inline text={h} /></th>)}</tr></thead>
                   <tbody>
@@ -75,6 +75,25 @@ export function Blocks({ blocks }: { blocks: Block[] }) {
                 {b.caption && <figcaption className="note-caption">{b.caption}</figcaption>}
               </figure>
             )
+          case 'analogy':
+            return (
+              <figure key={i} className="note-box note-analogy">
+                <p className="note-analogy-title">{b.title}</p>
+                <ol className="note-analogy-steps">
+                  {b.steps.map((st, j) => (
+                    <li key={j} className="note-analogy-step" data-tone={j % 4}>
+                      <span className="note-analogy-num">{j + 1}</span>
+                      <span className="note-analogy-icon" aria-hidden>{st.icon}</span>
+                      <span className="note-analogy-who">{st.who}</span>
+                      <span className="note-analogy-tech">{st.tech}</span>
+                      <span className="note-analogy-text"><Inline text={st.text} /></span>
+                      {j < b.steps.length - 1 && <ArrowRight size={18} className="note-analogy-arrow" aria-hidden />}
+                    </li>
+                  ))}
+                </ol>
+                {b.caption && <figcaption className="note-caption">{b.caption}</figcaption>}
+              </figure>
+            )
           case 'mistake':
             return (
               <div key={i} className="note-box note-mistake">
@@ -84,6 +103,13 @@ export function Blocks({ blocks }: { blocks: Block[] }) {
             )
           case 'tip':
             return <div key={i} className="note-box note-tip"><Inline text={b.text} /></div>
+          case 'recap':
+            return (
+              <div key={i} className="note-box note-recap">
+                <span className="note-recap-icon" aria-hidden>✅</span>
+                <p><strong>Remember:</strong> <Inline text={b.text} /></p>
+              </div>
+            )
           case 'revision':
             return (
               <div key={i} className="note-box note-revision">

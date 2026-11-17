@@ -13,6 +13,7 @@ export const security: NoteTopic = {
       title: 'Authentication vs authorization',
       blocks: [
         { type: 'def', text: '**Authentication** = ==who are you?== (login). **Authorization** = ==what may you do?== (roles, permissions, ownership). Fail authentication → 401; fail authorization → 403.' },
+        { type: 'analogy', title: 'Think of web security like a nightclub door', steps: [{ icon: '🪪', who: 'Guest shows ID', tech: 'Login', text: 'Who are you?' }, { icon: '🎟️', who: 'Wristband', tech: 'Token / session', text: 'Proof you were already checked' }, { icon: '👮', who: 'Bouncer per room', tech: 'Authorization', text: 'What are you allowed to enter?' }, { icon: '📹', who: 'CCTV + rules', tech: 'Rate limits, logging', text: 'Spot and stop bad behaviour' }] },
         { type: 'list', items: ['RBAC: permissions by role (admin, doctor, patient).', 'Always check **ownership** too: "can this user see *this* order?" — missing checks cause IDOR bugs.', 'Authorize on the server for every request; hiding a button is not security.'] },
       ],
     },

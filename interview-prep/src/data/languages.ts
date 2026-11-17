@@ -1,9 +1,9 @@
-// The 18 languages of the online compiler (the same set as Programiz).
+// The 18 languages of the online compiler (the same set as Programiz) plus a MongoDB playground.
 // "browser" languages run on a WebAssembly/JS runtime inside the page;
 // "server" languages are compiled and run by the /api/run backend.
 
 export type ServerLang = 'c' | 'cpp' | 'java' | 'kotlin' | 'csharp' | 'go' | 'rust' | 'scala' | 'dart' | 'ruby' | 'php' | 'swift'
-export type BrowserRuntime = 'python' | 'r' | 'sql' | 'web' | 'javascript' | 'typescript'
+export type BrowserRuntime = 'python' | 'r' | 'sql' | 'mongodb' | 'web' | 'javascript' | 'typescript'
 
 export interface Language {
   id: string
@@ -62,6 +62,22 @@ FROM customers c
 LEFT JOIN orders o ON o.customer_id = c.customer_id
 GROUP BY c.customer_id
 ORDER BY total DESC;
+`,
+  },
+  {
+    id: 'mongodb', name: 'MongoDB', file: 'queries.js', badge: 'Mongo', color: '#47a248', engine: 'browser', runtime: 'mongodb', stdin: false,
+    template: `// Online MongoDB playground — runs in your browser, no server needed.
+// Database "shop" has: customers, products, orders. Your changes are kept
+// between runs until you press "Reset DB". Open the Learn tab for guided
+// lessons with checked challenges.
+
+db.customers.find({ country: "India" })
+
+db.orders.aggregate([
+  { $match: { status: "paid" } },
+  { $group: { _id: "$customerId", spent: { $sum: "$total" }, orders: { $sum: 1 } } },
+  { $sort: { spent: -1 } }
+])
 `,
   },
   {

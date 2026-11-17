@@ -1,7 +1,8 @@
 /* Revision-notes reader. Three looks: the normal app style, a handwritten
    "series" style (matches the PDF volumes), and a print/PDF layout. */
 
-.note-article { font-size: 16px; line-height: 1.7; }
+.note-article { font-size: 17px; line-height: 1.75; }
+.note-article .note-p, .note-article .note-list, .note-article .note-steps { max-width: 68ch; }
 .note-section { scroll-margin-top: 5rem; padding-top: .5rem; }
 .note-h2 { display: flex; align-items: center; gap: .75rem; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; margin: 2.2rem 0 .8rem; }
 .note-h2 .num { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 999px; color: #fff; font-size: 1rem; flex: none; }
@@ -21,6 +22,10 @@
 .note-tip { background: #fef3c7; color: #3b2f0b; padding: .8rem 1.1rem; border-radius: 6px; box-shadow: 2px 3px 0 rgba(0,0,0,.06); transform: rotate(-.3deg); }
 [data-theme="dark"] .note-tip { background: #3f3313; color: #fde68a; }
 
+.note-recap { display: flex; align-items: flex-start; gap: .7rem; padding: .7rem 1rem; border: 2px dashed var(--good); background: color-mix(in srgb, var(--good) 8%, var(--surface)); }
+.note-recap p { margin: 0; }
+.note-recap strong { color: var(--good); }
+.note-recap-icon { font-size: 1.2rem; line-height: 1.6; }
 .note-list { margin: .6rem 0; padding-left: 0; list-style: none; }
 .note-list li { position: relative; padding-left: 1.4rem; margin: .3rem 0; }
 .note-list li::before { content: ""; position: absolute; left: .35rem; top: .7em; width: .4rem; height: .4rem; border-radius: 99px; background: var(--accent); }
@@ -49,9 +54,33 @@
 .note-flow-arrow { color: var(--bad); flex: none; }
 .note-caption { margin-top: .5rem; text-align: center; font-size: 13px; color: var(--muted); }
 
-.note-qa dt { font-weight: 700; color: var(--bad); margin-top: .9rem; }
-.note-qa dd { margin: .15rem 0 0; }
-.note-qa dd::before { content: "A. "; font-weight: 700; color: var(--good); }
+.note-analogy { padding: 1rem; background: var(--surface); }
+.note-analogy-title { margin: 0 0 .8rem; text-align: center; font-weight: 800; font-size: 1.05rem; letter-spacing: -.01em; }
+.note-analogy-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: .8rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.note-analogy-step { position: relative; display: flex; flex-direction: column; align-items: center; gap: .2rem; text-align: center; border: 2px solid var(--tone); background: color-mix(in srgb, var(--tone) 11%, var(--surface)); border-radius: 16px; padding: 1.1rem .7rem .8rem; }
+.note-analogy-step[data-tone="0"] { --tone: #ec6f8c; }
+.note-analogy-step[data-tone="1"] { --tone: #3b82f6; }
+.note-analogy-step[data-tone="2"] { --tone: #f59e0b; }
+.note-analogy-step[data-tone="3"] { --tone: #10b981; }
+.note-analogy-num { position: absolute; top: -.7rem; left: .7rem; display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 999px; background: var(--tone); color: #fff; font-size: .8rem; font-weight: 800; }
+.note-analogy-icon { font-size: 2.1rem; line-height: 1.1; }
+.note-analogy-who { font-weight: 800; font-size: .95rem; }
+.note-analogy-tech { font-size: .72rem; font-weight: 700; padding: .05rem .5rem; border-radius: 999px; background: var(--tone); color: #fff; }
+.note-analogy-text { font-size: .85rem; line-height: 1.35; color: var(--muted); margin-top: .15rem; }
+.note-analogy-arrow { display: none; position: absolute; right: -1.05rem; top: 50%; transform: translateY(-50%); color: var(--bad); background: var(--surface); border-radius: 999px; z-index: 1; }
+@media (min-width: 900px) { .note-analogy-steps { grid-template-columns: repeat(4, 1fr); } .note-analogy-step:not(:last-child) .note-analogy-arrow { display: block; } }
+[data-notes-hand="1"] .note-analogy { background: #fffdf6; }
+[data-notes-hand="1"] .note-analogy-title { font-family: var(--font-hand-title), cursive; font-size: 1.5rem; }
+[data-notes-hand="1"] .note-analogy-text { font-size: 15px; color: #3a4258; }
+.note-qa-item { margin-top: .6rem; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+.note-qa-q { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 1rem; text-align: left; padding: .7rem 1rem; font-weight: 700; color: var(--bad); cursor: pointer; }
+.note-qa-q:hover { background: var(--surface-2); }
+.note-qa-hint { flex: none; font-size: .75rem; font-weight: 600; color: var(--accent); }
+.note-qa-a { display: none; margin: 0; padding: .2rem 1rem .8rem; }
+.note-qa-a::before { content: "A. "; font-weight: 700; color: var(--good); }
+.note-qa-item[data-open="1"] .note-qa-a { display: block; }
+/* Simple view: only the ideas (analogies, definitions, tips); code and tables are hidden. */
+[data-notes-simple="1"] .note-detail { display: none; }
 
 /* ---------- handwritten "series" look (matches the PDF volumes) ---------- */
 [data-notes-hand="1"] .note-article {
@@ -85,6 +114,9 @@
 
 /* ---------- print / save as PDF ---------- */
 @media print {
+  .note-qa-a { display: block !important; }
+  .note-detail { display: block !important; }
+  .note-qa-hint { display: none; }
   @page { size: A4; margin: 12mm 11mm; }
   html, body { background: #fff !important; }
   aside, header:not(.note-head):not(.q-head), nav, .no-print { display: none !important; }

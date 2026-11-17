@@ -33,6 +33,7 @@ export const sql: NoteTopic = {
       title: 'Query order and basics',
       blocks: [
         { type: 'def', text: 'A relational database stores data in ==tables with a fixed schema==, linked by keys, queried with SQL, and protected by ACID transactions (MySQL, PostgreSQL, SQL Server, SQLite).' },
+        { type: 'analogy', title: 'Think of SQL like a librarian', steps: [{ icon: '🙋', who: 'Reader', tech: 'Client', text: 'Asks a question in SQL' }, { icon: '📚', who: 'Catalogue', tech: 'Index', text: 'Finds the right shelf fast' }, { icon: '📖', who: 'Shelves of books', tech: 'Tables and rows', text: 'Where the data really lives' }, { icon: '📋', who: 'Short list handed over', tech: 'Result set', text: 'Only the rows and columns you asked for' }] },
         { type: 'flow', steps: ['FROM / JOIN', 'WHERE', 'GROUP BY', 'HAVING', 'SELECT', 'ORDER BY', 'LIMIT'], caption: 'Logical order SQL runs in — why WHERE can\'t use a SELECT alias' },
         { type: 'code', lang: 'sql', title: 'Sample tables used below (run me first)', run: true, code: `${SQL_SETUP}\nSELECT * FROM emp;` },
         { type: 'list', items: ['**Primary key**: unique, not null row id. **Foreign key**: references another table\'s key.', '`WHERE` filters rows before grouping; `HAVING` filters groups after.', '`NULL` means unknown: use `IS NULL`, never `= NULL`; `COUNT(col)` skips NULLs, `COUNT(*)` doesn\'t.'] },

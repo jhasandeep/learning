@@ -1,0 +1,136 @@
+import type { McqSet } from './types'
+
+export const sql: McqSet = {
+  id: 'sql',
+  questions: [
+    {
+      id: 'where-having',
+      q: 'What is the difference between `WHERE` and `HAVING`?',
+      choices: [
+        '`WHERE` filters rows; `HAVING` filters groups',
+        '`HAVING` filters rows before grouping; `WHERE` filters after',
+        'They are interchangeable',
+        '`HAVING` can only be used in queries that contain a `JOIN`',
+      ],
+      explain: 'So aggregates such as `COUNT(*) > 5` go in `HAVING`; plain column conditions belong in `WHERE`, which is also faster.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'left-join',
+      q: '`customers LEFT JOIN orders` returns…',
+      choices: [
+        'All customers; NULLs where there are no orders',
+        'Only the customers who have at least one order',
+        'Every order, with NULLs where the customer is missing',
+        'Every combination of customers and orders',
+      ],
+      explain: 'INNER keeps only matches, LEFT keeps all rows from the left table, and CROSS JOIN gives every combination.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'null-compare',
+      q: 'Which finds rows where `email` is missing?',
+      choices: ['`WHERE email IS NULL`', '`WHERE email = NULL`', "`WHERE email = ''`", '`WHERE email == NULL`'],
+      explain: 'Any comparison with NULL is unknown (not true), so `= NULL` matches nothing.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'count',
+      q: 'How does `COUNT(*)` differ from `COUNT(email)`?',
+      choices: [
+        '`COUNT(email)` skips NULL emails',
+        'They always return the same number for any table',
+        '`COUNT(email)` counts only the distinct email values',
+        '`COUNT(*)` reads every column',
+      ],
+      explain: 'Use `COUNT(DISTINCT email)` for unique values.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'order',
+      q: 'In what order are these clauses logically evaluated?',
+      choices: ['FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY', 'SELECT → FROM → WHERE → ORDER BY', 'FROM → SELECT → WHERE → GROUP BY', 'WHERE → FROM → SELECT → HAVING'],
+      explain: 'That is why a `SELECT` alias cannot be used in `WHERE` but can in `ORDER BY`.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'index',
+      q: 'Which query can use an index on `(last_name, first_name)`?',
+      choices: ["`WHERE last_name = 'Lee'`", "`WHERE first_name = 'Ann'`", "`WHERE LOWER(last_name) = 'lee'`", "`WHERE last_name LIKE '%ee'`"],
+      explain: 'A composite index works from the leftmost column. Wrapping the column in a function or a leading wildcard prevents a normal index seek.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'acid',
+      q: 'The "I" in ACID stands for…',
+      choices: [
+        'Isolation',
+        'Indexing, so reads stay fast during writes',
+        'Integrity, so values always match their column types',
+        'Idempotency, so repeated statements are safe',
+      ],
+      explain: 'Atomicity, Consistency, Isolation, Durability. Isolation levels (READ COMMITTED, REPEATABLE READ, SERIALIZABLE) trade safety for concurrency.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'normalisation',
+      q: 'Storing a customer\'s address on every order row violates…',
+      choices: [
+        'Normalisation',
+        'Atomicity, because the write touches two tables',
+        'Referential integrity, because there is no foreign key',
+        'Nothing: duplicating data like this is best practice',
+      ],
+      explain: 'Normalise into a `customers` table referenced by `customer_id`. Denormalising on purpose is fine for read performance, with a reason.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'window',
+      q: 'What does `ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC)` give?',
+      choices: [
+        'Each employee\'s rank in their department',
+        'The total number of employees in the whole table',
+        'One row per department with its highest salary',
+        'The average salary per department',
+      ],
+      explain: 'Window functions keep every row (unlike `GROUP BY`). Filter `rn = 1` in an outer query for the top earner per department.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'delete-truncate',
+      q: '`DELETE FROM t` vs `TRUNCATE t`?',
+      choices: [
+        '`DELETE` can filter and fires triggers; `TRUNCATE` empties fast',
+        '`TRUNCATE` accepts a `WHERE` clause; `DELETE` does not',
+        '`DELETE` removes the table structure as well as the rows',
+        'They are identical apart from the keyword',
+      ],
+      explain: '`DROP TABLE` removes the table itself. `TRUNCATE` usually resets identity counters too.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'union',
+      q: '`UNION` vs `UNION ALL`?',
+      choices: [
+        '`UNION` removes duplicates; `UNION ALL` keeps them',
+        '`UNION ALL` removes duplicates; `UNION` keeps them',
+        '`UNION` joins the columns of two queries side by side',
+        'They are identical; `ALL` is an optional keyword',
+      ],
+      explain: 'Removing duplicates needs a sort or hash, so prefer `UNION ALL` when duplicates are impossible or wanted.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'n-plus-one',
+      q: 'The N+1 query problem is…',
+      choices: [
+        'One query, then one more per item',
+        'A query that returns one more row than expected',
+        'An off-by-one error',
+        'A query that joins N+1 tables together',
+      ],
+      explain: 'Fix it with a JOIN or a single `WHERE id IN (…)` query (ORMs call it eager loading).',
+      difficulty: 'Medium',
+    },
+  ],
+}

@@ -13,6 +13,7 @@ export const express: NoteTopic = {
       title: 'Express basics and middleware',
       blocks: [
         { type: 'def', text: '**Express** is a minimal Node.js web framework. A request flows through a ==chain of middleware== `(req, res, next)` until one sends a response.' },
+        { type: 'analogy', title: 'Think of Express like an airport security line', steps: [{ icon: '🧳', who: 'Passenger', tech: 'Request', text: 'Enters the line' }, { icon: '🛂', who: 'Checkpoints', tech: 'Middleware', text: 'Auth, JSON parser, logging, one after another' }, { icon: '🚪', who: 'Right gate', tech: 'Route handler', text: 'Matches the URL and does the work' }, { icon: '🎫', who: 'Boarding pass', tech: 'Response', text: 'Sent back to the passenger' }] },
         { type: 'flow', steps: ['Request', 'helmet / cors', 'json parser', 'auth', 'rate limit', 'route handler', 'error handler', 'Response'] },
         {
           type: 'code', lang: 'javascript', title: 'A small production-shaped API',

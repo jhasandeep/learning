@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { NOTE_TOPICS } from '@/data/notes'
+import { noteTypingSets, notesText } from '@/lib/typing-notes'
 import { CHAR_KEY, KEYBOARD, LESSONS } from '@/data/typing'
 import { backspace, createSession, isDone, keyOf, lessonText, rng, starsFor, stats, testWords, typable, typeChar, wordsFrom } from '@/lib/typing'
 
@@ -109,5 +111,37 @@ describe('code snippets', () => {
     expect(s.python.length).toBeGreaterThanOrEqual(8)
     expect(s.sql.length).toBeGreaterThanOrEqual(8)
     for (const list of Object.values(s)) for (const code of list) expect(typable(code), code).toBe(true)
+  })
+})
+
+describe('typing from the notes', () => {
+  const sets = noteTypingSets(NOTE_TOPICS)
+
+  it('has typable prose for every technology', () => {
+    expect(sets.length).toBe(NOTE_TOPICS.length)
+    for (const s of sets) {
+      expect(s.sentences.length, s.id).toBeGreaterThanOrEqual(20)
+      for (const sentence of s.sentences) {
+        expect(typable(sentence), `${s.id}: ${sentence}`).toBe(true)
+        expect(sentence, s.id).not.toMatch(/[`*=]{2}|\s{2}/) // no markup left over
+        expect(sentence.length).toBeGreaterThanOrEqual(40)
+      }
+    }
+  })
+
+  it('builds a passage of the requested size, from one technology or all', () => {
+    const one = notesText(sets, 'javascript', rng(3), 300)
+    expect(one.length).toBeGreaterThanOrEqual(300)
+    const js = new Set(sets.find((s) => s.id === 'javascript')!.sentences)
+    expect(one.split(/(?<=[.!?:]) /).every((x) => js.has(x) || x.length < 5 || [...js].some((j) => j.includes(x)))).toBe(true)
+    const all = notesText(sets, 'all', rng(4), 500)
+    expect(all.length).toBeGreaterThanOrEqual(500)
+    expect(typable(all)).toBe(true)
+  })
+
+  it('is reproducible for a seed and varies between seeds', () => {
+    expect(notesText(sets, 'all', rng(9), 200)).toBe(notesText(sets, 'all', rng(9), 200))
+    expect(notesText(sets, 'all', rng(9), 200)).not.toBe(notesText(sets, 'all', rng(10), 200))
+    expect(notesText(sets, 'nope', rng(1), 100)).toBe('')
   })
 })

@@ -7,7 +7,7 @@ import { LANGUAGES, type Language } from '@/data/languages'
 
 export const metadata: Metadata = {
   title: 'Online compilers',
-  description: 'Write, run and share code in 18 languages: Python, Java, C, C++, JavaScript, SQL and more.',
+  description: 'Write, run and share code in 18 languages plus a MongoDB playground: Python, Java, C, C++, JavaScript, SQL and more.',
 }
 
 const FEATURES = [

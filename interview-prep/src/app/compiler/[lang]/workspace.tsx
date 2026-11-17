@@ -10,9 +10,12 @@ import { LangIcon } from '@/components/lang-icon'
 import { useToast } from '@/components/toast'
 import { Button, cx, Kbd } from '@/components/ui'
 import { LANGUAGES_BY_ID } from '@/data/languages'
-import type { RunSummary, SqlItem, SqlSchemaTable, Stream } from '@/lib/run/protocol'
+import type { MongoCollectionInfo, MongoStep, RunSummary, SqlItem, SqlSchemaTable, Stream } from '@/lib/run/protocol'
+import { prefetchWandbox, WANDBOX_LANGUAGE } from '@/lib/run/wandbox'
 import { decodeShare, encodeShare } from '@/lib/share'
 import { LangRail } from './lang-rail'
+import { MongoLearn } from './mongo-learn'
+import { MongoOutput, type MongoView } from './mongo-output'
 
 const CodeEditor = dynamic(() => import('@/components/code-editor'), {
   ssr: false,
@@ -60,6 +63,9 @@ export function Workspace({ langId }: { langId: string }) {
   const lang = LANGUAGES_BY_ID[langId]
   const isWeb = lang.runtime === 'web'
   const isSql = lang.runtime === 'sql'
+  const isMongo = lang.runtime === 'mongodb'
+  // Compiled languages run on Wandbox straight from the browser, so they need no server of ours.
+  const online = lang.engine === 'server' && lang.runtime in WANDBOX_LANGUAGE
   const toast = useToast()
 
   const [code, setCode] = useState(() => initialCode(lang.id, lang.template))
@@ -67,6 +73,8 @@ export function Workspace({ langId }: { langId: string }) {
   const [chunks, setChunks] = useState<Chunk[]>([])
   const [images, setImages] = useState<string[]>([])
   const [sql, setSql] = useState<{ items: SqlItem[]; schema: SqlSchemaTable[] } | null>(null)
+  const [mongo, setMongo] = useState<MongoView | null>(null)
+  const [outTab, setOutTab] = useState<'output' | 'learn'>('output')
   const [status, setStatus] = useState<Status>('idle')
   const [loadingText, setLoadingText] = useState('')
   const [summary, setSummary] = useState<RunSummary | null>(null)
@@ -111,6 +119,10 @@ export function Workspace({ langId }: { langId: string }) {
   }, [lang.id, toast, updateCode, updateStdin])
 
   useEffect(() => {
+    if (online) prefetchWandbox()
+  }, [online])
+
+  useEffect(() => {
     if (lang.engine !== 'server') return
     let cancelled = false
     fetch('/api/run').then((r) => r.json()).then((d) => { if (!cancelled) setServer(d) }).catch(() => { if (!cancelled) setServer({ configured: false, reason: 'Could not reach the server.' }) })
@@ -142,6 +154,7 @@ export function Workspace({ langId }: { langId: string }) {
     const code = codeRef.current
     const stdin = stdinRef.current
     setPane('output')
+    if (isMongo) setOutTab('output')
     if (isWeb) {
       setChunks([])
       setPreview((p) => ({ html: withBridge(code), key: (p?.key ?? 0) + 1 }))
@@ -159,11 +172,12 @@ export function Workspace({ langId }: { langId: string }) {
       onLoading: (text) => { setStatus('loading'); setLoadingText(text) },
       onOutput: (stream, text) => { setStatus('running'); append(stream, text) },
       onSql: (items, schema) => setSql({ items, schema }),
+      onMongo: (steps, collections) => setMongo({ steps, collections }),
       onImage: (url) => setImages((imgs) => [...imgs, url]),
     })
     setSummary(result)
     setStatus('done')
-  }, [isWeb, status, lang, append])
+  }, [isWeb, isMongo, status, lang, append])
 
   const stop = useCallback(async () => {
     const { stopAll } = await import('@/lib/run')
@@ -172,13 +186,15 @@ export function Workspace({ langId }: { langId: string }) {
 
   const resetDb = async () => {
     if (status === 'running' || status === 'loading') return
-    const { resetSqlDatabase } = await import('@/lib/run')
+    const runtime = await import('@/lib/run')
     setChunks([])
     setStatus('running')
-    const result = await resetSqlDatabase({ onOutput: append, onSql: (items, schema) => setSql({ items, schema }) })
+    const handlers = { onOutput: append, onSql: (items: SqlItem[], schema: SqlSchemaTable[]) => setSql({ items, schema }), onMongo: (steps: MongoStep[], collections: MongoCollectionInfo[]) => setMongo({ steps, collections }) }
+    const result = await (isMongo ? runtime.resetMongoDatabase(handlers) : runtime.resetSqlDatabase(handlers))
     setSummary(result)
     setStatus('done')
-    toast('Database reset to the sample tables')
+    setOutTab('output')
+    toast(isMongo ? 'Database reset to the sample collections' : 'Database reset to the sample tables')
   }
 
   // Live preview for HTML: re-render shortly after typing stops.
@@ -272,9 +288,9 @@ export function Workspace({ langId }: { langId: string }) {
               <span className="hidden md:inline"><LangIcon lang={lang} size={28} /></span>
               <span className="truncate">{lang.name} Online Compiler</span>
             </h1>
-            <span className={cx('hidden items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] lg:inline-flex', lang.engine === 'browser' ? 'border-good/40 text-good' : 'border-violet/40 text-violet')} title={lang.engine === 'browser' ? 'Runs entirely in your browser — nothing is sent to a server' : 'Compiled and run on the server'}>
+            <span className={cx('hidden items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] lg:inline-flex', lang.engine === 'browser' ? 'border-good/40 text-good' : 'border-violet/40 text-violet')} title={lang.engine === 'browser' ? 'Runs entirely in your browser — nothing is sent to a server' : online ? 'Compiled and run by the public Wandbox service, called straight from your browser' : 'Compiled and run on the server'}>
               {lang.engine === 'browser' ? <Zap size={11} /> : <Server size={11} />}
-              {lang.engine === 'browser' ? 'in browser' : server?.backend ? `server · ${server.backend}` : 'server'}
+              {lang.engine === 'browser' ? 'in browser' : online ? 'online · Wandbox' : server?.backend ? `server · ${server.backend}` : 'server'}
             </span>
             <div className="ml-auto flex items-center gap-0.5">
               <IconButton label="Smaller text" onClick={() => setFontSize((f) => Math.max(11, f - 1))}><Minus size={15} /></IconButton>
@@ -306,7 +322,17 @@ export function Workspace({ langId }: { langId: string }) {
         {/* output */}
         <section aria-label="Output" className={cx('min-h-0 min-w-0 flex-col bg-surface md:flex', pane === 'output' ? 'flex flex-1' : 'hidden')} style={{ flexBasis: `${100 - split}%` }}>
           <div className="flex items-center gap-2 border-b border-line px-3 py-2">
-            <h2 className="text-sm font-semibold">{isWeb ? 'Preview' : 'Output'}</h2>
+            {isMongo ? (
+              <div role="tablist" aria-label="Output or lessons" className="flex gap-1 rounded-lg bg-surface-2 p-0.5">
+                {(['output', 'learn'] as const).map((t) => (
+                  <button key={t} type="button" role="tab" aria-selected={outTab === t} onClick={() => setOutTab(t)} className={cx('rounded-md px-2.5 py-1 text-xs font-semibold capitalize', outTab === t ? 'bg-surface text-text shadow-sm' : 'text-muted hover:text-text')}>
+                    {t === 'learn' ? 'Learn' : 'Output'}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <h2 className="text-sm font-semibold">{isWeb ? 'Preview' : 'Output'}</h2>
+            )}
             <StatusLine status={status} loadingText={loadingText} summary={summary} />
             <div className="ml-auto flex items-center gap-1">
               {isWeb && (
@@ -314,12 +340,12 @@ export function Workspace({ langId }: { langId: string }) {
                   <input type="checkbox" checked={autoRun} onChange={(e) => setAutoRun(e.target.checked)} className="accent-[var(--accent)]" /> Live
                 </label>
               )}
-              {isSql && <Button size="sm" variant="ghost" onClick={resetDb} title="Restore the sample tables"><RefreshCw size={14} /> Reset DB</Button>}
-              <IconButton label="Clear output" onClick={() => { setChunks([]); setImages([]); setSummary(null); setStatus('idle'); if (isSql) setSql((s) => (s ? { ...s, items: [] } : s)) }}><Trash2 size={15} /></IconButton>
+              {(isSql || isMongo) && <Button size="sm" variant="ghost" onClick={resetDb} title={isMongo ? 'Restore the sample collections' : 'Restore the sample tables'}><RefreshCw size={14} /> Reset DB</Button>}
+              <IconButton label="Clear output" onClick={() => { setChunks([]); setImages([]); setSummary(null); setStatus('idle'); if (isSql) setSql((s) => (s ? { ...s, items: [] } : s)); if (isMongo) setMongo((m) => (m ? { ...m, steps: [] } : m)) }}><Trash2 size={15} /></IconButton>
             </div>
           </div>
 
-          {lang.engine === 'server' && server && !server.configured && (
+          {lang.engine === 'server' && !online && server && !server.configured && (
             <div className="m-3 rounded-xl border border-warn/40 bg-warn/10 p-3 text-sm">
               <b className="text-warn">Server runner not configured.</b> <span className="text-muted">{server.reason} See the README section “Running compiled languages”.</span>
             </div>
@@ -342,7 +368,11 @@ export function Workspace({ langId }: { langId: string }) {
           ) : (
             <div className="flex min-h-0 flex-1 flex-col">
               <div className="min-h-0 flex-1 overflow-auto p-3">
-                {isSql ? (
+                {isMongo && outTab === 'learn' ? (
+                  <MongoLearn onLoad={updateCode} onRun={run} getCode={() => codeRef.current} />
+                ) : isMongo ? (
+                  <MongoOutput mongo={mongo} errors={chunks.filter((c) => c.stream !== 'stdout')} />
+                ) : isSql ? (
                   <SqlOutput sql={sql} chunks={chunks} />
                 ) : (
                   <>

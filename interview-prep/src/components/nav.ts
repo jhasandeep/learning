@@ -1,15 +1,20 @@
-import { BookOpen, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Keyboard, Layers, MessageCircleQuestion, Network, PenTool, SquareTerminal } from 'lucide-react'
+import { BookOpen, ClipboardList, GraduationCap, Server, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Keyboard, Layers, ListTodo, ListChecks, MessageCircleQuestion, Network, PenTool, SquareTerminal } from 'lucide-react'
 
 export const NAV = [
   { href: '/', label: 'Home', icon: House },
   { href: '/compiler', label: 'Compiler', icon: SquareTerminal },
+  { href: '/dsa', label: 'DSA course', icon: GraduationCap },
+  { href: '/system-design', label: 'System design', icon: Server },
+  { href: '/tasks', label: 'Tasks', icon: ListTodo },
   { href: '/campaign', label: 'Bug Hunt', icon: Bug },
   { href: '/endless', label: 'Endless', icon: InfinityIcon },
   { href: '/flashcards', label: 'Flashcards', icon: Layers },
   { href: '/typing', label: 'Typing', icon: Keyboard },
   { href: '/progress', label: 'Progress', icon: ChartNoAxesColumn },
   { href: '/questions', label: 'Questions', icon: MessageCircleQuestion },
+  { href: '/quiz', label: 'Quiz', icon: ListChecks },
   { href: '/notes', label: 'Notes', icon: BookOpen },
+  { href: '/cheatsheet', label: 'Cheat sheet', icon: ClipboardList },
   { href: '/map', label: 'Mind map', icon: Network },
   { href: '/board', label: 'Whiteboard', icon: PenTool },
 ] as const

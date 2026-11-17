@@ -1,12 +1,15 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Layers, ListChecks, MessageCircleQuestion } from 'lucide-react'
 import type { Metadata } from 'next'
 import { Caveat, Patrick_Hand } from 'next/font/google'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Blocks } from '@/components/notes/blocks'
-import { Inline } from '@/components/notes/inline'
+import { buttonClass } from '@/components/ui'
 import { TechIcon, TechTile } from '@/components/tech-icon'
-import { NOTE_TOPICS, NOTE_TOPICS_BY_ID } from '@/data/notes'
+import { MCQ_BY_ID } from '@/data/mcq'
+import { NOTE_TOPICS, NOTE_TOPICS_BY_ID, topicText } from '@/data/notes'
+import { QUESTION_SETS_BY_ID } from '@/data/questions'
+import { NoteOutline, QaList, ReadingProgress } from './note-reader'
 import { HAND_SCRIPT, NoteToolbar } from './note-toolbar'
 import '../notes.css'
 
@@ -32,10 +35,12 @@ export default async function Page({ params }: PageProps<'/notes/[topic]'>) {
   const index = NOTE_TOPICS.indexOf(topic)
   const prev = NOTE_TOPICS[index - 1]
   const next = NOTE_TOPICS[index + 1]
+  const minutes = Math.max(1, Math.round(topicText(topic).split(/\s+/).length / 200))
 
   return (
     <div className={`${handTitle.variable} ${handBody.variable} mx-auto max-w-6xl`}>
       <script dangerouslySetInnerHTML={{ __html: HAND_SCRIPT }} />
+      <ReadingProgress />
       <div className="no-print mb-4 flex items-center gap-2 text-sm">
         <Link href="/notes" className="inline-flex items-center gap-1 text-muted hover:text-text"><ChevronLeft size={16} /> Notes</Link>
         <span className="text-muted">/</span>
@@ -43,19 +48,7 @@ export default async function Page({ params }: PageProps<'/notes/[topic]'>) {
       </div>
 
       <div className="note-layout grid gap-8 lg:grid-cols-[220px_1fr]">
-        <nav aria-label="On this page" className="no-print hidden lg:block">
-          <div className="sticky top-20 space-y-1 text-sm">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">On this page</p>
-            {topic.sections.map((s, i) => (
-              <a key={s.id} href={`#${s.id}`} className="block rounded-lg px-2 py-1 text-muted hover:bg-surface-2 hover:text-text">
-                <span className="mr-1.5 font-mono text-xs">{i + 1}.</span>{s.title}
-              </a>
-            ))}
-            <a href="#qa" className="block rounded-lg px-2 py-1 text-muted hover:bg-surface-2 hover:text-text">
-              <span className="mr-1.5 font-mono text-xs">{topic.sections.length + 1}.</span>Rapid-fire Q&amp;A
-            </a>
-          </div>
-        </nav>
+        <NoteOutline sections={[...topic.sections.map((x) => ({ id: x.id, title: x.title })), { id: 'qa', title: 'Rapid-fire Q&A' }]} />
 
         <article className="note-article min-w-0 max-w-[860px]">
           <header className="note-head mb-6">
@@ -67,7 +60,8 @@ export default async function Page({ params }: PageProps<'/notes/[topic]'>) {
               </div>
             </div>
             <p className="mt-2 text-muted">{topic.tagline}</p>
-            <div className="mt-4"><NoteToolbar topicId={topic.id} deckId={topic.id} compilerLang={COMPILER_FOR[topic.id]} /></div>
+            <p className="no-print mt-1 text-xs text-muted">{topic.sections.length} sections · about {minutes} min read · {topic.qa.length} practice questions</p>
+            <div className="mt-4"><NoteToolbar topicId={topic.id} deckId={topic.id} compilerLang={COMPILER_FOR[topic.id]} hasQuestions={Boolean(QUESTION_SETS_BY_ID[topic.id])} /></div>
           </header>
 
           {topic.sections.map((s, i) => (
@@ -79,15 +73,19 @@ export default async function Page({ params }: PageProps<'/notes/[topic]'>) {
 
           <section id="qa" className="note-section">
             <h2 className="note-h2"><span className="num" style={{ background: topic.color }}>{topic.sections.length + 1}</span>Rapid-fire Q&amp;A</h2>
-            <dl className="note-qa">
-              {topic.qa.map(([q, a]) => (
-                <div key={q}>
-                  <dt>Q. <Inline text={q} /></dt>
-                  <dd><Inline text={a} /></dd>
-                </div>
-              ))}
-            </dl>
+            <QaList items={topic.qa} />
           </section>
+
+          <aside className="no-print note-box mt-10 rounded-2xl border border-line bg-surface p-5">
+            <p className="text-lg font-bold">Finished {topic.title}? Test yourself</p>
+            <p className="mt-1 text-sm text-muted">Remembering beats re-reading: answer from memory, then check.</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {MCQ_BY_ID[topic.id] && <Link href={`/quiz/${topic.id}`} className={buttonClass('primary')}><ListChecks size={16} /> Take the quiz</Link>}
+              <Link href={`/flashcards/${topic.id}`} className={buttonClass('secondary')}><Layers size={16} /> Flashcards</Link>
+              {QUESTION_SETS_BY_ID[topic.id] && <Link href={`/questions/${topic.id}`} className={buttonClass('secondary')}><MessageCircleQuestion size={16} /> Interview questions</Link>}
+              <a href="#qa" className={buttonClass('secondary')}>Rapid-fire Q&amp;A</a>
+            </div>
+          </aside>
 
           <nav aria-label="More notes" className="no-print mt-10 grid gap-3 border-t border-line pt-6 sm:grid-cols-2">
             {prev ? (

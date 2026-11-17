@@ -5,6 +5,7 @@
 //
 //   npm run build && npx next start -p 3100   (in another terminal)
 //   npm run notes:pdf [-- baseUrl [notes|boards|questions…]]
+//   ONLY=python,django npm run notes:pdf -- http://localhost:3100 notes boards   (just some topics)
 //
 // Uses Playwright (install it globally or with `npm i -D playwright`).
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
@@ -21,7 +22,8 @@ const { PDFDocument } = await import('pdf-lib')
 
 // Topic ids, in curriculum order, from the running notes index.
 const html = await (await fetch(`${base}/notes`)).text()
-const topics = [...new Set([...html.matchAll(/href="\/notes\/([\w-]+)"/g)].map((m) => m[1]))]
+const only = process.env.ONLY?.split(',') // e.g. ONLY=python,django to export just those topics
+const topics = [...new Set([...html.matchAll(/href="\/notes\/([\w-]+)"/g)].map((m) => m[1]))].filter((id) => !only || only.includes(id))
 if (topics.length === 0) throw new Error(`No topics found at ${base}/notes — is the server running?`)
 
 const report = async (file, pdf) => console.log(`${file}  ${(await PDFDocument.load(pdf)).getPageCount()} pages  ${(pdf.length / 1024).toFixed(0)} KB`)

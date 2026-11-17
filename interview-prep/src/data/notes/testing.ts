@@ -13,6 +13,7 @@ export const testing: NoteTopic = {
       title: 'What to test',
       blocks: [
         { type: 'def', text: 'Tests give ==confidence to change code==. Write many fast unit tests, some integration tests, and a few end-to-end tests of critical user flows.' },
+        { type: 'analogy', title: 'Think of testing like a car safety check', steps: [{ icon: '🔩', who: 'Check each part', tech: 'Unit tests', text: 'Brakes, lights, engine alone' }, { icon: '🚗', who: 'Parts together', tech: 'Integration tests', text: 'Do they work as a whole car?' }, { icon: '🛣️', who: 'Real test drive', tech: 'End-to-end tests', text: 'A full journey through the app' }, { icon: '✅', who: 'Safety certificate', tech: 'CI pipeline', text: 'Runs the checks on every change' }] },
         {
           type: 'table', head: ['Level', 'Tests', 'Tools'],
           rows: [
