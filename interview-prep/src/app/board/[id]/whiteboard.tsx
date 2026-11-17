@@ -3,7 +3,7 @@
 import { CaptureUpdateAction, convertToExcalidrawElements, Excalidraw, MainMenu, WelcomeScreen } from '@excalidraw/excalidraw'
 import type { BinaryFiles, ExcalidrawImperativeAPI, LibraryItems } from '@excalidraw/excalidraw/types'
 import type { ExcalidrawElement, ExcalidrawFrameLikeElement } from '@excalidraw/excalidraw/element/types'
-import { BookOpen, ChevronLeft, ChevronRight, FileDown, FileUp, Loader2, MonitorPlay, MousePointer2, RotateCcw, Wand2, X } from 'lucide-react'
+import { BookOpen, ChevronLeft, ChevronRight, FileDown, FileUp, Loader2, MonitorPlay, MousePointer2, PenLine, RotateCcw, Sparkles, Wand2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import '@excalidraw/excalidraw/index.css'
@@ -17,6 +17,7 @@ import { SLIDE, topicBoard, type Skeleton } from '@/lib/board/concepts'
 import { LIBRARY } from '@/lib/board/library'
 import { boardToPdf, framesInOrder, pdfToScene } from '@/lib/board/pdf'
 import { deleteBoard, loadBoard, saveBoard } from '@/lib/board/store'
+import { useSmartPen } from './use-smart-pen'
 
 // Excalidraw's hand-drawn fonts are self-hosted (copied by scripts/vendor-runtimes.mjs).
 if (typeof window !== 'undefined') (window as unknown as { EXCALIDRAW_ASSET_PATH: string }).EXCALIDRAW_ASSET_PATH = '/vendor/excalidraw/'
@@ -92,6 +93,12 @@ function Board({ def, onReset }: { def: BoardDef; onReset: () => void }) {
   const [slides, setSlides] = useState<ExcalidrawFrameLikeElement[] | null>(null)
   const [slide, setSlide] = useState(0)
   const [built, setBuilt] = useState(false)
+  // Smart pen: handwriting → clean text, rough shapes → exact shapes. On by default in the sketchbook.
+  const [smartPen, setSmartPen] = useState(() => {
+    const pref = localStorage.getItem('prep.smartpen') // the page is client-only (ssr: false)
+    return pref ? pref === '1' : def.kind === 'sketch'
+  })
+  const pen = useSmartPen(api, smartPen && !slides, (m) => toast(m, 'bad'))
   const wrapRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -188,6 +195,20 @@ function Board({ def, onReset }: { def: BoardDef; onReset: () => void }) {
     setTimeout(() => URL.revokeObjectURL(url), 10_000)
   })
 
+  const toggleSmartPen = () => {
+    const on = !smartPen
+    setSmartPen(on)
+    localStorage.setItem('prep.smartpen', on ? '1' : '0')
+    if (on) {
+      api?.setActiveTool({ type: 'freedraw' })
+      toast('Smart pen on: write or draw with the pen, pause, and it is cleaned up. Ctrl+Z undoes.', 'info')
+    }
+  }
+
+  const cleanSelection = () => {
+    if (!pen.convertSelection()) toast('Select some pen strokes first (V, then drag around them)', 'info')
+  }
+
   const reset = async () => {
     const what = def.kind === 'sketch' ? 'clear your sketchbook' : 'discard your drawings and rebuild this board'
     if (!window.confirm(`This will ${what}. Continue?`)) return
@@ -259,6 +280,8 @@ function Board({ def, onReset }: { def: BoardDef; onReset: () => void }) {
           {def.kind === 'topic' && <button type="button" className={btn} onClick={importNotesPdf} disabled={!api || Boolean(busy)} title="Add the handwritten notes PDF as slides below"><Wand2 size={14} /> <span className="hidden sm:inline">Add notes PDF</span></button>}
           <button type="button" className={btn} onClick={() => fileRef.current?.click()} disabled={!api || Boolean(busy)} title="Import a PDF: every page becomes a slide you can draw on"><FileUp size={14} /> <span className="hidden sm:inline">Import PDF</span></button>
           <input ref={fileRef} type="file" accept="application/pdf" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) void importFile(f) }} />
+          <button type="button" className={cx(btn, smartPen && 'border-accent/40 bg-accent/10 text-accent')} onClick={toggleSmartPen} disabled={!api} aria-pressed={smartPen} title="Smart pen: handwriting becomes clean text, rough shapes become exact shapes"><Sparkles size={14} /> <span className="hidden sm:inline">Smart pen</span></button>
+          <button type="button" className={btn} onClick={cleanSelection} disabled={!api || pen.busy} title="Turn the selected pen strokes into clean text or a shape"><PenLine size={14} /> <span className="hidden lg:inline">Clean up ink</span></button>
           <button type="button" className={btn} onClick={present} disabled={!api} title="Present the frames as slides (arrow keys)"><MonitorPlay size={14} /> <span className="hidden sm:inline">Present</span></button>
           <button type="button" className={cx(btn, 'border-accent/40 text-accent')} onClick={exportPdf} disabled={!api || Boolean(busy)} title="Download the board as a PDF, one page per frame"><FileDown size={14} /> <span className="hidden sm:inline">Export PDF</span></button>
           <button type="button" className={btn} onClick={reset} title={def.kind === 'sketch' ? 'Clear the board' : 'Rebuild this board from the notes'}><RotateCcw size={14} /> <span className="hidden lg:inline">Reset</span></button>
@@ -303,6 +326,24 @@ function Board({ def, onReset }: { def: BoardDef; onReset: () => void }) {
         ) : (
           <div className="grid h-full place-items-center text-sm text-muted">
             {error ? <p className="text-bad">{error}</p> : <p className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> {loading}</p>}
+          </div>
+        )}
+
+        {(pen.busy || pen.suggestion) && !slides && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-16 z-10 flex justify-center">
+            <div className="pointer-events-auto flex max-w-[92%] flex-wrap items-center gap-1 rounded-xl border border-line bg-surface/95 p-1.5 text-xs shadow-lg backdrop-blur">
+              {pen.busy ? (
+                <span className="flex items-center gap-1.5 px-2 text-muted"><Loader2 size={14} className="animate-spin" /> Reading your handwriting…</span>
+              ) : pen.suggestion && (
+                <>
+                  <span className="px-2 text-muted">Did you mean</span>
+                  {pen.suggestion.candidates.map((c, i) => (
+                    <button key={c} type="button" className={cx(btn, i === 0 && 'border-accent/40 text-accent')} onClick={() => pen.pick(c)}>{c}</button>
+                  ))}
+                  <button type="button" className={btn} onClick={pen.dismiss} aria-label="Dismiss"><X size={14} /></button>
+                </>
+              )}
+            </div>
           </div>
         )}
 
