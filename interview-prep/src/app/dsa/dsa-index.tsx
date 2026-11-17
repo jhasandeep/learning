@@ -14,12 +14,6 @@ export interface ModuleCard {
   lessons: { id: string; title: string; topic: string; blurb: string; steps: number; key: string }[]
 }
 
-const COMING = [
-  { level: 'Patterns', text: 'Sliding window, prefix sums, binary search, linked lists' },
-  { level: 'Medium', text: 'Recursion, backtracking, trees, sorting, intervals' },
-  { level: 'Hard', text: 'Dynamic programming, graphs, heaps, tries' },
-]
-
 export function DsaIndex({ modules }: { modules: ModuleCard[] }) {
   const p = useProgress()
   const all = modules.flatMap((m) => m.lessons.map((l) => ({ m, l })))
@@ -75,17 +69,6 @@ export function DsaIndex({ modules }: { modules: ModuleCard[] }) {
         )
       })}
 
-      <section aria-labelledby="coming">
-        <h2 id="coming" className="mb-3 text-xl font-semibold">Coming next</h2>
-        <ul className="grid gap-3 sm:grid-cols-3">
-          {COMING.map((c) => (
-            <li key={c.level} className="rounded-2xl border border-dashed border-line p-4">
-              <p className="text-sm font-semibold">{c.level}</p>
-              <p className="mt-1 text-sm text-muted">{c.text}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   )
 }

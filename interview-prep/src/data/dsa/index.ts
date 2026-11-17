@@ -1,11 +1,14 @@
 import { easy } from './easy'
 import { foundations } from './foundations'
+import { hard } from './hard'
+import { medium } from './medium'
+import { patterns } from './patterns'
 import type { DsaModule, Lesson } from './types'
 
 export type { BuildStep, Case, DryRun, DsaModule, Frame, Lang, Lesson, Practice } from './types'
 
 /** The course, easiest module first. */
-export const DSA_MODULES: DsaModule[] = [foundations, easy]
+export const DSA_MODULES: DsaModule[] = [foundations, easy, patterns, medium, hard]
 
 export const DSA_MODULES_BY_ID: Record<string, DsaModule> = Object.fromEntries(DSA_MODULES.map((m) => [m.id, m]))
 
