@@ -108,7 +108,8 @@ describe('judge0 backend', () => {
 describe('backend selection', () => {
   it('prefers explicit config and refuses the unsandboxed runner in production', () => {
     expect(getBackend({ NODE_ENV: 'production', PISTON_URL: 'http://p' } as NodeJS.ProcessEnv)).toMatchObject({ ok: true })
-    expect(getBackend({ NODE_ENV: 'production' } as NodeJS.ProcessEnv)).toMatchObject({ ok: false })
+    expect(getBackend({ NODE_ENV: 'production' } as NodeJS.ProcessEnv)).toMatchObject({ ok: true, backend: { name: 'online' } })
+    expect(getBackend({ NODE_ENV: 'production', RUNNER_BACKEND: 'none' } as NodeJS.ProcessEnv)).toMatchObject({ ok: false })
     expect(getBackend({ NODE_ENV: 'production', RUNNER_BACKEND: 'local' } as NodeJS.ProcessEnv)).toMatchObject({ ok: false })
     expect(getBackend({ NODE_ENV: 'development' } as NodeJS.ProcessEnv)).toMatchObject({ ok: true })
   })

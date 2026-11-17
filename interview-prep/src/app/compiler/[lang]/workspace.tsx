@@ -125,7 +125,8 @@ export function Workspace({ langId }: { langId: string }) {
   useEffect(() => {
     if (lang.engine !== 'server') return
     let cancelled = false
-    fetch('/api/run').then((r) => r.json()).then((d) => { if (!cancelled) setServer(d) }).catch(() => { if (!cancelled) setServer({ configured: false, reason: 'Could not reach the server.' }) })
+    // Without an /api/run route (e.g. a static host) the browser calls the online compilers itself.
+    fetch('/api/run').then((r) => r.json()).then((d) => { if (!cancelled) setServer(d) }).catch(() => { if (!cancelled) setServer({ configured: true, backend: 'online' }) })
     return () => { cancelled = true }
   }, [lang.engine])
 

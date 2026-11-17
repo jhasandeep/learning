@@ -2,6 +2,7 @@ import { BookOpen, ClipboardList, GraduationCap, Server, Bug, ChartNoAxesColumn,
 
 export const NAV = [
   { href: '/', label: 'Home', icon: House },
+  { href: '/learn', label: 'Learn', icon: GraduationCap },
   { href: '/compiler', label: 'Compiler', icon: SquareTerminal },
   { href: '/dsa', label: 'DSA course', icon: GraduationCap },
   { href: '/system-design', label: 'System design', icon: Server },

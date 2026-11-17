@@ -1,6 +1,6 @@
 'use client'
 
-import { Bug, Hash, ListChecks, Moon, Network, Search } from 'lucide-react'
+import { Bug, GraduationCap, Hash, ListChecks, Moon, Network, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { CAMPAIGN } from '@/data/campaign'
@@ -58,6 +58,7 @@ export function CommandPalette({ questionSets }: { questionSets: PaletteQuestion
       ...LANGUAGES.map((l) => ({ id: `compiler-${l.id}`, label: `${l.name} compiler`, hint: `Compiler · ${l.engine === 'browser' ? 'in browser' : 'server'}`, icon: <TechIcon kind="lang" id={l.id} size={16} color={l.color} fallback={l.badge} />, run: go(`/compiler/${l.id}`) })),
       ...NOTE_TOPICS.map((t) => ({ id: `notes-${t.id}`, label: `${t.title} notes`, hint: `Notes · ${t.category}`, icon: <TechIcon id={t.id} size={16} color={t.color} fallback={t.badge} />, run: go(`/notes/${t.id}`) })),
       ...questionSets.map((q) => ({ id: `questions-${q.id}`, label: `${q.title} interview questions`, hint: `${q.count} questions`, icon: <TechIcon id={q.id} size={16} color={q.color} fallback={q.badge} />, run: go(`/questions/${q.id}`) })),
+      ...questionSets.map((q) => ({ id: `learn-${q.id}`, label: `Learn ${q.title}`, hint: 'Step-by-step lessons', icon: <GraduationCap size={16} />, run: go(`/learn/${q.id}`) })),
       ...questionSets.map((q) => ({ id: `quiz-${q.id}`, label: `${q.title} quiz`, hint: 'Multiple choice', icon: <ListChecks size={16} />, run: go(`/quiz/${q.id}`) })),
       ...questionSets.map((q) => ({ id: `spot-${q.id}`, label: `${q.title}: find the mistake`, hint: 'Bug Hunt', icon: <Bug size={16} />, run: go(`/campaign/tech/${q.id}`) })),
       { id: 'map-create', label: 'Create a mind map', hint: 'Mind map', icon: <Network size={16} />, run: go('/map/create') },

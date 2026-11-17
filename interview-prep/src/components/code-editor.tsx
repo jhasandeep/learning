@@ -36,6 +36,10 @@ function languageExtension(id: string): Extension {
     case 'cpp': return cpp()
     case 'csharp': return StreamLanguage.define(csharp)
     case 'typescript': return javascript({ typescript: true })
+    case 'jsx': return javascript({ jsx: true })
+    case 'tsx': return javascript({ jsx: true, typescript: true })
+    case 'text':
+    case 'shell': return []
     case 'go': return go()
     case 'rust': return rust()
     case 'scala': return StreamLanguage.define(scala)
