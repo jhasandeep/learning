@@ -46,11 +46,20 @@ export interface BuildStep {
   verdict?: string
   /** A deliberate trap: this code looks right but fails some inputs, and the lesson explains why. */
   buggy?: boolean
+  /** Only these practice cases (by index) apply to this step. An empty list means "just make sure it runs". */
+  only?: number[]
 }
 
 export interface Practice {
-  /** The function name in each language. */
+  /** The function the tests call in each language. */
   fn: Both
+  /**
+   * For lessons where you write a class: test code that defines the `fn` function by driving your class.
+   * It is added after your code, before the tests.
+   */
+  driver?: Both
+  /** The name your code must define (a class name) when `driver` is used. Defaults to `fn`. */
+  symbol?: Both
   starter: Both
   cases: Case[]
   /** Compare lists without caring about order. */

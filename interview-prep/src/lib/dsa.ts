@@ -47,15 +47,17 @@ function jsCase(fn: string, c: Case, unordered: boolean): string {
 }
 
 /** The checks appended after the learner's code. */
-export function buildHarness(lang: Lang, p: Practice): string {
+export function buildHarness(lang: Lang, p: Practice, only?: number[]): string {
   const fn = p.fn[lang]
   const unordered = Boolean(p.unordered)
-  if (lang === 'python') return `${PY_HELPERS}\n${p.cases.map((c) => pyCase(fn, c, unordered)).join('\n')}`
-  return `${JS_HELPERS}\n${p.cases.map((c) => jsCase(fn, c, unordered)).join('\n')}`
+  const cases = only ? p.cases.filter((_, i) => only.includes(i)) : p.cases
+  const driver = p.driver ? `${p.driver[lang]}\n` : ''
+  if (lang === 'python') return `${PY_HELPERS}\n${driver}${cases.map((c) => pyCase(fn, c, unordered)).join('\n')}`
+  return `${JS_HELPERS}\n${driver}${cases.map((c) => jsCase(fn, c, unordered)).join('\n')}`
 }
 
 /** The lesson's practice as a runnable task for the existing task runner. */
-export function practiceTask(lesson: Lesson, lang: Lang): RunTask {
+export function practiceTask(lesson: Pick<Lesson, 'id' | 'title' | 'blurb' | 'recap' | 'practice' | 'steps'>, lang: Lang): RunTask {
   const p = lesson.practice
   return {
     id: lesson.id,
@@ -72,7 +74,7 @@ export function practiceTask(lesson: Lesson, lang: Lang): RunTask {
   }
 }
 
-export function practiceSolution(lesson: Lesson): Both {
+export function practiceSolution(lesson: Pick<Lesson, 'practice' | 'steps'>): Both {
   return lesson.practice.solution ?? lesson.steps[lesson.steps.length - 1].code
 }
 
