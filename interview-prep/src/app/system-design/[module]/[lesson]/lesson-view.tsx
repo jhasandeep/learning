@@ -88,7 +88,7 @@ export function SdLessonView({ module, index, lesson, html, prev, next }: Props)
         <h1 className="mt-1 text-3xl font-semibold tracking-tight">{lesson.title}</h1>
         <p className="mt-2 text-muted">{lesson.blurb}</p>
         <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted">
-          <span className="rounded-md bg-surface-2 px-2 py-1">Picture · real example · code · simulator · practice</span>
+          <span className="rounded-md bg-surface-2 px-2 py-1">Picture · real example · code · practice</span>
         </div>
       </header>
 
@@ -102,7 +102,7 @@ export function SdLessonView({ module, index, lesson, html, prev, next }: Props)
           ))}
         </div>
         <nav aria-label="Lesson sections" className="ml-auto hidden gap-3 text-xs text-muted lg:flex">
-          {[['problem', 'Problem'], ['see', 'See it'], ['real', 'Real world'], ['build', 'Build it'], ['play', 'Play'], ['practice', 'Practice'], ['quiz', 'Quiz']].map(([id, label]) => <a key={id} href={`#${id}`} className="hover:text-text">{label}</a>)}
+          {[['problem', 'Problem'], ['see', 'See it'], ['real', 'Real world'], ['build', 'Build it'], ...(lesson.sim ? [['play', 'Play']] : []), ['practice', 'Practice'], ['quiz', 'Quiz']].map(([id, label]) => <a key={id} href={`#${id}`} className="hover:text-text">{label}</a>)}
         </nav>
       </div>
 
@@ -117,7 +117,7 @@ export function SdLessonView({ module, index, lesson, html, prev, next }: Props)
         <Section n={2} id="see" title="See it in action">
           {lesson.before && (
             <div className="mb-3 inline-flex rounded-lg border border-line p-0.5" role="tablist">
-              {([['before', 'Without it'], ['how', 'With it']] as const).map(([id, label]) => (
+              {([['before', lesson.tabs?.[0] ?? 'Without it'], ['how', lesson.tabs?.[1] ?? 'With it']] as const).map(([id, label]) => (
                 <button key={id} type="button" role="tab" aria-selected={view === id} onClick={() => setView(id)} className={cx('rounded-md px-3 py-1 text-sm font-medium transition', view === id ? 'bg-accent text-white' : 'text-muted hover:text-text')}>{label}</button>
               ))}
             </div>
@@ -165,21 +165,23 @@ export function SdLessonView({ module, index, lesson, html, prev, next }: Props)
           {shown < lesson.steps.length && <Button className="mt-4" variant="primary" onClick={() => setShown((n) => n + 1)}>Show the next version <ArrowRight size={16} /></Button>}
         </Section>
 
-        <Section n={5} id="play" title="Play with it">
-          <p className="mb-3 text-sm text-muted"><Inline text={lesson.sim.intro} /></p>
-          <Sim id={lesson.sim.id} />
-          <div className="mt-3 rounded-2xl border border-line bg-surface p-4">
-            <p className="text-sm font-semibold">Try this</p>
-            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted">{lesson.sim.tryThis.map((t) => <li key={t}><Inline text={t} /></li>)}</ul>
-          </div>
-        </Section>
+        {lesson.sim && (
+          <Section n={5} id="play" title="Play with it">
+            <p className="mb-3 text-sm text-muted"><Inline text={lesson.sim.intro} /></p>
+            <Sim id={lesson.sim.id} />
+            <div className="mt-3 rounded-2xl border border-line bg-surface p-4">
+              <p className="text-sm font-semibold">Try this</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted">{lesson.sim.tryThis.map((t) => <li key={t}><Inline text={t} /></li>)}</ul>
+            </div>
+          </Section>
+        )}
 
-        <Section n={6} id="practice" title="Practice: write the real thing">
+        <Section n={lesson.sim ? 6 : 5} id="practice" title="Practice: write the real thing">
           <p className="mb-4 text-sm text-muted">Implement <code className="note-code">{(lesson.practice.symbol ?? lesson.practice.fn)[lang]}</code> in the editor and press <b>Check my code</b>. The tests drive your code the way a real system would use it.</p>
           <Practice key={lang} lesson={lesson} progressKey={sdKey(module.id, lesson.id)} solutionHtml={html.solution} lang={lang} />
         </Section>
 
-        <Section n={7} id="quiz" title="Check your understanding">
+        <Section n={lesson.sim ? 7 : 6} id="quiz" title="Check your understanding">
           <Quiz questions={lesson.quiz} />
           <h3 className="mb-3 mt-8 font-semibold">How you would answer in an interview</h3>
           <div className="space-y-3">
@@ -192,7 +194,7 @@ export function SdLessonView({ module, index, lesson, html, prev, next }: Props)
           </div>
         </Section>
 
-        <Section n={8} id="wrap" title="Wrap-up">
+        <Section n={lesson.sim ? 8 : 7} id="wrap" title="Wrap-up">
           <div className="rounded-2xl border border-line bg-surface p-5">
             <p className="font-semibold text-bad">Common mistakes</p>
             <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">{lesson.mistakes.map((m) => <li key={m}><Inline text={m} /></li>)}</ul>

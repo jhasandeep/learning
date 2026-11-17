@@ -43,7 +43,7 @@ export interface Arch {
   frames: ArchFrame[]
 }
 
-export type SimId = 'load-balancer' | 'cache' | 'hash-ring' | 'rate-limiter' | 'queue' | 'breaker' | 'shortener'
+export type SimId = 'load-balancer' | 'cache' | 'hash-ring' | 'rate-limiter' | 'queue' | 'breaker' | 'shortener' | 'autoscale' | 'cdn' | 'shard' | 'replication' | 'quorum' | 'jwt' | 'booking'
 
 export interface QuizQuestion {
   q: string
@@ -63,12 +63,14 @@ export interface SdLesson {
   /** The picture without the building block (optional) and with it. */
   before?: Arch
   how: Arch
+  /** Labels of the two diagram tabs. Defaults to "Without it" / "With it". */
+  tabs?: [string, string]
   realWorld: { name: string; text: string }[]
   tradeoffs: { gain: string[]; cost: string[]; useWhen: string[]; avoidWhen: string[] }
   /** How to build it, step by step, with code in both languages. */
   steps: BuildStep[]
-  /** The simulator to play with. */
-  sim: { id: SimId; intro: string; tryThis: string[] }
+  /** The simulator to play with (some lessons have only the diagram). */
+  sim?: { id: SimId; intro: string; tryThis: string[] }
   practice: Practice
   quiz: QuizQuestion[]
   /** Questions an interviewer may ask, with a model answer. */

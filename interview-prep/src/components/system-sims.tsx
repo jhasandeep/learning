@@ -453,6 +453,247 @@ function ShortenerSim() {
   )
 }
 
+// ---- autoscaling ---------------------------------------------------------------------------------------
+
+function AutoscaleSim() {
+  const [rps, setRps] = useState(300)
+  const [capacity, setCapacity] = useState(100)
+  const [target, setTarget] = useState(70)
+  const [spare, setSpare] = useState(1)
+  const needed = Math.max(1, Math.ceil(rps / (capacity * (target / 100)))) + spare
+  const util = Math.round((rps / (needed * capacity)) * 100)
+  const bigger = Math.ceil(rps / (capacity * 4)) // one machine that is 4x bigger
+  return (
+    <Panel title="Capacity planner">
+      <div className="space-y-2">
+        <Slider label="Traffic (requests/s)" min={10} max={3000} value={rps} onChange={setRps} />
+        <Slider label="One server handles" min={20} max={500} value={capacity} onChange={setCapacity} unit="/s" />
+        <Slider label="Target utilisation" min={30} max={95} value={target} onChange={setTarget} unit="%" />
+        <Slider label="Spare servers (for failures)" min={0} max={3} value={spare} onChange={setSpare} />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-1.5" aria-label={`${needed} servers`}>
+        {Array.from({ length: Math.min(needed, 40) }, (_, i) => <span key={i} className={cx('grid h-8 w-8 place-items-center rounded-md border-2 text-sm', i < needed - spare ? 'border-accent bg-accent/15' : 'border-dashed border-warn')}>🖥️</span>)}
+        {needed > 40 && <span className="self-center text-xs text-muted">+{needed - 40} more</span>}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Stat label="servers needed" value={needed} tone="good" />
+        <Stat label="average load" value={`${util}%`} />
+        <Stat label="vertical alternative" value={`${bigger}+ machines 4× bigger`} />
+      </div>
+      <p className="mt-2 text-xs text-muted">Dashed servers are spares. Lower the traffic and the fleet shrinks: that is what autoscaling does automatically. A single bigger machine has a ceiling and is still one point of failure.</p>
+    </Panel>
+  )
+}
+
+// ---- CDN -----------------------------------------------------------------------------------------------
+
+function CdnSim() {
+  const regions = [
+    { name: 'Mumbai', origin: 30, edge: 15 },
+    { name: 'London', origin: 190, edge: 20 },
+    { name: 'New York', origin: 240, edge: 18 },
+    { name: 'Sydney', origin: 320, edge: 22 },
+  ]
+  const [cdn, setCdn] = useState(true)
+  const [warm, setWarm] = useState<Record<string, boolean>>({})
+  const request = (name: string) => setWarm((w) => ({ ...w, [name]: true }))
+  return (
+    <Panel title="CDN latency (origin server is in Mumbai)">
+      <label className="mb-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={cdn} onChange={(e) => { setCdn(e.target.checked); setWarm({}) }} /> Use a CDN (copies of the file near each region)</label>
+      <div className="space-y-3">
+        {regions.map((r) => {
+          const hit = cdn && warm[r.name]
+          const ms = hit ? r.edge : r.origin
+          return (
+            <div key={r.name} className="flex items-center gap-3 text-sm">
+              <span className="w-24">{r.name}</span>
+              <div className="h-3 flex-1 rounded bg-surface-2"><div className={cx('h-3 rounded transition-all', hit ? 'bg-good' : 'bg-warn')} style={{ width: `${(ms / 340) * 100}%` }} /></div>
+              <span className="w-24 text-right font-mono text-xs">{ms} ms {hit ? '(edge)' : '(origin)'}</span>
+              <Button size="sm" onClick={() => request(r.name)}>Request</Button>
+            </div>
+          )
+        })}
+      </div>
+      <p className="mt-3 text-xs text-muted">{cdn ? 'The first request in a region is a cache miss and travels to the origin. After that, the nearby edge answers.' : 'Without a CDN every user fetches from Mumbai: far-away users wait much longer.'}</p>
+    </Panel>
+  )
+}
+
+// ---- sharding strategies -------------------------------------------------------------------------------
+
+function ShardSim() {
+  const names = ['aman', 'anita', 'arjun', 'asha', 'bhavna', 'chirag', 'divya', 'deepak', 'esha', 'farhan', 'gita', 'harsh', 'isha', 'jatin', 'kavya', 'manish', 'neha', 'nikhil', 'omar', 'priya', 'rahul', 'riya', 'sanjay', 'sara', 'tanvi', 'vikram']
+  const [strategy, setStrategy] = useState<'range' | 'hash'>('range')
+  const [shards, setShards] = useState(3)
+  const shardOf = (key: string) => (strategy === 'range' ? Math.floor(((key.charCodeAt(0) - 97) * shards) / 26) : [...key].reduce((n, c) => n + c.charCodeAt(0), 0) % shards)
+  const groups = Array.from({ length: shards }, (_, i) => names.filter((n) => shardOf(n) === i))
+  return (
+    <Panel title="Which shard stores each user?">
+      <div className="flex flex-wrap items-center gap-4 text-sm">
+        <label className="flex items-center gap-2"><span className="text-muted">Strategy</span>
+          <select value={strategy} onChange={(e) => setStrategy(e.target.value as 'range' | 'hash')} className="rounded-lg border border-line bg-surface-2 px-2 py-1">
+            <option value="range">Range (by first letter)</option>
+            <option value="hash">Hash of the key</option>
+          </select>
+        </label>
+        <Slider label="Shards" min={2} max={6} value={shards} onChange={setShards} />
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        {groups.map((g, i) => (
+          <div key={i} className="rounded-xl border border-line bg-surface-2 p-2">
+            <p className="text-xs font-semibold">Shard {i + 1} <span className="font-normal text-muted">· {g.length} users</span></p>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted">{g.join(', ') || 'empty'}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-xs text-muted">Range sharding keeps neighbours together (good for range queries) but names are not evenly spread, so some shards become hot. Hash sharding spreads load evenly but scatters related keys.</p>
+    </Panel>
+  )
+}
+
+// ---- replication ---------------------------------------------------------------------------------------
+
+function ReplicationSim() {
+  const [leader, setLeader] = useState(0)
+  const [followers, setFollowers] = useState([0, 0])
+  const [version, setVersion] = useState(0)
+  const [msg, setMsg] = useState('')
+  const write = () => {
+    setVersion((v) => v + 1)
+    setLeader(version + 1)
+    setMsg('Written to the leader. The followers have not received it yet.')
+  }
+  const replicate = () => {
+    setFollowers([leader, leader])
+    setMsg('The leader sent its changes: followers are up to date.')
+  }
+  const readFollower = () => setMsg(followers[0] === leader ? `Read from follower 1: value v${followers[0]} (fresh).` : `Read from follower 1: value v${followers[0]}, but the leader has v${leader}: a stale read caused by replication lag.`)
+  return (
+    <Panel title="Leader and followers">
+      <div className="flex flex-wrap gap-3">
+        {[['Leader (accepts writes)', leader, true], ['Follower 1', followers[0], false], ['Follower 2', followers[1], false]].map(([name, v, lead]) => (
+          <div key={String(name)} className={cx('min-w-32 rounded-xl border-2 p-3 text-center', lead ? 'border-accent bg-accent/10' : v === leader ? 'border-good' : 'border-warn')}>
+            <p className="text-xs text-muted">{String(name)}</p>
+            <p className="mt-1 font-mono text-lg font-bold">v{String(v)}</p>
+            {!lead && v !== leader && <p className="text-[11px] text-warn">behind</p>}
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button size="sm" variant="primary" onClick={write}>Write a new value</Button>
+        <Button size="sm" onClick={replicate}>Replicate to followers</Button>
+        <Button size="sm" onClick={readFollower}>Read from follower 1</Button>
+        <Button size="sm" variant="ghost" onClick={() => { setLeader(0); setFollowers([0, 0]); setVersion(0); setMsg('') }}>Reset</Button>
+      </div>
+      <p className="mt-3 min-h-5 text-sm">{msg}</p>
+    </Panel>
+  )
+}
+
+// ---- quorum --------------------------------------------------------------------------------------------
+
+function QuorumSim() {
+  const N = 5
+  const [w, setW] = useState(3)
+  const [r, setR] = useState(3)
+  const [down, setDown] = useState<number[]>([])
+  const up = Array.from({ length: N }, (_, i) => i).filter((i) => !down.includes(i))
+  const canWrite = up.length >= w
+  const canRead = up.length >= r
+  const overlap = w + r > N
+  return (
+    <Panel title="Quorum with 5 replicas">
+      <div className="space-y-2">
+        <Slider label="Write quorum W" min={1} max={N} value={w} onChange={setW} />
+        <Slider label="Read quorum R" min={1} max={N} value={r} onChange={setR} />
+      </div>
+      <p className="mt-3 text-xs text-muted">Click a replica to take it down or bring it back (a network partition or a crash).</p>
+      <div className="mt-2 flex gap-2">
+        {Array.from({ length: N }, (_, i) => (
+          <button key={i} type="button" onClick={() => setDown((d) => (d.includes(i) ? d.filter((x) => x !== i) : [...d, i]))} className={cx('h-12 w-12 rounded-xl border-2 text-lg', down.includes(i) ? 'border-bad bg-bad/10' : 'border-good bg-good/10')} aria-label={`Replica ${i + 1} is ${down.includes(i) ? 'down' : 'up'}`}>{down.includes(i) ? '✖' : '🗄️'}</button>
+        ))}
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Stat label="R + W > N ?" value={overlap ? `${r + w} > ${N}: reads see the latest write` : `${r + w} ≤ ${N}: a read may miss the latest write`} tone={overlap ? 'good' : 'bad'} />
+        <Stat label="writes" value={canWrite ? 'available' : 'rejected (not enough replicas)'} tone={canWrite ? 'good' : 'bad'} />
+        <Stat label="reads" value={canRead ? 'available' : 'rejected (not enough replicas)'} tone={canRead ? 'good' : 'bad'} />
+      </div>
+      <p className="mt-2 text-xs text-muted">This is the CAP trade-off in one picture: raise W and R for consistency and you lose availability when replicas fail; lower them and you stay available but may read stale data.</p>
+    </Panel>
+  )
+}
+
+// ---- JWT -----------------------------------------------------------------------------------------------
+
+const b64url = (str: string) => btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+
+function JwtSim() {
+  const [name, setName] = useState('asha')
+  const [role, setRole] = useState('user')
+  const [ttl, setTtl] = useState(15)
+  const [tamper, setTamper] = useState(false)
+  const header = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
+  const payload = b64url(JSON.stringify({ sub: name, role, exp: ttl * 60 }))
+  const signature = b64url(`sig-${fnv(`${header}.${payload}.secret`).toString(16)}`)
+  const shownPayload = tamper ? b64url(JSON.stringify({ sub: name, role: 'admin', exp: ttl * 60 })) : payload
+  const valid = !tamper
+  return (
+    <Panel title="Build a token">
+      <div className="grid gap-3 text-sm sm:grid-cols-3">
+        <label className="flex flex-col gap-1"><span className="text-muted">User (sub)</span><input value={name} onChange={(e) => setName(e.target.value.slice(0, 12))} className="rounded-lg border border-line bg-surface-2 px-2 py-1" /></label>
+        <label className="flex flex-col gap-1"><span className="text-muted">Role</span><select value={role} onChange={(e) => setRole(e.target.value)} className="rounded-lg border border-line bg-surface-2 px-2 py-1"><option>user</option><option>editor</option></select></label>
+        <Slider label="Expires in" min={1} max={60} value={ttl} onChange={setTtl} unit=" min" />
+      </div>
+      <p className="mt-4 break-all rounded-xl bg-surface-2 p-3 font-mono text-xs leading-relaxed"><span className="text-accent">{header}</span>.<span className="text-warn">{shownPayload}</span>.<span className="text-good">{signature}</span></p>
+      <p className="mt-1 text-[11px] text-muted"><span className="text-accent">header</span> · <span className="text-warn">payload (anyone can read it, it is only encoded)</span> · <span className="text-good">signature (made with the server secret)</span></p>
+      <label className="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={tamper} onChange={(e) => setTamper(e.target.checked)} /> An attacker edits the payload to make themselves an admin</label>
+      <p className={cx('mt-2 rounded-lg px-3 py-2 text-sm font-medium', valid ? 'bg-good/10 text-good' : 'bg-bad/10 text-bad')}>{valid ? 'Server check: signature matches, token accepted.' : 'Server check: the signature no longer matches the payload, token rejected.'}</p>
+    </Panel>
+  )
+}
+
+// ---- seat booking --------------------------------------------------------------------------------------
+
+function BookingSim() {
+  const [hold, setHold] = useState(true)
+  const [taken, setTaken] = useState<string | null>(null)
+  const [log, setLog] = useState<string[]>([])
+  const users = ['Asha', 'Ben']
+  const [seen, setSeen] = useState<string[]>([])
+  const look = (u: string) => setSeen((s) => (s.includes(u) ? s : [...s, u]))
+  const book = (u: string) => {
+    if (!hold) {
+      setTaken((t) => (t ? `${t} and ${u}` : u))
+      setLog((l) => [`${u} booked the seat${taken ? ' too: DOUBLE BOOKING' : ''}`, ...l].slice(0, 8))
+      return
+    }
+    if (taken) setLog((l) => [`${u} was too late: the seat is already ${taken.includes(' and ') ? 'booked' : `held by ${taken}`}`, ...l].slice(0, 8))
+    else {
+      setTaken(u)
+      setLog((l) => [`${u} got the seat (an atomic hold: only one request can win)`, ...l].slice(0, 8))
+    }
+  }
+  return (
+    <Panel title="Two people grab the last seat">
+      <label className="mb-3 flex items-center gap-2 text-sm"><input type="checkbox" checked={hold} onChange={(e) => { setHold(e.target.checked); setTaken(null); setLog([]); setSeen([]) }} /> Use an atomic hold (check and reserve in one step)</label>
+      <div className="flex flex-wrap items-center gap-6">
+        <div className={cx('grid h-16 w-16 place-items-center rounded-xl border-2 text-2xl', taken ? 'border-bad bg-bad/10' : 'border-good bg-good/10')} aria-label="The last seat">{taken ? '🔒' : '💺'}</div>
+        <div className="space-y-2">
+          {users.map((u) => (
+            <div key={u} className="flex items-center gap-2 text-sm">
+              <span className="w-12">{u}</span>
+              {!hold && <Button size="sm" onClick={() => look(u)} disabled={seen.includes(u)}>{seen.includes(u) ? 'Sees a free seat' : 'Look at seats'}</Button>}
+              <Button size="sm" variant="primary" onClick={() => book(u)} disabled={!hold && !seen.includes(u)}>Book it</Button>
+            </div>
+          ))}
+        </div>
+      </div>
+      {!hold && <p className="mt-2 text-xs text-muted">Without a hold, both users first <b>look</b> (the seat is free for both), then both press <b>Book it</b>.</p>}
+      {log.length > 0 && <ul className="mt-3 space-y-0.5 text-xs text-muted">{log.map((l, i) => <li key={i}>{l}</li>)}</ul>}
+    </Panel>
+  )
+}
+
 export function Sim({ id }: { id: SimId }) {
   switch (id) {
     case 'load-balancer': return <LoadBalancerSim />
@@ -462,5 +703,12 @@ export function Sim({ id }: { id: SimId }) {
     case 'queue': return <QueueSim />
     case 'breaker': return <BreakerSim />
     case 'shortener': return <ShortenerSim />
+    case 'autoscale': return <AutoscaleSim />
+    case 'cdn': return <CdnSim />
+    case 'shard': return <ShardSim />
+    case 'replication': return <ReplicationSim />
+    case 'quorum': return <QuorumSim />
+    case 'jwt': return <JwtSim />
+    case 'booking': return <BookingSim />
   }
 }
