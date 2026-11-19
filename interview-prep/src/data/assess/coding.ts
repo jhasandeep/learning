@@ -965,5 +965,1152 @@ const peak: CodingQuestion = {
   tags: ['sweep-line', 'intervals', 'capacity'],
 }
 
-export const CODING: CodingQuestion[] = [aggregate, retry, debounce, cursor, rateLimit, route, validate, peak, ttlCache, pool, sse]
+// ---- 12. Merge sorted log streams -------------------------------------------------------------------
+
+const mergeLogs: CodingQuestion = {
+  id: 'merge-log-streams',
+  title: 'Merge sorted log streams',
+  topic: 'Data processing',
+  difficulty: 'easy',
+  estimated_time_minutes: 20,
+  blurb: 'Combine timestamps from several servers, each already sorted, into one sorted timeline.',
+  statement: 'Several servers each write their log timestamps in increasing order. Merge all of them into a single list that is sorted in non-decreasing order. Duplicates are kept.',
+  input_format: '`streams` is a list of lists of non-negative integers. Each inner list is sorted in non-decreasing order and may be empty.',
+  output_format: 'One sorted list holding every timestamp.',
+  constraints: ['0 <= streams.length <= 1000', 'The total number of timestamps is at most 10^5'],
+  examples: [
+    { input: '[[1, 4, 7], [2, 5, 8], [3, 6, 9]]', output: '[1, 2, 3, 4, 5, 6, 7, 8, 9]', explanation: 'Always take the smallest value that is still waiting at the front of any stream.' },
+    { input: '[[1, 1], [1]]', output: '[1, 1, 1]', explanation: 'Equal timestamps are all kept.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'merge_logs', javascript: 'mergeLogs' },
+    starter: {
+      python: `def merge_logs(streams):
+    # return one sorted list with all timestamps
+    pass
+`,
+      javascript: `function mergeLogs(streams) {
+  // return one sorted array with all timestamps
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: three interleaved streams', args: [[[1, 4, 7], [2, 5, 8], [3, 6, 9]]], expected: [1, 2, 3, 4, 5, 6, 7, 8, 9] },
+      { label: 'Sample 2: duplicates are kept', args: [[[1, 1], [1]]], expected: [1, 1, 1] },
+      { label: 'Hidden: no streams', args: [[]], expected: [] },
+      { label: 'Hidden: empty streams are skipped', args: [[[], [5], [], [2, 9]]], expected: [2, 5, 9] },
+      { label: 'Hidden: streams of different lengths', args: [[[1, 2, 3, 4, 5], [10]]], expected: [1, 2, 3, 4, 5, 10] },
+      { label: 'Hidden: one stream is entirely before another', args: [[[10, 11], [1, 2]]], expected: [1, 2, 10, 11] },
+    ],
+    hints: ['Keep one pointer per stream, pointing at its next unread timestamp.', 'Repeatedly pick the stream whose next value is smallest, append that value and advance its pointer.', 'Stop when every pointer is at the end of its stream. (A heap makes picking the smallest faster.)'],
+  },
+  steps: ref(
+    `def merge_logs(streams):
+    pointers = [0] * len(streams)
+    out = []
+    while True:
+        best = -1
+        for i, stream in enumerate(streams):
+            if pointers[i] < len(stream) and (best == -1 or stream[pointers[i]] < streams[best][pointers[best]]):
+                best = i
+        if best == -1:
+            return out
+        out.append(streams[best][pointers[best]])
+        pointers[best] += 1
+`,
+    `function mergeLogs(streams) {
+  const pointers = streams.map(() => 0);
+  const out = [];
+  for (;;) {
+    let best = -1;
+    for (let i = 0; i < streams.length; i++) {
+      if (pointers[i] < streams[i].length && (best === -1 || streams[i][pointers[i]] < streams[best][pointers[best]])) best = i;
+    }
+    if (best === -1) return out;
+    out.push(streams[best][pointers[best]]);
+    pointers[best] += 1;
+  }
+}
+`,
+    'A k-way merge: one pointer per stream, always take the smallest front value. Using a min-heap of the fronts brings the cost down to O(N log k).',
+  ),
+  complexity: { time: 'O(N × k) with a scan, O(N log k) with a heap', space: 'O(k) besides the output' },
+  mistakes: ['Concatenating and sorting everything, which ignores the fact that the inputs are sorted.', 'Crashing on empty streams.', 'Dropping duplicate timestamps.', 'Mutating the input lists (for example with `shift()`, which is also slow).'],
+  recap: 'To merge sorted lists, always take the smallest front element; a heap makes that step fast.',
+  tags: ['merge', 'k-way', 'heap', 'logs'],
+}
+
+// ---- 13. Top endpoints ------------------------------------------------------------------------------
+
+const topEndpoints: CodingQuestion = {
+  id: 'top-endpoints',
+  title: 'Busiest endpoints',
+  topic: 'Analytics',
+  difficulty: 'easy',
+  estimated_time_minutes: 15,
+  blurb: 'Count requests per endpoint from an access log and report the k busiest ones.',
+  statement: 'Given a list of requested paths from an access log, return the `k` most requested paths as `[path, count]` pairs. Sort by count from highest to lowest and break ties by path in alphabetical order. If there are fewer than `k` distinct paths, return all of them.',
+  input_format: '`paths` is a list of strings. `k` is a non-negative integer.',
+  output_format: 'A list of `[path, count]` pairs.',
+  constraints: ['0 <= paths.length <= 10^5', '0 <= k <= 10^5'],
+  examples: [
+    { input: '["/a", "/b", "/a", "/c", "/a", "/b"], k = 2', output: '[["/a", 3], ["/b", 2]]', explanation: '/a was requested 3 times and /b twice; /c only once.' },
+    { input: '["/x", "/y"], k = 5', output: '[["/x", 1], ["/y", 1]]', explanation: 'There are only two distinct paths, and the tie is broken alphabetically.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'top_endpoints', javascript: 'topEndpoints' },
+    starter: {
+      python: `def top_endpoints(paths, k):
+    # return the k most requested [path, count] pairs
+    pass
+`,
+      javascript: `function topEndpoints(paths, k) {
+  // return the k most requested [path, count] pairs
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: the two busiest paths', args: [['/a', '/b', '/a', '/c', '/a', '/b'], 2], expected: [['/a', 3], ['/b', 2]] },
+      { label: 'Sample 2: fewer paths than k, ties by name', args: [['/y', '/x'], 5], expected: [['/x', 1], ['/y', 1]] },
+      { label: 'Hidden: no requests', args: [[], 3], expected: [] },
+      { label: 'Hidden: k is zero', args: [['/a'], 0], expected: [] },
+      { label: 'Hidden: ties are broken alphabetically', args: [['/c', '/a', '/b', '/b', '/a', '/c'], 2], expected: [['/a', 2], ['/b', 2]] },
+      { label: 'Hidden: one path repeated', args: [['/h', '/h', '/h'], 1], expected: [['/h', 3]] },
+    ],
+    hints: ['Count the requests per path in a dictionary (or `Map`).', 'Sort the pairs by count descending and then by path ascending.', 'Return the first `k` pairs.'],
+  },
+  steps: ref(
+    `def top_endpoints(paths, k):
+    counts = {}
+    for path in paths:
+        counts[path] = counts.get(path, 0) + 1
+    rows = [[path, n] for path, n in counts.items()]
+    rows.sort(key=lambda r: (-r[1], r[0]))
+    return rows[:k]
+`,
+    `function topEndpoints(paths, k) {
+  const counts = new Map();
+  for (const path of paths) counts.set(path, (counts.get(path) || 0) + 1);
+  const rows = [...counts].map(([path, n]) => [path, n]);
+  rows.sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  return rows.slice(0, k);
+}
+`,
+    'Count with a hash map, then sort by count (descending) with the path as a tie-breaker. A heap would give O(n log k) for very large inputs.',
+  ),
+  complexity: { time: 'O(n + d log d) for d distinct paths', space: 'O(d)' },
+  mistakes: ['Forgetting the alphabetical tie-breaker.', 'Sorting the raw log instead of the counts.', 'Returning more than `k` rows, or crashing when `k` is larger than the number of paths.', 'Comparing JavaScript strings with `-`.'],
+  recap: 'Count in a hash map, then sort by (count descending, name ascending) and cut at k.',
+  tags: ['hash-map', 'sorting', 'logs'],
+}
+
+// ---- 14. Balanced brackets --------------------------------------------------------------------------
+
+const brackets: CodingQuestion = {
+  id: 'balanced-brackets',
+  title: 'Balanced brackets in a config',
+  topic: 'Parsing',
+  difficulty: 'easy',
+  estimated_time_minutes: 15,
+  blurb: 'Check that every bracket in a JSON-like text is closed in the right order.',
+  statement: 'Given a text, return `true` if every `(`, `[` and `{` is closed by the matching bracket in the correct order, and `false` otherwise. All other characters are ignored.',
+  input_format: '`text` is a string.',
+  output_format: 'A boolean.',
+  constraints: ['0 <= text.length <= 10^5'],
+  examples: [
+    { input: '{"a": [1, (2)]}', output: 'true', explanation: 'Each bracket is closed in the reverse order of opening.' },
+    { input: '([)]', output: 'false', explanation: 'The square bracket is closed while the round bracket is still open.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'is_balanced', javascript: 'isBalanced' },
+    starter: {
+      python: `def is_balanced(text):
+    # return True when all brackets match in the right order
+    pass
+`,
+      javascript: `function isBalanced(text) {
+  // return true when all brackets match in the right order
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: nested brackets in a JSON-like text', args: ['{"a": [1, (2)]}'], expected: true },
+      { label: 'Sample 2: wrong closing order', args: ['([)]'], expected: false },
+      { label: 'Hidden: empty text', args: [''], expected: true },
+      { label: 'Hidden: an opening bracket is never closed', args: ['(('], expected: false },
+      { label: 'Hidden: a closing bracket with nothing open', args: ['a(b)c]'], expected: false },
+      { label: 'Hidden: closing before opening', args: ['}{'], expected: false },
+      { label: 'Hidden: text without brackets', args: ['hello world'], expected: true },
+    ],
+    hints: ['Use a stack: push every opening bracket.', 'On a closing bracket, the stack must not be empty and its top must be the matching opening bracket; pop it.', 'At the end the stack must be empty.'],
+  },
+  steps: ref(
+    `def is_balanced(text):
+    pairs = {")": "(", "]": "[", "}": "{"}
+    stack = []
+    for ch in text:
+        if ch in "([{":
+            stack.append(ch)
+        elif ch in pairs:
+            if not stack or stack.pop() != pairs[ch]:
+                return False
+    return not stack
+`,
+    `function isBalanced(text) {
+  const pairs = { ")": "(", "]": "[", "}": "{" };
+  const stack = [];
+  for (const ch of text) {
+    if ("([{".includes(ch)) stack.push(ch);
+    else if (ch in pairs) {
+      if (stack.length === 0 || stack.pop() !== pairs[ch]) return false;
+    }
+  }
+  return stack.length === 0;
+}
+`,
+    'A stack remembers the open brackets; the most recent one must be closed first.',
+  ),
+  complexity: { time: 'O(n)', space: 'O(n)' },
+  mistakes: ['Only counting brackets, which accepts `([)]`.', 'Popping from an empty stack.', 'Forgetting to check the stack is empty at the end.', 'Treating other characters (such as quotes) as brackets.'],
+  recap: 'Matching nested brackets is a stack problem: last opened, first closed.',
+  tags: ['stack', 'parsing', 'strings'],
+}
+
+// ---- 15. Flatten JSON -------------------------------------------------------------------------------
+
+const flatten: CodingQuestion = {
+  id: 'flatten-json',
+  title: 'Flatten a nested JSON object',
+  topic: 'Data transformation',
+  difficulty: 'medium',
+  estimated_time_minutes: 25,
+  blurb: 'Turn a nested object into one level with dotted keys, as done for logging, CSV export and form fields.',
+  statement: 'Write `flatten(obj)` that turns a nested object into a flat object. The key of a nested value is the path of keys joined with `"."`; list items use their index as the key part. Empty objects and empty lists are kept as values at their path. Other values (numbers, strings, booleans, null) are kept as they are.',
+  input_format: '`obj` is a JSON object (it may contain nested objects and lists).',
+  output_format: 'A flat object whose keys are dotted paths.',
+  constraints: ['The nesting depth is at most 100', 'Keys do not contain dots', 'The total number of values is at most 10^5'],
+  examples: [
+    { input: '{"a": {"b": 1, "c": 2}, "d": 3}', output: '{"a.b": 1, "a.c": 2, "d": 3}', explanation: 'The nested keys are joined with a dot.' },
+    { input: '{"a": [1, {"b": 2}]}', output: '{"a.0": 1, "a.1.b": 2}', explanation: 'List positions become parts of the path.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'flatten', javascript: 'flatten' },
+    starter: {
+      python: `def flatten(obj):
+    # return a flat dict with dotted keys
+    pass
+`,
+      javascript: `function flatten(obj) {
+  // return a flat object with dotted keys
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: nested objects', args: [{ a: { b: 1, c: 2 }, d: 3 }], expected: { 'a.b': 1, 'a.c': 2, d: 3 } },
+      { label: 'Sample 2: lists use their index', args: [{ a: [1, { b: 2 }] }], expected: { 'a.0': 1, 'a.1.b': 2 } },
+      { label: 'Hidden: an empty object', args: [{}], expected: {} },
+      { label: 'Hidden: empty containers are kept as values', args: [{ a: {}, b: [], c: { d: {} } }], expected: { a: {}, b: [], 'c.d': {} } },
+      { label: 'Hidden: null and false are real values', args: [{ a: null, b: { c: false } }], expected: { a: null, 'b.c': false } },
+      { label: 'Hidden: deep nesting', args: [{ a: { b: { c: { d: 'x' } } } }], expected: { 'a.b.c.d': 'x' } },
+    ],
+    hints: ['Write a helper that takes the current path prefix and a value, and calls itself for each child.', 'For an object use the key, for a list use the index; join with a dot unless the prefix is empty.', 'When the value is not a non-empty object or list, store it under the current path.'],
+  },
+  steps: ref(
+    `def flatten(obj):
+    out = {}
+
+    def walk(value, path):
+        if isinstance(value, dict) and value:
+            for key, child in value.items():
+                walk(child, key if path == "" else path + "." + key)
+        elif isinstance(value, list) and value:
+            for i, child in enumerate(value):
+                walk(child, str(i) if path == "" else path + "." + str(i))
+        else:
+            out[path] = value
+
+    for key, child in obj.items():
+        walk(child, key)
+    return out
+`,
+    `function flatten(obj) {
+  const out = {};
+  function walk(value, path) {
+    if (Array.isArray(value) && value.length > 0) {
+      value.forEach((child, i) => walk(child, path === "" ? String(i) : path + "." + i));
+    } else if (value !== null && typeof value === "object" && !Array.isArray(value) && Object.keys(value).length > 0) {
+      for (const [key, child] of Object.entries(value)) walk(child, path === "" ? key : path + "." + key);
+    } else {
+      out[path] = value;
+    }
+  }
+  for (const [key, child] of Object.entries(obj)) walk(child, key);
+  return out;
+}
+`,
+    'A recursive walk carries the path so far. Containers with content recurse; everything else (including empty containers) is a leaf.',
+  ),
+  complexity: { time: 'O(total size of the output keys and values)', space: 'O(depth) for the recursion plus the output' },
+  mistakes: ['Dropping empty objects and lists, which silently loses data.', 'Treating `null` as an object (`typeof null` is `"object"` in JavaScript).', 'Starting every key with a leading dot.', 'Forgetting that lists are objects too in Python-style checks.'],
+  recap: 'Flattening is a recursive walk that builds the key path on the way down and stores leaves.',
+  tags: ['recursion', 'json', 'objects'],
+}
+
+// ---- 16. Deep merge ---------------------------------------------------------------------------------
+
+const deepMerge: CodingQuestion = {
+  id: 'deep-merge-config',
+  title: 'Merge configuration objects',
+  topic: 'Configuration',
+  difficulty: 'medium',
+  estimated_time_minutes: 25,
+  blurb: 'Combine default settings with user overrides, merging nested objects but replacing everything else.',
+  statement: 'Implement `deep_merge(base, override)` that returns a new object. For each key in `override`: if both values are objects (not lists, not null), merge them recursively; otherwise the value from `override` replaces the one in `base` (including lists and `null`). Keys that appear only in `base` are kept. The inputs must not be changed.',
+  input_format: '`base` and `override` are JSON objects.',
+  output_format: 'A new merged object.',
+  constraints: ['The nesting depth is at most 100', 'Total size at most 10^5 values'],
+  examples: [
+    { input: 'base {"db": {"host": "a", "port": 1}, "debug": false}, override {"db": {"port": 2}}', output: '{"db": {"host": "a", "port": 2}, "debug": false}', explanation: 'The db objects are merged, so host stays and port changes.' },
+    { input: 'base {"tags": ["x", "y"]}, override {"tags": ["z"]}', output: '{"tags": ["z"]}', explanation: 'Lists are replaced, not merged.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'deep_merge', javascript: 'deepMerge' },
+    starter: {
+      python: `def deep_merge(base, override):
+    # return a new merged dict; do not change the inputs
+    pass
+`,
+      javascript: `function deepMerge(base, override) {
+  // return a new merged object; do not change the inputs
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: nested objects are merged', args: [{ db: { host: 'a', port: 1 }, debug: false }, { db: { port: 2 } }], expected: { db: { host: 'a', port: 2 }, debug: false } },
+      { label: 'Sample 2: lists are replaced', args: [{ tags: ['x', 'y'] }, { tags: ['z'] }], expected: { tags: ['z'] } },
+      { label: 'Hidden: new keys are added', args: [{ a: 1 }, { b: { c: 2 } }], expected: { a: 1, b: { c: 2 } } },
+      { label: 'Hidden: null replaces an object', args: [{ a: { b: 1 } }, { a: null }], expected: { a: null } },
+      { label: 'Hidden: an object replaces a plain value', args: [{ a: 1 }, { a: { b: 2 } }], expected: { a: { b: 2 } } },
+      { label: 'Hidden: empty override changes nothing', args: [{ a: { b: [1] } }, {}], expected: { a: { b: [1] } } },
+    ],
+    hints: ['Start from a copy of `base`.', 'For each key in `override`: if the base value and the override value are both objects, call `deep_merge` on them; otherwise take the override value.', 'Be careful: lists and `null` are not "objects" for this purpose.'],
+  },
+  steps: ref(
+    `def deep_merge(base, override):
+    def is_obj(v):
+        return isinstance(v, dict)
+
+    out = dict(base)
+    for key, value in override.items():
+        if key in out and is_obj(out[key]) and is_obj(value):
+            out[key] = deep_merge(out[key], value)
+        else:
+            out[key] = value
+    return out
+`,
+    `function deepMerge(base, override) {
+  const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+  const out = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    if (key in out && isObj(out[key]) && isObj(value)) out[key] = deepMerge(out[key], value);
+    else out[key] = value;
+  }
+  return out;
+}
+`,
+    'Copy the base, then for each override key either recurse (both sides are plain objects) or replace.',
+  ),
+  complexity: { time: 'O(size of override plus the objects it touches)', space: 'O(size of the result)' },
+  mistakes: ['Mutating `base` so later calls see changed defaults.', 'Merging lists by position or by concatenation when the rule says replace.', 'Treating `null` as an object and crashing on it.', 'Using a shallow spread, which replaces whole nested objects.'],
+  recap: 'Deep merge recurses only when both sides are plain objects; everything else is replaced by the override.',
+  tags: ['recursion', 'config', 'objects'],
+}
+
+// ---- 17. Query string parser ------------------------------------------------------------------------
+
+const query: CodingQuestion = {
+  id: 'query-string-parser',
+  title: 'Parse a query string',
+  topic: 'HTTP',
+  difficulty: 'medium',
+  estimated_time_minutes: 25,
+  blurb: 'Turn the part of a URL after the question mark into an object, handling repeated keys and encoded characters.',
+  statement: 'Write `parse_query(qs)` for a string like `"a=1&b=2&a=3"` (no leading `?`). Pairs are separated by `&` and each pair is `key=value`. Rules:\n\n- Decode `+` as a space and `%XX` as the character with that hexadecimal code (in both keys and values).\n- A key that appears once maps to its string value; a key that appears several times maps to a list of values in order.\n- A pair without `=` has the value `""`. Empty pairs (for example from `&&`) are ignored.\n\nReturn an object of the keys and values.',
+  input_format: '`qs` is a string that contains only valid percent-encoding.',
+  output_format: 'An object whose values are strings or lists of strings.',
+  constraints: ['0 <= qs.length <= 10^5', 'Percent escapes are valid and decode to plain characters'],
+  examples: [
+    { input: '"a=1&b=2&a=3"', output: '{"a": ["1", "3"], "b": "2"}', explanation: 'The repeated key a becomes a list.' },
+    { input: '"q=hello+world&x=%26"', output: '{"q": "hello world", "x": "&"}', explanation: '+ is a space and %26 is the ampersand character.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'parse_query', javascript: 'parseQuery' },
+    starter: {
+      python: `def parse_query(qs):
+    # return a dict: a string value, or a list of strings for repeated keys
+    pass
+`,
+      javascript: `function parseQuery(qs) {
+  // return an object: a string value, or an array of strings for repeated keys
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: a repeated key becomes a list', args: ['a=1&b=2&a=3'], expected: { a: ['1', '3'], b: '2' } },
+      { label: 'Sample 2: plus signs and percent escapes are decoded', args: ['q=hello+world&x=%26'], expected: { q: 'hello world', x: '&' } },
+      { label: 'Hidden: an empty string', args: [''], expected: {} },
+      { label: 'Hidden: a key without a value', args: ['flag&a=1'], expected: { flag: '', a: '1' } },
+      { label: 'Hidden: empty pairs are ignored', args: ['&&a=1&&'], expected: { a: '1' } },
+      { label: 'Hidden: an equals sign inside a value', args: ['expr=1%2B1=2'], expected: { expr: '1+1=2' } },
+      { label: 'Hidden: three values for one key', args: ['t=a&t=b&t=c'], expected: { t: ['a', 'b', 'c'] } },
+    ],
+    hints: ['Split on "&" and skip empty pieces.', 'Split each piece at the FIRST "=" only: the rest (even other "=" signs) belongs to the value.', 'Decode "+" to a space first, then decode the percent escapes. Collect repeated keys in a list.'],
+  },
+  steps: ref(
+    `from urllib.parse import unquote
+
+def parse_query(qs):
+    def decode(text):
+        return unquote(text.replace("+", " "))
+
+    out = {}
+    for pair in qs.split("&"):
+        if pair == "":
+            continue
+        key, _, value = pair.partition("=")
+        key, value = decode(key), decode(value)
+        if key in out:
+            if isinstance(out[key], list):
+                out[key].append(value)
+            else:
+                out[key] = [out[key], value]
+        else:
+            out[key] = value
+    return out
+`,
+    `function parseQuery(qs) {
+  const decode = (text) => decodeURIComponent(text.replace(/\\+/g, " "));
+  const out = {};
+  for (const pair of qs.split("&")) {
+    if (pair === "") continue;
+    const at = pair.indexOf("=");
+    const key = decode(at === -1 ? pair : pair.slice(0, at));
+    const value = at === -1 ? "" : decode(pair.slice(at + 1));
+    if (Object.prototype.hasOwnProperty.call(out, key)) {
+      if (Array.isArray(out[key])) out[key].push(value);
+      else out[key] = [out[key], value];
+    } else {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+`,
+    'Split into pairs, split each pair at the first "=", decode "+" and percent escapes, and promote a key to a list when it repeats.',
+  ),
+  complexity: { time: 'O(length of the string)', space: 'O(length of the string)' },
+  mistakes: ['Splitting a pair on every "=", which breaks values that contain "=".', 'Decoding before splitting, so an encoded "&" or "=" is treated as a separator.', 'Forgetting that "+" means a space in form-encoded data.', 'Overwriting repeated keys instead of collecting them.'],
+  recap: 'Split first, decode second; and a repeated key turns its value into a list.',
+  tags: ['http', 'parsing', 'url'],
+}
+
+// ---- 18. Semver compare -----------------------------------------------------------------------------
+
+const semver: CodingQuestion = {
+  id: 'compare-versions',
+  title: 'Compare version numbers',
+  topic: 'Dependencies',
+  difficulty: 'easy',
+  estimated_time_minutes: 15,
+  blurb: 'Decide which of two dotted version strings is newer, the way a package manager does.',
+  statement: 'Compare two version strings made of dot-separated non-negative integers, such as `"1.2.10"`. Compare the numbers from left to right as integers (so `10` is greater than `9`). If one version is shorter, treat the missing parts as `0`. Return `1` if `a` is newer, `-1` if `b` is newer and `0` if they are equal.',
+  input_format: '`a` and `b` are strings of integers separated by dots.',
+  output_format: '`-1`, `0` or `1`.',
+  constraints: ['1 <= a.length, b.length <= 200', 'Each part fits in a 32-bit integer', 'No pre-release tags such as "-beta"'],
+  examples: [
+    { input: '"1.2.10" and "1.2.9"', output: '1', explanation: 'The last parts are compared as numbers: 10 is greater than 9.' },
+    { input: '"1.0" and "1.0.0"', output: '0', explanation: 'The missing part counts as 0, so the versions are equal.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'compare_versions', javascript: 'compareVersions' },
+    starter: {
+      python: `def compare_versions(a, b):
+    # return 1, -1 or 0
+    pass
+`,
+      javascript: `function compareVersions(a, b) {
+  // return 1, -1 or 0
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: parts are compared as numbers', args: ['1.2.10', '1.2.9'], expected: 1 },
+      { label: 'Sample 2: missing parts count as zero', args: ['1.0', '1.0.0'], expected: 0 },
+      { label: 'Hidden: the older version comes first', args: ['0.9.9', '1.0.0'], expected: -1 },
+      { label: 'Hidden: a longer version with a non-zero tail is newer', args: ['2', '2.0.1'], expected: -1 },
+      { label: 'Hidden: equal versions', args: ['3.4.5', '3.4.5'], expected: 0 },
+      { label: 'Hidden: the first difference decides', args: ['1.10', '1.9.9.9'], expected: 1 },
+    ],
+    hints: ['Split both strings on "." and convert every part to an integer.', 'Walk up to the longer length, using 0 when a version has no part at that position.', 'Return as soon as two parts differ.'],
+  },
+  steps: ref(
+    `def compare_versions(a, b):
+    x = [int(p) for p in a.split(".")]
+    y = [int(p) for p in b.split(".")]
+    for i in range(max(len(x), len(y))):
+        left = x[i] if i < len(x) else 0
+        right = y[i] if i < len(y) else 0
+        if left != right:
+            return 1 if left > right else -1
+    return 0
+`,
+    `function compareVersions(a, b) {
+  const x = a.split(".").map(Number);
+  const y = b.split(".").map(Number);
+  for (let i = 0; i < Math.max(x.length, y.length); i++) {
+    const left = i < x.length ? x[i] : 0;
+    const right = i < y.length ? y[i] : 0;
+    if (left !== right) return left > right ? 1 : -1;
+  }
+  return 0;
+}
+`,
+    'Compare part by part as integers, padding the shorter version with zeros.',
+  ),
+  complexity: { time: 'O(length of the strings)', space: 'O(number of parts)' },
+  mistakes: ['Comparing the strings alphabetically, which says "1.10" < "1.9".', 'Not padding, so "1.0" and "1.0.0" look different.', 'Returning the difference of the numbers instead of -1, 0 or 1.', 'Stopping at the length of the shorter version.'],
+  recap: 'Version parts are numbers, not text, and missing parts mean zero.',
+  tags: ['strings', 'versions', 'comparison'],
+}
+
+// ---- 19. Event deduplication ------------------------------------------------------------------------
+
+const dedupe: CodingQuestion = {
+  id: 'dedupe-events',
+  title: 'Drop duplicate events',
+  topic: 'Event processing',
+  difficulty: 'medium',
+  estimated_time_minutes: 25,
+  blurb: 'Ignore repeats of the same event that arrive within a time window, as a webhook or notification system does.',
+  statement: 'Events arrive as `[time, key]` in non-decreasing time order. An event is **kept** unless the same key was **kept** less than `window` time units earlier (that is, `time - lastKeptTime < window`). A dropped event does not extend the window. Return the kept events in order.',
+  input_format: '`events` is a list of `[time, key]` pairs with integer times and string keys. `window` is a positive integer.',
+  output_format: 'The list of kept `[time, key]` pairs.',
+  constraints: ['0 <= events.length <= 10^5', '1 <= window <= 10^9'],
+  examples: [
+    { input: 'window 10, events [0 a], [5 a], [10 a], [12 b]', output: '[0 a], [10 a], [12 b]', explanation: 'The a at 5 is a repeat (5 < 10). The a at 10 is exactly 10 after the kept one, so it is kept.' },
+    { input: 'window 10, events [0 a], [9 a], [15 a]', output: '[0 a], [15 a]', explanation: 'The a at 9 is dropped and does not extend the window, so the a at 15 is kept.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'dedupe_events', javascript: 'dedupeEvents' },
+    starter: {
+      python: `def dedupe_events(window, events):
+    # return the kept [time, key] events
+    pass
+`,
+      javascript: `function dedupeEvents(window, events) {
+  // return the kept [time, key] events
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: a repeat inside the window is dropped', args: [10, [[0, 'a'], [5, 'a'], [10, 'a'], [12, 'b']]], expected: [[0, 'a'], [10, 'a'], [12, 'b']] },
+      { label: 'Sample 2: a dropped event does not extend the window', args: [10, [[0, 'a'], [9, 'a'], [15, 'a']]], expected: [[0, 'a'], [15, 'a']] },
+      { label: 'Hidden: no events', args: [5, []], expected: [] },
+      { label: 'Hidden: different keys never clash', args: [100, [[0, 'a'], [1, 'b'], [2, 'c']]], expected: [[0, 'a'], [1, 'b'], [2, 'c']] },
+      { label: 'Hidden: events at the same time with the same key', args: [5, [[3, 'x'], [3, 'x'], [3, 'y']]], expected: [[3, 'x'], [3, 'y']] },
+      { label: 'Hidden: a steady stream keeps every window-th event', args: [3, [[0, 'k'], [1, 'k'], [2, 'k'], [3, 'k'], [4, 'k'], [5, 'k'], [6, 'k']]], expected: [[0, 'k'], [3, 'k'], [6, 'k']] },
+    ],
+    hints: ['Remember, for each key, the time of the last event you kept.', 'For a new event, keep it if the key is new or `time - last >= window`.', 'Update the remembered time only when you keep the event.'],
+  },
+  steps: ref(
+    `def dedupe_events(window, events):
+    last_kept = {}
+    kept = []
+    for t, key in events:
+        if key not in last_kept or t - last_kept[key] >= window:
+            last_kept[key] = t
+            kept.append([t, key])
+    return kept
+`,
+    `function dedupeEvents(window, events) {
+  const lastKept = new Map();
+  const kept = [];
+  for (const [t, key] of events) {
+    if (!lastKept.has(key) || t - lastKept.get(key) >= window) {
+      lastKept.set(key, t);
+      kept.push([t, key]);
+    }
+  }
+  return kept;
+}
+`,
+    'One map from key to the time of its last kept event is enough; only kept events move the window.',
+  ),
+  complexity: { time: 'O(n)', space: 'O(distinct keys)' },
+  mistakes: ['Updating the last time for dropped events, which makes the window slide forever.', 'Using `>` instead of `>=` at the boundary.', 'Treating different keys as duplicates of each other.', 'Keeping all events in memory forever (real systems expire old keys).'],
+  recap: 'Deduplication needs one remembered timestamp per key, updated only when an event is kept.',
+  tags: ['dedupe', 'webhooks', 'hash-map'],
+}
+
+// ---- 20. Token bucket -------------------------------------------------------------------------------
+
+const tokenBucket: CodingQuestion = {
+  id: 'token-bucket-limiter',
+  title: 'Token bucket rate limiter',
+  topic: 'API protection',
+  difficulty: 'medium',
+  estimated_time_minutes: 25,
+  blurb: 'Allow short bursts but a steady average rate, by spending tokens that refill over time.',
+  statement: 'A token bucket holds at most `capacity` tokens and starts full. It gains `rate` tokens per time unit (whole tokens, capped at `capacity`). Each request at time `t` first adds the tokens earned since the previous request, then needs **1 token**: if at least 1 is available the request is allowed and one token is removed, otherwise it is rejected (and no token is removed).\n\nGiven the request times in non-decreasing order, return whether each request is allowed.',
+  input_format: '`capacity` and `rate` are positive integers. `times` is a list of integers in non-decreasing order (the bucket is full at time 0).',
+  output_format: 'A list of booleans.',
+  constraints: ['1 <= capacity, rate <= 10^6', '0 <= times.length <= 10^5', 'Times are integers between 0 and 10^9'],
+  examples: [
+    { input: 'capacity 2, rate 1, times [0, 0, 0, 1, 2]', output: '[true, true, false, true, true]', explanation: 'Two requests at time 0 empty the bucket and the third is rejected. One token is earned by time 1 and another by time 2.' },
+    { input: 'capacity 1, rate 1, times [0, 0, 5]', output: '[true, false, true]', explanation: 'After a long pause the bucket refills, but never above its capacity.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'token_bucket', javascript: 'tokenBucket' },
+    starter: {
+      python: `def token_bucket(capacity, rate, times):
+    # return a list of booleans, one per request
+    pass
+`,
+      javascript: `function tokenBucket(capacity, rate, times) {
+  // return an array of booleans, one per request
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: a burst, then a steady refill', args: [2, 1, [0, 0, 0, 1, 2]], expected: [true, true, false, true, true] },
+      { label: 'Sample 2: the bucket never holds more than its capacity', args: [1, 1, [0, 0, 5]], expected: [true, false, true] },
+      { label: 'Hidden: no requests', args: [3, 1, []], expected: [] },
+      { label: 'Hidden: a faster refill rate', args: [5, 2, [0, 0, 0, 0, 0, 0, 1, 1, 1]], expected: [true, true, true, true, true, false, true, true, false] },
+      { label: 'Hidden: rejected requests do not spend tokens', args: [1, 1, [0, 0, 0, 1]], expected: [true, false, false, true] },
+      { label: 'Hidden: a long gap refills only up to the capacity', args: [3, 1, [0, 0, 0, 0, 100, 100, 100, 100]], expected: [true, true, true, false, true, true, true, false] },
+    ],
+    hints: ['Track the number of tokens and the time of the previous request.', 'Before each request add `(t - last) * rate` tokens, but never go above `capacity`.', 'If `tokens >= 1`, allow the request and subtract 1; otherwise reject without changing the tokens.'],
+  },
+  steps: ref(
+    `def token_bucket(capacity, rate, times):
+    tokens = capacity
+    last = 0
+    out = []
+    for t in times:
+        tokens = min(capacity, tokens + (t - last) * rate)
+        last = t
+        if tokens >= 1:
+            tokens -= 1
+            out.append(True)
+        else:
+            out.append(False)
+    return out
+`,
+    `function tokenBucket(capacity, rate, times) {
+  let tokens = capacity;
+  let last = 0;
+  const out = [];
+  for (const t of times) {
+    tokens = Math.min(capacity, tokens + (t - last) * rate);
+    last = t;
+    if (tokens >= 1) {
+      tokens -= 1;
+      out.push(true);
+    } else {
+      out.push(false);
+    }
+  }
+  return out;
+}
+`,
+    'Refill lazily when a request arrives: add the tokens earned since the last request (capped), then spend one if available.',
+  ),
+  complexity: { time: 'O(n)', space: 'O(1) besides the output' },
+  mistakes: ['Refilling with a timer instead of computing the tokens from the elapsed time.', 'Letting the bucket grow past its capacity.', 'Spending a token on a rejected request.', 'Forgetting to update the last time when a request is rejected.'],
+  recap: 'A token bucket is two numbers (tokens and last time); refill lazily, cap at capacity, spend on success.',
+  tags: ['rate-limiting', 'token-bucket', 'simulation'],
+}
+
+// ---- 21. Circuit breaker ----------------------------------------------------------------------------
+
+const breaker: CodingQuestion = {
+  id: 'circuit-breaker',
+  title: 'Circuit breaker state machine',
+  topic: 'Resilience',
+  difficulty: 'hard',
+  estimated_time_minutes: 35,
+  blurb: 'Stop calling a failing service for a while, then test it with a single trial call, as libraries like Resilience4j do.',
+  statement: 'A circuit breaker protects calls to a service.\n\n- **Closed:** calls are allowed. Count consecutive failures (a success resets the count to 0). When the count reaches `threshold`, the breaker **opens** at that call\'s time.\n- **Open:** calls are **blocked** (the service is not called) until `cooldown` time units have passed since it opened. A call at time `>= opened_at + cooldown` is a **trial**.\n- **Trial (half-open):** the call is allowed. If it succeeds the breaker closes (failures reset to 0). If it fails the breaker opens again at this call\'s time.\n\nYou get each call as `[time, ok]`, where `ok` says whether the service would succeed if called (ignored when the call is blocked). Return `"allowed"` or `"blocked"` for every call.',
+  input_format: '`threshold` and `cooldown` are positive integers. `calls` is a list of `[time, ok]` with non-decreasing integer times.',
+  output_format: 'A list of the strings `"allowed"` and `"blocked"`.',
+  constraints: ['1 <= threshold <= 10^5', '1 <= cooldown <= 10^9', '0 <= calls.length <= 10^5'],
+  examples: [
+    { input: 'threshold 2, cooldown 10, calls [0 fail], [1 fail], [2 ok], [11 ok], [12 fail]', output: 'allowed, allowed, blocked, allowed, allowed', explanation: 'Two failures open the breaker at time 1. The call at 2 is blocked. At 11 (= 1 + 10) a trial is allowed and succeeds, closing the breaker.' },
+    { input: 'threshold 1, cooldown 5, calls [0 fail], [5 fail], [9 ok], [10 ok]', output: 'allowed, allowed, blocked, allowed', explanation: 'The trial at 5 fails and reopens the breaker at 5. The call at 9 is blocked; the call at 10 is a new trial.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'circuit_breaker', javascript: 'circuitBreaker' },
+    starter: {
+      python: `def circuit_breaker(threshold, cooldown, calls):
+    # return "allowed" or "blocked" for every call
+    pass
+`,
+      javascript: `function circuitBreaker(threshold, cooldown, calls) {
+  // return "allowed" or "blocked" for every call
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: it opens, blocks, then a trial closes it', args: [2, 10, [[0, false], [1, false], [2, true], [11, true], [12, false]]], expected: ['allowed', 'allowed', 'blocked', 'allowed', 'allowed'] },
+      { label: 'Sample 2: a failed trial opens the breaker again', args: [1, 5, [[0, false], [5, false], [9, true], [10, true]]], expected: ['allowed', 'allowed', 'blocked', 'allowed'] },
+      { label: 'Hidden: no calls', args: [3, 10, []], expected: [] },
+      { label: 'Hidden: a success resets the failure count', args: [2, 10, [[0, false], [1, true], [2, false], [3, true], [4, false]]], expected: ['allowed', 'allowed', 'allowed', 'allowed', 'allowed'] },
+      { label: 'Hidden: calls just before the cooldown ends are blocked', args: [1, 10, [[0, false], [9, true], [10, true]]], expected: ['allowed', 'blocked', 'allowed'] },
+      { label: 'Hidden: after closing, failures count from zero again', args: [2, 5, [[0, false], [1, false], [6, true], [7, false], [8, true], [9, false], [10, false], [11, true]]], expected: ['allowed', 'allowed', 'allowed', 'allowed', 'allowed', 'allowed', 'allowed', 'blocked'] },
+    ],
+    hints: ['Keep three things: the current state (closed or open), the failure count and the time the breaker opened.', 'When open and `time < opened_at + cooldown`, the call is blocked and changes nothing. Otherwise it is a trial.', 'After an allowed call: success closes the breaker and resets the count; a failure either adds to the count (when closed) or reopens at this time (after a trial).'],
+  },
+  steps: ref(
+    `def circuit_breaker(threshold, cooldown, calls):
+    failures = 0
+    opened_at = None  # None means closed
+    out = []
+    for t, ok in calls:
+        if opened_at is not None and t < opened_at + cooldown:
+            out.append("blocked")
+            continue
+        out.append("allowed")
+        if ok:
+            failures = 0
+            opened_at = None
+        elif opened_at is not None:
+            opened_at = t  # a failed trial reopens it
+        else:
+            failures += 1
+            if failures >= threshold:
+                opened_at = t
+    return out
+`,
+    `function circuitBreaker(threshold, cooldown, calls) {
+  let failures = 0;
+  let openedAt = null; // null means closed
+  const out = [];
+  for (const [t, ok] of calls) {
+    if (openedAt !== null && t < openedAt + cooldown) {
+      out.push("blocked");
+      continue;
+    }
+    out.push("allowed");
+    if (ok) {
+      failures = 0;
+      openedAt = null;
+    } else if (openedAt !== null) {
+      openedAt = t; // a failed trial reopens it
+    } else {
+      failures += 1;
+      if (failures >= threshold) openedAt = t;
+    }
+  }
+  return out;
+}
+`,
+    'The whole state machine is a failure count and an optional "opened at" time. A call is blocked only while the cooldown has not passed.',
+  ),
+  complexity: { time: 'O(n)', space: 'O(1) besides the output' },
+  mistakes: ['Counting failures that are not consecutive.', 'Forgetting to reset the count when the trial succeeds.', 'Letting blocked calls change the state or the failure count.', 'Using `>` instead of `>=` for the end of the cooldown.'],
+  recap: 'A circuit breaker is closed, open or in a trial: it trips after consecutive failures and heals through one trial call.',
+  tags: ['circuit-breaker', 'resilience', 'state-machine'],
+}
+
+// ---- 22. Autocomplete -------------------------------------------------------------------------------
+
+const autocomplete: CodingQuestion = {
+  id: 'autocomplete-suggestions',
+  title: 'Autocomplete suggestions',
+  topic: 'Search',
+  difficulty: 'easy',
+  estimated_time_minutes: 15,
+  blurb: 'Return the first few words that start with what the user has typed, in alphabetical order.',
+  statement: 'Given a list of words (it may contain duplicates), a typed `prefix` and a number `k`, return up to `k` **distinct** words that start with the prefix, in alphabetical order. Matching is case-sensitive.',
+  input_format: '`words` is a list of strings. `prefix` is a string (possibly empty). `k` is a non-negative integer.',
+  output_format: 'A list of at most `k` strings.',
+  constraints: ['0 <= words.length <= 10^5', '0 <= k <= 10^5'],
+  examples: [
+    { input: 'words ["car", "cat", "dog", "cart", "car"], prefix "ca", k 2', output: '["car", "cart"]', explanation: 'The matching distinct words are car, cart and cat; the first two alphabetically are returned.' },
+    { input: 'words ["a", "b"], prefix "", k 5', output: '["a", "b"]', explanation: 'An empty prefix matches every word.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'autocomplete', javascript: 'autocomplete' },
+    starter: {
+      python: `def autocomplete(words, prefix, k):
+    # return up to k distinct matching words in alphabetical order
+    pass
+`,
+      javascript: `function autocomplete(words, prefix, k) {
+  // return up to k distinct matching words in alphabetical order
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: the first two matches in order', args: [['car', 'cat', 'dog', 'cart', 'car'], 'ca', 2], expected: ['car', 'cart'] },
+      { label: 'Sample 2: an empty prefix matches everything', args: [['b', 'a'], '', 5], expected: ['a', 'b'] },
+      { label: 'Hidden: nothing matches', args: [['apple'], 'z', 3], expected: [] },
+      { label: 'Hidden: k is zero', args: [['apple'], 'a', 0], expected: [] },
+      { label: 'Hidden: matching is case-sensitive', args: [['Apple', 'apple', 'apricot'], 'ap', 5], expected: ['apple', 'apricot'] },
+      { label: 'Hidden: duplicates are listed once', args: [['go', 'go', 'goal', 'go'], 'go', 5], expected: ['go', 'goal'] },
+    ],
+    hints: ['Keep only words that start with the prefix.', 'Remove duplicates, for example with a set.', 'Sort alphabetically and return the first `k`.'],
+  },
+  steps: ref(
+    `def autocomplete(words, prefix, k):
+    matches = sorted({w for w in words if w.startswith(prefix)})
+    return matches[:k]
+`,
+    `function autocomplete(words, prefix, k) {
+  const matches = [...new Set(words.filter((w) => w.startsWith(prefix)))];
+  matches.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  return matches.slice(0, k);
+}
+`,
+    'Filter by prefix, remove duplicates, sort and cut. For huge dictionaries a trie (or a sorted array with binary search) avoids scanning every word.',
+  ),
+  complexity: { time: 'O(n × L + m log m) for n words of length L and m matches', space: 'O(m)' },
+  mistakes: ['Returning duplicates.', 'Using the default JavaScript sort for words with capital letters without a plain comparison.', 'Matching the prefix anywhere in the word instead of at the start.', 'Not handling `k` larger than the number of matches.'],
+  recap: 'Autocomplete is filter by prefix, deduplicate, sort and take k; a trie speeds it up at scale.',
+  tags: ['strings', 'search', 'sorting'],
+}
+
+// ---- 23. JSON diff ----------------------------------------------------------------------------------
+
+const jsonDiff: CodingQuestion = {
+  id: 'json-diff',
+  title: 'Diff two JSON objects',
+  topic: 'Data comparison',
+  difficulty: 'hard',
+  estimated_time_minutes: 35,
+  blurb: 'List which fields were added, removed or changed between two versions of a record, like an audit log does.',
+  statement: 'Write `json_diff(a, b)` that compares two JSON objects and returns a list of `[kind, path]` entries, sorted by `path` (plain string order). `path` is the keys joined with `"."`.\n\n- `"added"`: the key exists only in `b`.\n- `"removed"`: the key exists only in `a`.\n- `"changed"`: the key exists in both with different values.\n\nWhen both values are objects, compare them recursively and report the inner paths. Lists and other values are compared as whole values (deeply equal means unchanged). Report an added or removed object as one entry for its own path.',
+  input_format: '`a` and `b` are JSON objects.',
+  output_format: 'A list of `[kind, path]` pairs sorted by path.',
+  constraints: ['The nesting depth is at most 50', 'Keys do not contain dots', 'The total number of values is at most 10^5'],
+  examples: [
+    { input: 'a {"name": "Asha", "age": 30}, b {"name": "Asha", "age": 31, "city": "Pune"}', output: '[["changed", "age"], ["added", "city"]]', explanation: 'age changed, city is new and name is the same.' },
+    { input: 'a {"x": {"y": 1}}, b {"x": {"y": 2}}', output: '[["changed", "x.y"]]', explanation: 'Objects are compared recursively, so the path of the inner key is reported.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'json_diff', javascript: 'jsonDiff' },
+    starter: {
+      python: `def json_diff(a, b):
+    # return a list of [kind, path] sorted by path
+    pass
+`,
+      javascript: `function jsonDiff(a, b) {
+  // return an array of [kind, path] sorted by path
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: changed and added fields', args: [{ name: 'Asha', age: 30 }, { name: 'Asha', age: 31, city: 'Pune' }], expected: [['changed', 'age'], ['added', 'city']] },
+      { label: 'Sample 2: a nested change is reported by its full path', args: [{ x: { y: 1 } }, { x: { y: 2 } }], expected: [['changed', 'x.y']] },
+      { label: 'Hidden: identical objects', args: [{ a: [1, 2], b: { c: null } }, { a: [1, 2], b: { c: null } }], expected: [] },
+      { label: 'Hidden: removed fields', args: [{ a: 1, b: 2 }, { a: 1 }], expected: [['removed', 'b']] },
+      { label: 'Hidden: lists are compared as whole values', args: [{ tags: ['a', 'b'] }, { tags: ['a', 'c'] }], expected: [['changed', 'tags']] },
+      { label: 'Hidden: an added object is one entry', args: [{}, { user: { name: 'x', age: 1 } }], expected: [['added', 'user']] },
+      { label: 'Hidden: a value changes type', args: [{ a: 1, b: { c: 1 } }, { a: { z: 1 }, b: 5 }], expected: [['changed', 'a'], ['changed', 'b']] },
+    ],
+    hints: ['Write a helper that compares two objects with a path prefix and fills a result list.', 'For each key: only in `b` is added, only in `a` is removed; if both values are objects recurse, otherwise compare them for deep equality.', 'Sort the result by path at the end.'],
+  },
+  steps: ref(
+    `def json_diff(a, b):
+    out = []
+
+    def is_obj(v):
+        return isinstance(v, dict)
+
+    def walk(x, y, prefix):
+        for key in set(x) | set(y):
+            path = prefix + key
+            if key not in y:
+                out.append(["removed", path])
+            elif key not in x:
+                out.append(["added", path])
+            elif is_obj(x[key]) and is_obj(y[key]):
+                walk(x[key], y[key], path + ".")
+            elif x[key] != y[key] or type(x[key]) is not type(y[key]):
+                out.append(["changed", path])
+
+    walk(a, b, "")
+    out.sort(key=lambda e: e[1])
+    return out
+`,
+    `function jsonDiff(a, b) {
+  const out = [];
+  const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+  const same = (x, y) => JSON.stringify(x) === JSON.stringify(y);
+
+  function walk(x, y, prefix) {
+    const keys = new Set([...Object.keys(x), ...Object.keys(y)]);
+    for (const key of keys) {
+      const path = prefix + key;
+      if (!(key in y)) out.push(["removed", path]);
+      else if (!(key in x)) out.push(["added", path]);
+      else if (isObj(x[key]) && isObj(y[key])) walk(x[key], y[key], path + ".");
+      else if (!same(x[key], y[key])) out.push(["changed", path]);
+    }
+  }
+
+  walk(a, b, "");
+  out.sort((p, q) => (p[1] < q[1] ? -1 : p[1] > q[1] ? 1 : 0));
+  return out;
+}
+`,
+    'Walk both objects together, building the path. Objects on both sides recurse; anything else is compared as a whole value. Sort the paths at the end.',
+  ),
+  complexity: { time: 'O(size of both objects + r log r) for r reported changes', space: 'O(depth + r)' },
+  mistakes: ['Reporting every inner key of an added or removed object instead of one entry.', 'Comparing lists element by element and reporting indexes (the rule says whole values).', 'Treating `null` as an object and crashing in the recursion.', 'Forgetting the final sort, so the order depends on key order.'],
+  recap: 'A diff walks both structures together: missing keys are added or removed, objects recurse, everything else is compared whole.',
+  tags: ['diff', 'recursion', 'json'],
+}
+
+// ---- 24. Cart total ---------------------------------------------------------------------------------
+
+const cart: CodingQuestion = {
+  id: 'cart-total',
+  title: 'Shopping cart total',
+  topic: 'E-commerce',
+  difficulty: 'medium',
+  estimated_time_minutes: 25,
+  blurb: 'Compute subtotal, coupon discount, tax and total with whole-number money (paise or cents) so rounding is exact.',
+  statement: 'All money is in whole minor units (paise or cents), so there are no decimals. Given cart `items` as `[price, quantity]` and an optional `coupon`:\n\n1. `subtotal` = sum of `price × quantity`.\n2. `discount`: for `["percent", p]` it is `subtotal × p // 100` (rounded down); for `["fixed", amount]` it is `min(amount, subtotal)`; for `null` it is 0.\n3. `tax` is 18% of `(subtotal - discount)`, rounded half up: `((subtotal - discount) × 18 + 50) // 100`.\n4. `total` = `subtotal - discount + tax`.\n\nReturn an object with `subtotal`, `discount`, `tax` and `total`.',
+  input_format: '`items` is a list of `[price, quantity]` with non-negative integers. `coupon` is `null`, `["percent", p]` with `0 <= p <= 100`, or `["fixed", amount]`.',
+  output_format: 'An object `{ subtotal, discount, tax, total }` of integers.',
+  constraints: ['0 <= items.length <= 10^4', 'All values fit comfortably in 53-bit integers'],
+  examples: [
+    { input: 'items [[1000, 2], [550, 1]], coupon ["percent", 10]', output: '{ subtotal: 2550, discount: 255, tax: 413, total: 2708 }', explanation: 'Subtotal 2550; 10% discount is 255; tax is 18% of 2295 = 413.1, rounded to 413.' },
+    { input: 'items [[500, 1]], coupon ["fixed", 900]', output: '{ subtotal: 500, discount: 500, tax: 0, total: 0 }', explanation: 'The fixed discount can not be more than the subtotal.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'cart_total', javascript: 'cartTotal' },
+    starter: {
+      python: `def cart_total(items, coupon):
+    # return {"subtotal": ..., "discount": ..., "tax": ..., "total": ...}
+    pass
+`,
+      javascript: `function cartTotal(items, coupon) {
+  // return { subtotal, discount, tax, total }
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: a percentage coupon', args: [[[1000, 2], [550, 1]], ['percent', 10]], expected: { subtotal: 2550, discount: 255, tax: 413, total: 2708 } },
+      { label: 'Sample 2: a fixed coupon larger than the subtotal', args: [[[500, 1]], ['fixed', 900]], expected: { subtotal: 500, discount: 500, tax: 0, total: 0 } },
+      { label: 'Hidden: an empty cart', args: [[], null], expected: { subtotal: 0, discount: 0, tax: 0, total: 0 } },
+      { label: 'Hidden: no coupon', args: [[[999, 3]], null], expected: { subtotal: 2997, discount: 0, tax: 539, total: 3536 } },
+      { label: 'Hidden: the percentage discount is rounded down', args: [[[333, 1]], ['percent', 50]], expected: { subtotal: 333, discount: 166, tax: 30, total: 197 } },
+      { label: 'Hidden: a fixed coupon smaller than the subtotal', args: [[[2000, 1], [100, 5]], ['fixed', 300]], expected: { subtotal: 2500, discount: 300, tax: 396, total: 2596 } },
+    ],
+    hints: ['Use integer arithmetic only: `//` in Python, and `Math.floor` in JavaScript for the percentage discount.', 'Tax is charged on the amount after the discount, and is rounded half up with the `+ 50` trick.', 'The total is the discounted amount plus the tax.'],
+  },
+  steps: ref(
+    `def cart_total(items, coupon):
+    subtotal = sum(price * qty for price, qty in items)
+    if coupon is None:
+        discount = 0
+    elif coupon[0] == "percent":
+        discount = subtotal * coupon[1] // 100
+    else:
+        discount = min(coupon[1], subtotal)
+    taxable = subtotal - discount
+    tax = (taxable * 18 + 50) // 100
+    return {"subtotal": subtotal, "discount": discount, "tax": tax, "total": taxable + tax}
+`,
+    `function cartTotal(items, coupon) {
+  const subtotal = items.reduce((sum, [price, qty]) => sum + price * qty, 0);
+  let discount = 0;
+  if (coupon !== null) {
+    discount = coupon[0] === "percent" ? Math.floor((subtotal * coupon[1]) / 100) : Math.min(coupon[1], subtotal);
+  }
+  const taxable = subtotal - discount;
+  const tax = Math.floor((taxable * 18 + 50) / 100);
+  return { subtotal, discount, tax, total: taxable + tax };
+}
+`,
+    'Keep money in whole minor units so there is no floating-point error; follow the order: subtotal, discount, tax on the discounted amount, total.',
+  ),
+  complexity: { time: 'O(number of items)', space: 'O(1)' },
+  mistakes: ['Using floating-point numbers for money (0.1 + 0.2 problems).', 'Charging tax on the amount before the discount.', 'Letting a fixed coupon make the total negative.', 'Rounding the percentage discount up instead of down.'],
+  recap: 'Store money as integers of the smallest unit and apply the steps in a fixed order.',
+  tags: ['money', 'integers', 'e-commerce'],
+}
+
+// ---- 25. LFU cache ----------------------------------------------------------------------------------
+
+const lfu: CodingQuestion = {
+  id: 'lfu-cache',
+  title: 'LFU cache',
+  topic: 'Caching',
+  difficulty: 'hard',
+  estimated_time_minutes: 40,
+  blurb: 'Evict the least frequently used entry, using recency to break ties.',
+  statement: 'Implement `LFUCache(capacity)` with `get(key)` and `put(key, value)`.\n\nEvery entry has a **use count**. A new entry starts with 1. Each successful `get` and each `put` that updates an existing key increases the count by 1. When a new key is added to a full cache, evict the entry with the **lowest use count**; if several have the lowest count, evict the **least recently used** of them. `get` returns the value, or `null` if the key is missing. A cache with capacity 0 stores nothing.',
+  input_format: '`capacity` is a non-negative integer. Operations are given as `["put", key, value]` and `["get", key]` through a small driver.',
+  output_format: '`get` returns the value or `null`; `put` returns nothing.',
+  constraints: ['0 <= capacity <= 10^5', 'Keys are strings, values are integers'],
+  examples: [
+    { input: 'capacity 2: put a 1; put b 2; get a; put c 3; get b; get a', output: '1, null, 1', explanation: 'a has been used twice and b once, so adding c evicts b.' },
+    { input: 'capacity 2: put a 1; put b 2; put c 3; get a', output: 'null', explanation: 'a and b both have count 1; a is the least recently used, so it is evicted when c arrives.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'simulate_lfu', javascript: 'simulateLfu' },
+    symbol: { python: 'class LFUCache', javascript: 'class LFUCache' },
+    driver: {
+      python: `def simulate_lfu(capacity, ops):
+    cache = LFUCache(capacity)
+    out = []
+    for op in ops:
+        if op[0] == "put":
+            cache.put(op[1], op[2])
+        else:
+            out.append(cache.get(op[1]))
+    return out
+`,
+      javascript: `function simulateLfu(capacity, ops) {
+  const cache = new LFUCache(capacity);
+  const out = [];
+  for (const op of ops) {
+    if (op[0] === "put") cache.put(op[1], op[2]);
+    else {
+      const v = cache.get(op[1]);
+      out.push(v === undefined ? null : v);
+    }
+  }
+  return out;
+}
+`,
+    },
+    starter: {
+      python: `class LFUCache:
+    def __init__(self, capacity):
+        pass
+
+    def get(self, key):
+        pass
+
+    def put(self, key, value):
+        pass
+`,
+      javascript: `class LFUCache {
+  constructor(capacity) {}
+
+  get(key) {}
+
+  put(key, value) {}
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: the less used entry is evicted', args: [2, [['put', 'a', 1], ['put', 'b', 2], ['get', 'a'], ['put', 'c', 3], ['get', 'b'], ['get', 'a']]], expected: [1, null, 1] },
+      { label: 'Sample 2: ties go to the least recently used', args: [2, [['put', 'a', 1], ['put', 'b', 2], ['put', 'c', 3], ['get', 'a'], ['get', 'b'], ['get', 'c']]], expected: [null, 2, 3] },
+      { label: 'Hidden: a capacity of zero stores nothing', args: [0, [['put', 'a', 1], ['get', 'a']]], expected: [null] },
+      { label: 'Hidden: updating a key counts as a use', args: [2, [['put', 'a', 1], ['put', 'b', 2], ['put', 'a', 10], ['put', 'c', 3], ['get', 'a'], ['get', 'b'], ['get', 'c']]], expected: [10, null, 3] },
+      { label: 'Hidden: a new entry can be evicted by the next newcomer', args: [1, [['put', 'a', 1], ['get', 'a'], ['put', 'b', 2], ['get', 'a'], ['get', 'b']]], expected: [1, null, 2] },
+      { label: 'Hidden: counts beat recency', args: [2, [['put', 'a', 1], ['get', 'a'], ['get', 'a'], ['put', 'b', 2], ['put', 'c', 3], ['get', 'a'], ['get', 'b'], ['get', 'c']]], expected: [1, 1, 1, null, 3] },
+    ],
+    hints: ['Store for each key its value, its use count and the "time" of its last use (a counter that goes up on every operation).', 'To evict, find the entry with the smallest (count, last use) pair and delete it. A simple scan is fine for the tests.', 'Remember: `get` on a missing key changes nothing, and `put` on an existing key increases its count.'],
+  },
+  steps: ref(
+    `class LFUCache:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.entries = {}  # key -> [value, count, last_use]
+        self.clock = 0
+
+    def _touch(self, key):
+        self.clock += 1
+        entry = self.entries[key]
+        entry[1] += 1
+        entry[2] = self.clock
+
+    def get(self, key):
+        if key not in self.entries:
+            return None
+        self._touch(key)
+        return self.entries[key][0]
+
+    def put(self, key, value):
+        if self.capacity == 0:
+            return
+        if key in self.entries:
+            self.entries[key][0] = value
+            self._touch(key)
+            return
+        if len(self.entries) >= self.capacity:
+            victim = min(self.entries, key=lambda k: (self.entries[k][1], self.entries[k][2]))
+            del self.entries[victim]
+        self.clock += 1
+        self.entries[key] = [value, 1, self.clock]
+`,
+    `class LFUCache {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.entries = new Map(); // key -> { value, count, lastUse }
+    this.clock = 0;
+  }
+
+  touch(key) {
+    const entry = this.entries.get(key);
+    this.clock += 1;
+    entry.count += 1;
+    entry.lastUse = this.clock;
+  }
+
+  get(key) {
+    if (!this.entries.has(key)) return null;
+    this.touch(key);
+    return this.entries.get(key).value;
+  }
+
+  put(key, value) {
+    if (this.capacity === 0) return;
+    if (this.entries.has(key)) {
+      this.entries.get(key).value = value;
+      this.touch(key);
+      return;
+    }
+    if (this.entries.size >= this.capacity) {
+      let victim = null;
+      for (const [k, e] of this.entries) {
+        const v = victim === null ? null : this.entries.get(victim);
+        if (v === null || e.count < v.count || (e.count === v.count && e.lastUse < v.lastUse)) victim = k;
+      }
+      this.entries.delete(victim);
+    }
+    this.clock += 1;
+    this.entries.set(key, { value, count: 1, lastUse: this.clock });
+  }
+}
+`,
+    'Each entry carries its use count and the time of its last use; the eviction victim is the smallest (count, last use) pair. This scan is O(n) per eviction; an O(1) design keeps one ordered list per count.',
+  ),
+  complexity: { time: 'get O(1); put O(n) when it must evict (O(1) with a list per count)', space: 'O(capacity)' },
+  mistakes: ['Forgetting that updating an existing key also counts as a use.', 'Breaking ties by insertion order instead of last use.', 'Evicting before checking whether the key already exists.', 'Not handling a capacity of zero.'],
+  recap: 'LFU evicts by (use count, last use); remember to count both reads and updates.',
+  tags: ['cache', 'lfu', 'data-structures'],
+}
+
+export const CODING: CodingQuestion[] = [aggregate, topEndpoints, brackets, mergeLogs, autocomplete, semver, retry, debounce, cursor, rateLimit, tokenBucket, dedupe, route, validate, peak, flatten, deepMerge, query, cart, ttlCache, pool, breaker, jsonDiff, lfu, sse]
 export const CODING_BY_ID: Record<string, CodingQuestion> = Object.fromEntries(CODING.map((c) => [c.id, c]))

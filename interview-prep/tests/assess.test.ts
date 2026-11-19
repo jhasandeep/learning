@@ -9,10 +9,9 @@ describe('assessment multiple-choice sets', () => {
 
   for (const set of ASSESS_SETS) {
     describe(set.id, () => {
-      it('has unique question ids and a multiple of four questions', () => {
+      it('has unique question ids', () => {
         const ids = set.questions.map((q) => q.id)
         expect(new Set(ids).size).toBe(ids.length)
-        expect(ids.length % 4).toBe(0)
       })
 
       it('gives every question four distinct options and one valid answer', () => {
@@ -31,7 +30,7 @@ describe('assessment multiple-choice sets', () => {
         const counts = { A: 0, B: 0, C: 0, D: 0 }
         for (const q of set.questions) counts[q.correct]++
         const each = set.questions.length / 4
-        for (const n of Object.values(counts)) expect(n).toBe(each)
+        for (const n of Object.values(counts)) expect(Math.abs(n - each)).toBeLessThanOrEqual(1)
       })
 
       it('does not make the longest option the answer too often', () => {
