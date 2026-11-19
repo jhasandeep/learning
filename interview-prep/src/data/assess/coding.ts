@@ -642,5 +642,328 @@ const sse: CodingQuestion = {
   tags: ['streaming', 'sse', 'llm', 'parsing'],
 }
 
-export const CODING: CodingQuestion[] = [aggregate, retry, rateLimit, route, ttlCache, pool, sse]
+
+// ---- 8. Debounce ------------------------------------------------------------------------------------
+
+const debounce: CodingQuestion = {
+  id: 'debounce-timeline',
+  title: 'Debounce: when does it fire?',
+  topic: 'Event handling',
+  difficulty: 'easy',
+  estimated_time_minutes: 20,
+  blurb: 'Work out when a trailing debounced search or save call really runs, given the times the user triggered it.',
+  statement: 'A function is debounced with a delay of `wait` milliseconds (trailing edge). Each call schedules the real function to run at `time + wait`, and a new call made **before** that moment cancels the pending run and schedules a new one. If a call arrives at exactly the scheduled time, the pending run happens first and the new call starts a fresh timer.\n\nGiven the times at which the debounced function was called (in non-decreasing order), return the times at which the real function actually runs.',
+  input_format: '`wait` is a positive integer. `times` is a list of non-negative integers in non-decreasing order.',
+  output_format: 'A list of the times the real function runs.',
+  constraints: ['1 <= wait <= 10^9', '0 <= times.length <= 10^5', 'Times are integers in non-decreasing order'],
+  examples: [
+    { input: 'wait 200, calls at [0, 50, 100, 400]', output: '[300, 600]', explanation: 'The calls at 0, 50 and 100 keep resetting the timer, so the run happens 200 after the last one (300). The call at 400 starts another timer that ends at 600.' },
+    { input: 'wait 100, calls at [0, 100]', output: '[100, 200]', explanation: 'The first timer ends at exactly 100, when the second call arrives, so it runs first. The second call then runs at 200.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'debounce_fires', javascript: 'debounceFires' },
+    starter: {
+      python: `def debounce_fires(wait, times):
+    # return the list of times the real function runs
+    pass
+`,
+      javascript: `function debounceFires(wait, times) {
+  // return the array of times the real function runs
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: a burst of calls fires once, after the last one', args: [200, [0, 50, 100, 400]], expected: [300, 600] },
+      { label: 'Sample 2: a call at exactly the fire time lets the pending run happen', args: [100, [0, 100]], expected: [100, 200] },
+      { label: 'Hidden: no calls', args: [10, []], expected: [] },
+      { label: 'Hidden: a single call', args: [10, [5]], expected: [15] },
+      { label: 'Hidden: a long burst', args: [10, [0, 1, 2, 3]], expected: [13] },
+      { label: 'Hidden: well-spaced calls all fire', args: [50, [0, 100, 200]], expected: [50, 150, 250] },
+    ],
+    hints: ['Remember only the time of the pending run (or "none").', 'For each call at time `t`: if a run is pending and `t` is at or after its time, that run has already happened, so record it.', 'Then set the pending run to `t + wait`. When the calls end, the last pending run still happens.'],
+  },
+  steps: ref(
+    `def debounce_fires(wait, times):
+    fires = []
+    pending = None
+    for t in times:
+        if pending is not None and t >= pending:
+            fires.append(pending)
+        pending = t + wait
+    if pending is not None:
+        fires.append(pending)
+    return fires
+`,
+    `function debounceFires(wait, times) {
+  const fires = [];
+  let pending = null;
+  for (const t of times) {
+    if (pending !== null && t >= pending) fires.push(pending);
+    pending = t + wait;
+  }
+  if (pending !== null) fires.push(pending);
+  return fires;
+}
+`,
+    'Only one timer can be pending. A new call either finds it already expired (it ran) or cancels it, and then sets a new one.',
+  ),
+  complexity: { time: 'O(n)', space: 'O(1) besides the output' },
+  mistakes: ['Restarting the timer without noticing that the previous one had already fired.', 'Using `>` instead of `>=` at the boundary.', 'Forgetting the final pending run after the last call.', 'Confusing debounce with throttle (throttle runs at most once per interval, even during a burst).'],
+  recap: 'A debounce keeps one pending timer: a later call either replaces it or finds it already fired.',
+  tags: ['debounce', 'timers', 'frontend'],
+}
+
+// ---- 9. Cursor pagination ---------------------------------------------------------------------------
+
+const cursor: CodingQuestion = {
+  id: 'cursor-pagination',
+  title: 'Cursor-based pagination',
+  topic: 'API design',
+  difficulty: 'easy',
+  estimated_time_minutes: 20,
+  blurb: 'Return the next page of an ID-ordered list using a cursor instead of page numbers, like a feed endpoint.',
+  statement: 'A feed API returns items sorted by id in increasing order. Instead of page numbers it uses a **cursor**: the id of the last item the client has already seen (or `null` for the first page).\n\nImplement `next_page(ids, limit, cursor)`. Return the first `limit` ids that are **greater than** the cursor, and a `next_cursor`: the last id of the page when more ids remain after it, otherwise `null`.',
+  input_format: '`ids` is a sorted list of distinct integers. `limit` is a positive integer. `cursor` is an integer or `null`. The cursor does not have to be one of the ids.',
+  output_format: 'An object `{ items, next_cursor }`.',
+  constraints: ['0 <= ids.length <= 10^5', '1 <= limit <= 10^5', 'ids are strictly increasing'],
+  examples: [
+    { input: 'ids [1,2,3,4,5], limit 2, cursor null', output: '{ items: [1, 2], next_cursor: 2 }', explanation: 'The first page holds 1 and 2, and more ids remain, so the client continues from 2.' },
+    { input: 'ids [1,2,3,4,5], limit 2, cursor 4', output: '{ items: [5], next_cursor: null }', explanation: 'Only 5 is greater than 4, and nothing remains afterwards.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'next_page', javascript: 'nextPage' },
+    starter: {
+      python: `def next_page(ids, limit, cursor):
+    # return {"items": [...], "next_cursor": id or None}
+    pass
+`,
+      javascript: `function nextPage(ids, limit, cursor) {
+  // return { items: [...], next_cursor: id or null }
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: the first page', args: [[1, 2, 3, 4, 5], 2, null], expected: { items: [1, 2], next_cursor: 2 } },
+      { label: 'Sample 2: the last page has no next cursor', args: [[1, 2, 3, 4, 5], 2, 4], expected: { items: [5], next_cursor: null } },
+      { label: 'Hidden: a page that fits exactly ends the list', args: [[1, 2, 3], 3, null], expected: { items: [1, 2, 3], next_cursor: null } },
+      { label: 'Hidden: a cursor past the end', args: [[1, 2, 3], 2, 3], expected: { items: [], next_cursor: null } },
+      { label: 'Hidden: the cursor is not one of the ids', args: [[10, 20, 30, 40], 2, 15], expected: { items: [20, 30], next_cursor: 30 } },
+      { label: 'Hidden: no ids at all', args: [[], 5, null], expected: { items: [], next_cursor: null } },
+    ],
+    hints: ['Find the first position whose id is greater than the cursor (a binary search works because the list is sorted).', 'Take `limit` ids from that position.', 'If there are still ids after the page, the next cursor is the last id of the page; otherwise it is null.'],
+  },
+  steps: ref(
+    `def next_page(ids, limit, cursor):
+    lo, hi = 0, len(ids)
+    if cursor is not None:
+        while lo < hi:  # first index with ids[i] > cursor
+            mid = (lo + hi) // 2
+            if ids[mid] > cursor:
+                hi = mid
+            else:
+                lo = mid + 1
+    items = ids[lo:lo + limit]
+    more = lo + limit < len(ids)
+    return {"items": items, "next_cursor": items[-1] if items and more else None}
+`,
+    `function nextPage(ids, limit, cursor) {
+  let lo = 0;
+  let hi = ids.length;
+  if (cursor !== null) {
+    while (lo < hi) { // first index with ids[i] > cursor
+      const mid = (lo + hi) >> 1;
+      if (ids[mid] > cursor) hi = mid;
+      else lo = mid + 1;
+    }
+  }
+  const items = ids.slice(lo, lo + limit);
+  const more = lo + limit < ids.length;
+  return { items, next_cursor: items.length > 0 && more ? items[items.length - 1] : null };
+}
+`,
+    'A binary search finds where the page starts, so the cost does not grow with how deep the client has scrolled, unlike an offset.',
+  ),
+  complexity: { time: 'O(log n + limit)', space: 'O(limit)' },
+  mistakes: ['Returning a next cursor on the last page, so clients request one empty page.', 'Using `>=` and repeating the cursor item on the next page.', 'Using offsets: new items inserted while scrolling cause repeats or gaps.', 'Assuming the cursor is always present in the list.'],
+  recap: 'A cursor says "continue after this id", which is stable while data changes and cheap to look up in an index.',
+  tags: ['pagination', 'binary-search', 'rest'],
+}
+
+// ---- 10. Request validation -------------------------------------------------------------------------
+
+const validate: CodingQuestion = {
+  id: 'request-validation',
+  title: 'Validate a request body',
+  topic: 'API validation',
+  difficulty: 'medium',
+  estimated_time_minutes: 25,
+  blurb: 'Check a JSON body against a small schema and return clear error messages, as a validation middleware would.',
+  statement: 'Write `validate(schema, body)`. The schema maps each field name to rules: `type` (`"string"` or `"number"`), optional `required` (default false), and optional `min` / `max`.\n\nCheck the fields in the order they appear in the schema, producing at most one error per field:\n\n1. Missing (absent or `null`): if required, `"<field> is required"`; otherwise skip the field.\n2. Wrong type: `"<field> must be a <type>"`.\n3. Number out of range: `"<field> must be >= <min>"` or `"<field> must be <= <max>"`.\n4. String length out of range: `"<field> must be at least <min> characters"` or `"<field> must be at most <max> characters"`.\n\nFields in the body that are not in the schema are ignored. Return the list of error messages (empty when valid).',
+  input_format: '`schema` is an object of rules. `body` is an object.',
+  output_format: 'A list of error strings.',
+  constraints: ['1 <= number of schema fields <= 100', 'min and max are integers when present', 'A boolean is not a number'],
+  examples: [
+    { input: 'schema {name: string required min 2, age: number min 18}; body {name: "A", age: 15}', output: '["name must be at least 2 characters", "age must be >= 18"]', explanation: 'Both fields are present with the right type, but both fail their range rule.' },
+    { input: 'schema {name: string required}; body {}', output: '["name is required"]', explanation: 'A required field is missing.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'validate', javascript: 'validate' },
+    starter: {
+      python: `def validate(schema, body):
+    # return a list of error messages in schema order
+    pass
+`,
+      javascript: `function validate(schema, body) {
+  // return an array of error messages in schema order
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: range errors on two fields', args: [{ name: { type: 'string', required: true, min: 2 }, age: { type: 'number', min: 18 } }, { name: 'A', age: 15 }], expected: ['name must be at least 2 characters', 'age must be >= 18'] },
+      { label: 'Sample 2: a required field is missing', args: [{ name: { type: 'string', required: true } }, {}], expected: ['name is required'] },
+      { label: 'Hidden: a valid body has no errors', args: [{ name: { type: 'string', required: true, max: 5 }, age: { type: 'number', min: 0, max: 120 } }, { name: 'Asha', age: 30, extra: 1 }], expected: [] },
+      { label: 'Hidden: a wrong type is reported once, without range checks', args: [{ age: { type: 'number', min: 18 } }, { age: '15' }], expected: ['age must be a number'] },
+      { label: 'Hidden: an optional missing field is skipped', args: [{ nick: { type: 'string', min: 3 } }, { nick: null }], expected: [] },
+      { label: 'Hidden: upper bounds', args: [{ code: { type: 'string', max: 3 }, qty: { type: 'number', max: 10 } }, { code: 'ABCD', qty: 11 }], expected: ['code must be at most 3 characters', 'qty must be <= 10'] },
+      { label: 'Hidden: errors follow the schema order', args: [{ a: { type: 'string', required: true }, b: { type: 'number', required: true } }, { b: 'x' }], expected: ['a is required', 'b must be a number'] },
+    ],
+    hints: ['Loop over the schema fields in order; look up each one in the body.', 'Treat a missing key and `null` the same way. Check required first, then the type, and only then the range.', 'For numbers compare the value, for strings compare the length. Report at most one error per field.'],
+  },
+  steps: ref(
+    `def validate(schema, body):
+    errors = []
+    for field, rules in schema.items():
+        value = body.get(field)
+        if value is None:
+            if rules.get("required"):
+                errors.append(field + " is required")
+            continue
+        kind = rules["type"]
+        if kind == "number":
+            ok = isinstance(value, (int, float)) and not isinstance(value, bool)
+        else:
+            ok = isinstance(value, str)
+        if not ok:
+            errors.append(field + " must be a " + kind)
+            continue
+        size = value if kind == "number" else len(value)
+        if "min" in rules and size < rules["min"]:
+            errors.append(field + (" must be >= " if kind == "number" else " must be at least ") + str(rules["min"]) + ("" if kind == "number" else " characters"))
+        elif "max" in rules and size > rules["max"]:
+            errors.append(field + (" must be <= " if kind == "number" else " must be at most ") + str(rules["max"]) + ("" if kind == "number" else " characters"))
+    return errors
+`,
+    `function validate(schema, body) {
+  const errors = [];
+  for (const [field, rules] of Object.entries(schema)) {
+    const value = body[field];
+    if (value === undefined || value === null) {
+      if (rules.required) errors.push(field + " is required");
+      continue;
+    }
+    const kind = rules.type;
+    const ok = kind === "number" ? typeof value === "number" : typeof value === "string";
+    if (!ok) {
+      errors.push(field + " must be a " + kind);
+      continue;
+    }
+    const size = kind === "number" ? value : value.length;
+    if (rules.min !== undefined && size < rules.min) {
+      errors.push(field + (kind === "number" ? " must be >= " : " must be at least ") + rules.min + (kind === "number" ? "" : " characters"));
+    } else if (rules.max !== undefined && size > rules.max) {
+      errors.push(field + (kind === "number" ? " must be <= " : " must be at most ") + rules.max + (kind === "number" ? "" : " characters"));
+    }
+  }
+  return errors;
+}
+`,
+    'Walk the schema in order and run the checks as a ladder: missing, then type, then range. A failed step stops the later ones for that field.',
+  ),
+  complexity: { time: 'O(number of fields)', space: 'O(number of errors)' },
+  mistakes: ['Range-checking a value that already has the wrong type.', 'Treating `0` or an empty string as "missing" because they are falsy.', 'Reporting errors in the order of the body instead of the schema.', 'Trusting the client: validation in the browser never replaces validation on the server.'],
+  recap: 'Validation is a ladder of checks per field (missing, type, range); stop at the first failure so each field reports one clear error.',
+  tags: ['validation', 'api', 'strings'],
+}
+
+// ---- 11. Peak concurrent connections ----------------------------------------------------------------
+
+const peak: CodingQuestion = {
+  id: 'peak-connections',
+  title: 'Peak concurrent connections',
+  topic: 'Capacity planning',
+  difficulty: 'medium',
+  estimated_time_minutes: 25,
+  blurb: 'Find the highest number of connections that were open at the same moment from a list of sessions.',
+  statement: 'A server logs each session as `[start, end)`: it is open from `start` up to, but **not including**, `end`. Given all the sessions, return the largest number of sessions that were open at the same time. This number tells you how many connections the server must support.',
+  input_format: '`sessions` is a list of `[start, end]` pairs with `start < end`, in any order.',
+  output_format: 'An integer: the peak number of simultaneous sessions (0 if there are no sessions).',
+  constraints: ['0 <= sessions.length <= 10^5', '0 <= start < end <= 10^9'],
+  examples: [
+    { input: '[[0, 5], [1, 3], [2, 6]]', output: '3', explanation: 'All three sessions are open at time 2.' },
+    { input: '[[0, 2], [2, 4]]', output: '1', explanation: 'The first session ends at 2, exactly when the second starts, so they never overlap.' },
+  ],
+  visible: 2,
+  practice: {
+    fn: { python: 'peak_connections', javascript: 'peakConnections' },
+    starter: {
+      python: `def peak_connections(sessions):
+    # return the maximum number of sessions open at the same time
+    pass
+`,
+      javascript: `function peakConnections(sessions) {
+  // return the maximum number of sessions open at the same time
+}
+`,
+    },
+    cases: [
+      { label: 'Sample 1: three overlapping sessions', args: [[[0, 5], [1, 3], [2, 6]]], expected: 3 },
+      { label: 'Sample 2: a session that starts when another ends does not overlap', args: [[[0, 2], [2, 4]]], expected: 1 },
+      { label: 'Hidden: no sessions', args: [[]], expected: 0 },
+      { label: 'Hidden: identical sessions', args: [[[1, 2], [1, 2], [1, 2]]], expected: 3 },
+      { label: 'Hidden: a chain of back-to-back sessions', args: [[[0, 1], [1, 2], [2, 3]]], expected: 1 },
+      { label: 'Hidden: unsorted input with a nested session', args: [[[5, 9], [0, 10], [6, 7], [20, 30]]], expected: 3 },
+    ],
+    hints: ['Turn every session into two events: +1 at `start` and -1 at `end`.', 'Sort the events by time. When a -1 and a +1 happen at the same time, process the -1 first (the end is exclusive).', 'Sweep through the events, keep a running count, and remember the largest value.'],
+  },
+  steps: ref(
+    `def peak_connections(sessions):
+    events = []
+    for start, end in sessions:
+        events.append((start, 1))
+        events.append((end, -1))
+    events.sort()  # at equal times -1 comes before +1
+    current = best = 0
+    for _, delta in events:
+        current += delta
+        best = max(best, current)
+    return best
+`,
+    `function peakConnections(sessions) {
+  const events = [];
+  for (const [start, end] of sessions) {
+    events.push([start, 1]);
+    events.push([end, -1]);
+  }
+  events.sort((a, b) => a[0] - b[0] || a[1] - b[1]); // at equal times -1 comes before +1
+  let current = 0;
+  let best = 0;
+  for (const [, delta] of events) {
+    current += delta;
+    best = Math.max(best, current);
+  }
+  return best;
+}
+`,
+    'A sweep line over sorted start and end events keeps a running count of open sessions; the maximum of that count is the answer.',
+  ),
+  complexity: { time: 'O(n log n)', space: 'O(n)' },
+  mistakes: ['Processing a start before an end at the same time, which overcounts back-to-back sessions.', 'Comparing every pair of sessions (O(n²)).', 'Sorting by start only and forgetting that sessions end.', 'Returning the number of sessions instead of the peak.'],
+  recap: 'Turn intervals into +1 and -1 events, sort them, and sweep with a running count.',
+  tags: ['sweep-line', 'intervals', 'capacity'],
+}
+
+export const CODING: CodingQuestion[] = [aggregate, retry, debounce, cursor, rateLimit, route, validate, peak, ttlCache, pool, sse]
 export const CODING_BY_ID: Record<string, CodingQuestion> = Object.fromEntries(CODING.map((c) => [c.id, c]))
