@@ -2,6 +2,7 @@
 import { async } from './async'
 import { express } from './express'
 import { javascript } from './javascript'
+import { llm } from './llm'
 import { mongodb } from './mongodb'
 import { nestjs } from './nestjs'
 import { nextjs } from './nextjs'
@@ -15,7 +16,7 @@ import type { SyntaxSet } from './types'
 
 export type { SyntaxLang, SyntaxSet, SyntaxSnippet } from './types'
 
-export const SYNTAX_SETS: SyntaxSet[] = [javascript, async, typescript, react, nextjs, nodejs, express, nestjs, testing, sql, mongodb, python]
+export const SYNTAX_SETS: SyntaxSet[] = [javascript, async, typescript, react, nextjs, nodejs, express, nestjs, testing, sql, mongodb, python, llm]
 
 export const SYNTAX_SETS_BY_ID: Record<string, SyntaxSet> = Object.fromEntries(SYNTAX_SETS.map((s) => [s.id, s]))
 
@@ -33,4 +34,5 @@ export const SYNTAX_LOOK: Record<string, { icon: string; color: string }> = {
   sql: { icon: 'sql', color: '#2563eb' },
   mongodb: { icon: 'mongodb', color: '#15803d' },
   python: { icon: 'python', color: '#3776ab' },
+  llm: { icon: 'llm', color: '#8b5cf6' },
 }

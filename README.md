@@ -16,7 +16,7 @@ A personal space for tracking what I'm learning: notes, practice exercises, and 
 - [System Design](notes/system-design/System-Design-Notes.pdf): handwritten-style revision notes covering the Gate Smashers System Design playlist (36 lectures). Source HTML: [`system-design-notes.html`](notes/system-design/system-design-notes.html).
 - [DSA in Python & JavaScript](notes/dsa/DSA-Notes-Python-JS.pdf): handwritten-style notes covering Technical Suneja's *DSA in JavaScript* playlist (#1–#21), with every solution in both languages. The code comes from the tested files in [`exercises/dsa/`](exercises/dsa/).
   - Notebook version: [`DSA-Handwritten-Notes.pdf`](notes/dsa/DSA-Handwritten-Notes.pdf) (ruled paper, handwriting fonts throughout, code in coloured pens).
-- Full-stack developer notes: 14 topics (HTML, CSS, JavaScript, TypeScript, React, Next.js, Node.js, Express & REST, auth & security, SQL, MongoDB, Git, Docker/CI-CD, testing). Read them in the app at `/notes` (switchable handwritten style, runnable code, flashcards). There is also a handwritten PDF per topic in [`interview-prep/public/notes/`](interview-prep/public/notes/).
+- Full-stack developer notes: 16 topics (HTML, CSS, JavaScript, TypeScript, React, Next.js, Node.js, Express & REST, auth & security, SQL, MongoDB, Git, Docker/CI-CD, testing, Gen AI & LLMs, AI in the SDLC). Read them in the app at `/notes` (switchable handwritten style, runnable code, flashcards). There is also a handwritten PDF per topic in [`interview-prep/public/notes/`](interview-prep/public/notes/).
 - Concept boards: every notes topic as a hand-drawn Excalidraw board at `/board`, which you can present and annotate. You can also import PDFs. Download them as PDFs from [`interview-prep/public/notes/boards/`](interview-prep/public/notes/boards/).
 
 ## Roadmap
@@ -38,6 +38,7 @@ Track current goals here. Tick items off as you finish them.
 | 2026-10-19 | Online compiler | Programiz-style compiler for 18 languages, light theme by default |
 | 2026-10-19 | Full-stack notes | 14 topics in the app + handwritten PDFs + flashcard decks |
 | 2026-10-19 | Interview questions | ~400 most-asked questions for 16 technologies, with practice mode and PDFs |
+| 2026-11-22 | Gen AI & AI SDLC | Notes, 50 interview questions, LLM API typing set, boards, PDFs |
 | 2026-10-21 | Interview syntax | 137 snippets to type until memorised; 5/10 min and Auto typing tests |
 | 2026-10-19 | Typing | typing.com-style lessons, timed tests, finger guide, weak-key heatmap |
 | 2026-10-19 | Mind map | Zoomable visual map of all 16 technologies with recall mode |

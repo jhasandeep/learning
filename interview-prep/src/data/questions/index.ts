@@ -1,9 +1,11 @@
 // Most-asked interview questions: one set per technology, in curriculum order.
 import { NOTE_TOPICS_BY_ID } from '../notes'
+import { aiSdlc } from './ai-sdlc'
 import { css } from './css'
 import { docker } from './docker'
 import { dsa } from './dsa'
 import { express } from './express'
+import { genai } from './genai'
 import { git } from './git'
 import { html } from './html'
 import { javascript } from './javascript'
@@ -50,6 +52,8 @@ export const QUESTION_SETS: QuestionTech[] = [
   fromNotes(git),
   fromNotes(docker),
   fromNotes(testing),
+  fromNotes(genai),
+  fromNotes(aiSdlc),
   { ...systemDesign, category: 'Fundamentals', color: '#e11d48', badge: 'SD' },
   { ...dsa, category: 'Fundamentals', color: '#16a34a', badge: 'DSA' },
 ]
