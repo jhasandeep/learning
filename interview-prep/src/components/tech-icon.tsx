@@ -1,4 +1,4 @@
-import { Binary, Network, ShieldCheck, type LucideIcon } from 'lucide-react'
+import { Binary, Briefcase, Network, ShieldCheck, type LucideIcon } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import { cx } from './ui'
 
@@ -21,6 +21,7 @@ const TOPICS: Record<string, Spec> = {
   security: { lucide: ShieldCheck }, sql: { logo: 'postgresql' }, mongodb: { logo: 'mongodb' }, git: { logo: 'git' },
   docker: { logo: 'docker' }, testing: { logo: 'jest' }, 'system-design': { lucide: Network }, dsa: { lucide: Binary },
   nestjs: { logo: 'nestjs' }, python: { logo: 'python' },
+  'company-coding': { lucide: Briefcase }, 'output-event-loop': { logo: 'javascript' }, 'output-python': { logo: 'python' },
 }
 
 /** Logos drawn in black: inverted on dark backgrounds (globals.css .tech-ink). */

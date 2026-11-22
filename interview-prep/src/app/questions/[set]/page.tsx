@@ -31,8 +31,14 @@ export async function generateMetadata({ params }: PageProps<'/questions/[set]'>
 function Body({ q }: { q: Question }) {
   return (
     <div className="space-y-4 text-[15px]">
+      {q.output && q.code && (
+        <>
+          <CodeBlock block={{ type: 'code', lang: q.code.lang, code: q.code.code, run: q.code.run, title: 'Predict the output' }} />
+          <CodeBlock block={{ type: 'code', lang: 'text', code: q.output, title: 'Output' }} />
+        </>
+      )}
       <Answer text={q.a} />
-      {q.code && <CodeBlock block={{ type: 'code', lang: q.code.lang, code: q.code.code, run: q.code.run, title: 'Example' }} />}
+      {!q.output && q.code && <CodeBlock block={{ type: 'code', lang: q.code.lang, code: q.code.code, run: q.code.run, title: 'Example' }} />}
       {q.followUp && (
         <p className="flex gap-2 rounded-xl border border-violet/30 bg-violet/5 px-3.5 py-2.5 text-sm">
           <MessageCircleQuestion size={16} className="mt-0.5 shrink-0 text-violet" />

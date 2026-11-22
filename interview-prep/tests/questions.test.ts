@@ -73,6 +73,17 @@ describe('question sets', () => {
         }
       })
 
+      // Output-guessing questions: the stated output must be what the code really prints.
+      for (const q of set.questions.filter((x): x is Question & { code: NonNullable<Question['code']>; output: string } => Boolean(x.output && x.code))) {
+        it(`${q.id}: stated output is correct`, () => {
+          const { lang, code } = q.code
+          if (lang === 'python' && !hasPython) return
+          const cmd = lang === 'python' ? ['python3', ['-I', '-c', code]] as const : ['node', ['-e', code]] as const
+          const actual = execFileSync(cmd[0], [...cmd[1]], { timeout: 8000, stdio: ['ignore', 'pipe', 'ignore'] }).toString().replace(/\n+$/, '')
+          expect(actual).toBe(q.output)
+        })
+      }
+
       const runnable = set.questions.filter((q): q is Question & { code: NonNullable<Question['code']> } => Boolean(q.code?.run))
       for (const q of runnable) {
         it(`${q.id}: code runs`, async () => {

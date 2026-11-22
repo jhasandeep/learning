@@ -37,6 +37,7 @@ Track current goals here. Tick items off as you finish them.
 | 2026-10-19 | PrepArena app | Next.js interview-prep site: bug-hunt campaign, endless mode, flashcards, progress |
 | 2026-10-19 | Online compiler | Programiz-style compiler for 18 languages, light theme by default |
 | 2026-10-19 | Full-stack notes | 14 topics in the app + handwritten PDFs + flashcard decks |
+| 2026-11-22 | Company prep | 3 new question sets: company coding rounds (Express + React fetch/axios, utilities), JS/event-loop and Python output guessing |
 | 2026-10-19 | Interview questions | ~400 most-asked questions for 16 technologies, with practice mode and PDFs |
 | 2026-10-21 | Interview syntax | 137 snippets to type until memorised; 5/10 min and Auto typing tests |
 | 2026-10-19 | Typing | typing.com-style lessons, timed tests, finger guide, weak-key heatmap |
