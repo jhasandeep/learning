@@ -1,3 +1,4 @@
+import { aiSdlc } from './ai-sdlc'
 import { css } from './css'
 import { git } from './git'
 import { html } from './html'
@@ -5,6 +6,7 @@ import { django } from './django'
 import { docker } from './docker'
 import { express } from './express'
 import { fastapi } from './fastapi'
+import { genai } from './genai'
 import { javascript } from './javascript'
 import { mongodb } from './mongodb'
 import { nextjs } from './nextjs'
@@ -20,7 +22,7 @@ import type { TaskPath } from './types'
 export type { CheckItem, MongoTask, Rule, RuleTask, RunTask, SqlTask, Task, TaskPath } from './types'
 
 /** Every technology's path of hands-on tasks, in the notes curriculum order. */
-export const TASK_PATHS: TaskPath[] = [html, css, javascript, typescript, python, sql, mongodb, react, nextjs, nodejs, express, security, django, fastapi, git, docker, testing]
+export const TASK_PATHS: TaskPath[] = [html, css, javascript, typescript, python, sql, mongodb, react, nextjs, nodejs, express, security, django, fastapi, git, docker, testing, genai, aiSdlc]
 
 export const TASK_PATHS_BY_ID: Record<string, TaskPath> = Object.fromEntries(TASK_PATHS.map((p) => [p.id, p]))
 
