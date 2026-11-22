@@ -39,6 +39,8 @@ export class WorkerRunner {
           case 'started': timer = setTimeout(() => kill('TIMEOUT'), this.timeoutMs); break
           case 'output': handlers.onOutput(ev.stream, ev.text); break
           case 'sql': handlers.onSql?.(ev.items, ev.schema); break
+          case 'mongo': handlers.onMongo?.(ev.steps, ev.collections); break
+          case 'check': handlers.onCheck?.(ev.result); break
           case 'done': finish({ exitCode: ev.exitCode, ms: ev.ms, signal: null }); break
         }
       }

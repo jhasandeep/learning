@@ -13,6 +13,7 @@ export const git: NoteTopic = {
       title: 'How Git thinks',
       blocks: [
         { type: 'def', text: '**Git** is a distributed version control system. A commit is a ==snapshot of the project + a pointer to its parent(s)==; a branch is just a movable pointer to a commit.' },
+        { type: 'analogy', title: 'Think of Git like saving a video game', steps: [{ icon: '🎮', who: 'Playing', tech: 'Working tree', text: 'You change files as you play' }, { icon: '📦', who: 'Choose what to save', tech: 'Staging area', text: 'git add picks the changes' }, { icon: '💾', who: 'Save slot', tech: 'Commit', text: 'A snapshot you can always return to' }, { icon: '☁️', who: 'Cloud save', tech: 'Remote (GitHub)', text: 'git push shares it with the team' }] },
         { type: 'flow', steps: ['Working tree', 'git add → Staging area', 'git commit → Local repo', 'git push → Remote (GitHub)'] },
         {
           type: 'code', lang: 'text', title: 'Everyday commands',

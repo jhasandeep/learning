@@ -163,3 +163,14 @@ body {
 @media (min-width: 640px) { .typing-text { --line: 2.75rem; } }
 .typing-text.typing-compact { --line: 1.75rem; }
 @media (min-width: 640px) { .typing-text.typing-compact { --line: 2rem; } }
+
+/* Find-the-mistake: a wrong line shakes. */
+@keyframes spot-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.spot-shake { animation: spot-shake 0.3s ease; }
+@media (prefers-reduced-motion: reduce) { .spot-shake { animation: none; } }
+
+@media print {
+  .cheat .cheat-sheet { break-inside: avoid-page; border-radius: 0; }
+  .cheat .cheat-group { break-inside: avoid; }
+  .cheat { max-width: none; }
+}

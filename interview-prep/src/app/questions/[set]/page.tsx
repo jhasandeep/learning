@@ -1,4 +1,4 @@
-import { BookOpen, ChevronLeft, Download, Flame, Layers, MessageCircleQuestion, Network, PenTool } from 'lucide-react'
+import { BookOpen, Bug, ChevronLeft, GraduationCap, Download, Flame, Layers, ListChecks, MessageCircleQuestion, Network, PenTool } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -9,7 +9,10 @@ import { TechTile } from '@/components/tech-icon'
 import { buttonClass } from '@/components/ui'
 import { BOARDS_BY_ID } from '@/data/boards'
 import { DECKS } from '@/data/decks'
+import { LEARN_BY_ID } from '@/data/learn'
+import { MCQ_BY_ID } from '@/data/mcq'
 import { QUESTION_SETS, QUESTION_SETS_BY_ID, questionKey, questionText, type Question, type QuestionTech } from '@/data/questions'
+import { SPOT_BY_ID } from '@/data/spot'
 import { QuestionBrowser, type QuestionItem } from '../question-browser'
 import '../../notes/notes.css'
 import '../questions.css'
@@ -31,8 +34,14 @@ export async function generateMetadata({ params }: PageProps<'/questions/[set]'>
 function Body({ q }: { q: Question }) {
   return (
     <div className="space-y-4 text-[15px]">
+      {q.output && q.code && (
+        <>
+          <CodeBlock block={{ type: 'code', lang: q.code.lang, code: q.code.code, run: q.code.run, title: 'Predict the output' }} />
+          <CodeBlock block={{ type: 'code', lang: 'text', code: q.output, title: 'Output' }} />
+        </>
+      )}
       <Answer text={q.a} />
-      {q.code && <CodeBlock block={{ type: 'code', lang: q.code.lang, code: q.code.code, run: q.code.run, title: 'Example' }} />}
+      {!q.output && q.code && <CodeBlock block={{ type: 'code', lang: q.code.lang, code: q.code.code, run: q.code.run, title: 'Example' }} />}
       {q.followUp && (
         <p className="flex gap-2 rounded-xl border border-violet/30 bg-violet/5 px-3.5 py-2.5 text-sm">
           <MessageCircleQuestion size={16} className="mt-0.5 shrink-0 text-violet" />
@@ -96,6 +105,9 @@ export default async function Page({ params }: PageProps<'/questions/[set]'>) {
               <a href={`/notes/questions/${id}.pdf`} download className={buttonClass('secondary', 'sm')} title="Every question with its answer, as an A4 PDF"><Download size={14} /> PDF</a>
               {!cross && <>
                 {set.notesId && <Link href={`/notes/${set.notesId}`} className={buttonClass('secondary', 'sm')}><BookOpen size={14} /> Notes</Link>}
+                {LEARN_BY_ID[set.id] && <Link href={`/learn/${set.id}`} className={buttonClass('secondary', 'sm')}><GraduationCap size={14} /> Learn</Link>}
+                {MCQ_BY_ID[set.id] && <Link href={`/quiz/${set.id}`} className={buttonClass('secondary', 'sm')}><ListChecks size={14} /> Quiz</Link>}
+                {SPOT_BY_ID[set.id] && <Link href={`/campaign/tech/${set.id}`} className={buttonClass('secondary', 'sm')}><Bug size={14} /> Find the mistake</Link>}
                 {deck && <Link href={`/flashcards/${deck}`} className={buttonClass('secondary', 'sm')}><Layers size={14} /> Flashcards</Link>}
                 <Link href={`/map/${set.id}`} className={buttonClass('secondary', 'sm')}><Network size={14} /> Mind map</Link>
                 {board && <Link href={`/board/${board}`} className={buttonClass('secondary', 'sm')}><PenTool size={14} /> Whiteboard</Link>}

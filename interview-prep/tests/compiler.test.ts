@@ -6,9 +6,9 @@ import { JUDGE0_NAME_PATTERNS } from '@/lib/exec/judge0'
 import { decodeShare, encodeShare } from '@/lib/share'
 
 describe('language registry', () => {
-  it('has the 18 Programiz languages with unique ids and starter code', () => {
-    expect(LANGUAGES).toHaveLength(18)
-    expect(new Set(LANGUAGES.map((l) => l.id)).size).toBe(18)
+  it('has the 18 Programiz languages plus MongoDB, with unique ids and starter code', () => {
+    expect(LANGUAGES).toHaveLength(19)
+    expect(new Set(LANGUAGES.map((l) => l.id)).size).toBe(19)
     for (const l of LANGUAGES) expect(l.template.trim().length).toBeGreaterThan(20)
   })
 

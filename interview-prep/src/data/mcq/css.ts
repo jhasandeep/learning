@@ -1,0 +1,121 @@
+import type { McqSet } from './types'
+
+export const css: McqSet = {
+  id: 'css',
+  questions: [
+    {
+      id: 'specificity',
+      q: 'Which selector has the highest specificity?',
+      choices: ['`#nav a`', '`.menu .item a`', '`nav ul li a`', '`a:hover`'],
+      explain: 'Specificity is counted as (ids, classes/attributes/pseudo-classes, elements). `#nav a` is (1,0,1); one id beats any number of classes: `.menu .item a` is only (0,2,1).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'box-sizing',
+      q: 'With `box-sizing: border-box`, an element has `width: 200px; padding: 20px; border: 5px`. How wide is it on screen?',
+      choices: ['200px', '250px', '240px', '210px'],
+      explain: 'With `border-box` the width ==includes== padding and border, so it stays 200px and the content shrinks to 150px. With the default `content-box` it would be 250px.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'position-absolute',
+      q: 'An element with `position: absolute` is positioned relative to…',
+      choices: [
+        'The nearest positioned ancestor',
+        'Its direct parent element',
+        'The viewport, so it stays put while the page scrolls',
+        'The `<body>` element, unless the `<html>` element has padding',
+      ],
+      explain: 'It looks up the tree for the nearest ==positioned== ancestor (relative, absolute, fixed, sticky, or one with a transform). If none, it uses the initial containing block.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'flex-center',
+      q: 'In a flex container with the default `flex-direction: row`, which property centres items vertically?',
+      choices: ['`align-items: center`', '`justify-content: center`', '`vertical-align: middle`', '`text-align: center`'],
+      explain: '`justify-content` works on the main axis (horizontal in a row); `align-items` works on the cross axis (vertical in a row).',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'rem-em',
+      q: 'What is the difference between `rem` and `em`?',
+      choices: [
+        '`rem` follows the root font size; `em` the local one',
+        '`em` follows the root font size; `rem` follows the parent element',
+        'They behave identically; `rem` is just the newer spelling',
+        '`rem` is a percentage of the viewport width',
+      ],
+      explain: '`em` compounds when nested (1.2em inside 1.2em = 1.44×), which `rem` avoids. Viewport units are `vw`/`vh`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'z-index',
+      q: 'You set `z-index: 9999` on an element but it still appears behind another. The most likely reason?',
+      choices: [
+        'It sits in a lower stacking context',
+        '`z-index` is capped at 999',
+        '`z-index` only works on elements with `display: block`',
+        'The other element comes later in the HTML, so it always wins',
+      ],
+      explain: '`z-index` only competes ==within the same stacking context==. A parent with `opacity < 1`, a `transform`, or `position` + `z-index` creates a new context that caps its children. (It also needs a positioned element or a flex/grid item.)',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'grid-fr',
+      q: 'What does `grid-template-columns: 1fr 2fr` produce?',
+      choices: [
+        'Two columns sharing free space 1:2',
+        'Two fixed columns, 1 pixel and 2 pixels wide',
+        'One column that repeats twice down the page',
+        'Two equal columns',
+      ],
+      explain: '`fr` is a share of the remaining space: here one third and two thirds.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'display-none-visibility',
+      q: 'How does `visibility: hidden` differ from `display: none`?',
+      choices: [
+        '`visibility: hidden` keeps its space; `display: none` doesn\'t',
+        '`display: none` keeps the element\'s space; `visibility: hidden` removes it',
+        'Only `display: none` actually hides the content from the screen',
+        'There is no difference; both are kept only for old browsers',
+      ],
+      explain: 'A hidden element still takes up room; a `display: none` element is gone from layout. Both are hidden from screen readers.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'margin-collapse',
+      q: 'Two stacked paragraphs have `margin-bottom: 20px` and `margin-top: 30px`. What is the gap between them?',
+      choices: ['30px', '50px', '20px', '25px'],
+      explain: 'Vertical margins between block siblings ==collapse==: the larger one wins. Margins do not collapse in flex or grid layouts.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'media-mobile-first',
+      q: 'In a mobile-first stylesheet, which media query adds desktop styles?',
+      choices: ['`@media (min-width: 1024px)`', '`@media (max-width: 1024px)`', '`@media screen and (mobile)`', '`@media (orientation: desktop)`'],
+      explain: 'Mobile-first writes the base styles for small screens, then layers wider screens on top with `min-width` queries.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'pseudo',
+      q: 'What is the difference between `::before` and `:hover`?',
+      choices: [
+        '`::before` is a pseudo-element; `:hover` is a state',
+        'Both are pseudo-classes that select an element in a particular state',
+        '`::before` only works on images and other replaced elements',
+        '`:hover` creates a new element that sits on top',
+      ],
+      explain: 'Pseudo-elements (`::before`, `::after`, `::placeholder`) style a part of an element and need `content` to render; pseudo-classes (`:hover`, `:focus-visible`, `:nth-child()`) select a state.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'animate-cheap',
+      q: 'Which properties are cheapest to animate?',
+      choices: ['`transform` and `opacity`', '`width` and `height`', '`top` and `left`', '`margin` and `padding`'],
+      explain: '`transform` and `opacity` can be handled by the compositor without layout or paint. Animating size or position properties triggers layout on every frame.',
+      difficulty: 'Medium',
+    },
+  ],
+}

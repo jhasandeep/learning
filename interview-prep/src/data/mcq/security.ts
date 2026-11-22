@@ -1,0 +1,136 @@
+import type { McqSet } from './types'
+
+export const security: McqSet = {
+  id: 'security',
+  questions: [
+    {
+      id: 'hash-passwords',
+      q: 'How should passwords be stored?',
+      choices: [
+        'Hashed with bcrypt or Argon2',
+        'Encrypted with AES so support staff can recover them',
+        'Hashed once with SHA-256',
+        'In plain text, but in a separate locked-down table',
+      ],
+      explain: 'Fast hashes like SHA-256 can be brute-forced billions of times per second. bcrypt/Argon2 are deliberately slow and salt each hash. Passwords should never be recoverable.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'sql-injection',
+      q: 'What prevents SQL injection?',
+      choices: [
+        'Parameterised queries',
+        'Escaping quotes in the input with a regular expression',
+        'Sending the form with POST instead of GET',
+        'Hiding errors',
+      ],
+      explain: 'With placeholders the driver sends data separately from the SQL text, so input can never become code.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'xss',
+      q: 'Which is an XSS risk in React?',
+      choices: ['`<div dangerouslySetInnerHTML={{ __html: comment }} />` with user input', '`<div>{comment}</div>`', '`<input value={comment} />`', '`<p title={comment} />`'],
+      explain: 'React escapes text in JSX. Raw HTML bypasses that; sanitise it (DOMPurify) first. `href={userUrl}` with `javascript:` URLs is another hole.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'httponly',
+      q: 'What does the `HttpOnly` flag on a cookie do?',
+      choices: ['Stops JavaScript from reading the cookie', 'Sends the cookie only over HTTPS', 'Blocks the cookie on cross-site requests', 'Makes the cookie expire when the tab closes'],
+      explain: 'So an XSS bug cannot steal a session token. `Secure` is HTTPS-only and `SameSite` controls cross-site sending.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'csrf',
+      q: 'CSRF attacks rely on…',
+      choices: [
+        'Browsers attaching cookies to cross-site requests',
+        'Injecting scripts into your page through user input',
+        'Guessing a user\'s password with a list of common ones',
+        'Reading tokens from `localStorage` in another tab',
+      ],
+      explain: 'Defences: `SameSite=Lax/Strict` cookies, CSRF tokens, and checking the `Origin` header on state-changing requests.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'jwt',
+      q: 'What is true about a JWT?',
+      choices: [
+        'Anyone can read its payload; the signature only stops changes',
+        'It is encrypted, so secrets inside the payload are safe',
+        'It can be revoked instantly by default, like a session',
+        'The server keeps a copy of every token it has issued',
+      ],
+      explain: 'Never put secrets in a JWT. Stateless tokens cannot be revoked before expiry without a deny-list, so keep access tokens short-lived.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'authn-authz',
+      q: 'Authentication vs authorisation?',
+      choices: [
+        'Authentication is who you are; authorisation is what you may do',
+        'They are two names for the same login check',
+        'Authorisation proves who you are; authentication grants permissions',
+        'Authentication is for APIs; authorisation is for web pages',
+      ],
+      explain: 'Login is authentication (401 when it fails); permission checks are authorisation (403).',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'idor',
+      q: '`GET /api/invoices/1043` returns any invoice to any logged-in user. What is this?',
+      choices: ['Broken access control (IDOR)', 'XSS', 'CSRF', 'SQL injection'],
+      explain: 'Insecure Direct Object Reference: the server must check that the invoice belongs to the caller. It is #1 in the OWASP Top 10.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'csp',
+      q: 'What does a Content-Security-Policy header mainly defend against?',
+      choices: [
+        'XSS, by limiting script sources',
+        'SQL injection, by filtering query strings',
+        'Brute-force logins',
+        'DDoS attacks, by blocking unknown IP addresses',
+      ],
+      explain: 'A strict CSP (no `unsafe-inline`, nonces for scripts) means injected `<script>` tags do not run.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'rate-limit',
+      q: 'What best slows down password guessing on a login endpoint?',
+      choices: [
+        'Rate limiting per account and IP',
+        'Longer, more detailed error messages on failure',
+        'Serving the login page over HTTPS',
+        'Hashing each password twice before storing it',
+      ],
+      explain: 'HTTPS protects the transport, not the endpoint. Add MFA for real protection against credential stuffing.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'oauth',
+      q: 'In OAuth 2.0, what does the authorization code flow with PKCE protect against?',
+      choices: [
+        'A stolen authorization code being redeemed',
+        'Users choosing weak or reused passwords',
+        'Cross-site scripting on the provider\'s login page',
+        'Access tokens expiring in the middle of a session',
+      ],
+      explain: 'The client proves it started the flow by sending the `code_verifier` that matches the earlier `code_challenge`.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'secrets-git',
+      q: 'You committed an API key and pushed it. What first?',
+      choices: [
+        'Rotate the key, then clean history',
+        'Delete the line in a new commit and push it',
+        'Make the repository private',
+        'Nothing: the key is only in an old commit now',
+      ],
+      explain: 'Assume it is already leaked: bots scan GitHub within minutes. Removing it from the latest commit leaves it in history.',
+      difficulty: 'Easy',
+    },
+  ],
+}

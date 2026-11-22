@@ -150,6 +150,7 @@ const CATEGORY_COLOR: Record<QuestionCategory, string> = {
   'DevOps & Tools': '#7c3aed',
   'AI & LLMs': '#8b5cf6',
   Fundamentals: '#e11d48',
+  'Company Prep': '#0891b2',
 }
 
 export function buildMap(sets: QuestionTech[], topics: Record<string, NoteTopic>, categories: QuestionCategory[]): MapNode {

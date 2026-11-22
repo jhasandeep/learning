@@ -13,6 +13,7 @@ export const typescript: NoteTopic = {
       title: 'Why TypeScript?',
       blocks: [
         { type: 'def', text: '**TypeScript** = JavaScript + a ==static type system==. Types are checked at compile time and **erased** at runtime — the output is plain JavaScript.' },
+        { type: 'analogy', title: 'Think of TypeScript like a security checkpoint', steps: [{ icon: '🧳', who: 'Traveller', tech: 'Value', text: 'Wants to move through your code' }, { icon: '🛂', who: 'Passport check', tech: 'Type annotation', text: 'Says what the value must look like' }, { icon: '🚫', who: 'Guard stops mistakes', tech: 'Compiler error', text: 'Catches wrong types before they fly' }, { icon: '✈️', who: 'Safe flight', tech: 'JavaScript output', text: 'Types vanish; clean JS runs' }] },
         { type: 'list', items: ['Catches typos, wrong arguments and null bugs before running.', 'Better editor autocomplete and safe refactors across a big codebase.', 'Types document APIs (props, responses, DB models).'] },
         { type: 'mistake', text: 'Types don\'t validate data at runtime. JSON from an API is whatever the server sent — validate it with a schema library such as Zod at the boundary.' },
       ],

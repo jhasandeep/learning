@@ -13,6 +13,7 @@ export const docker: NoteTopic = {
       title: 'Images and containers',
       blocks: [
         { type: 'def', text: 'A **Docker image** is a read-only, layered package of an app + its runtime and dependencies. A **container** is a ==running instance of an image==, isolated but sharing the host kernel (lighter than a VM).' },
+        { type: 'analogy', title: 'Think of Docker like a shipping container', steps: [{ icon: '📝', who: 'Packing list', tech: 'Dockerfile', text: 'Recipe for what goes inside' }, { icon: '📦', who: 'Sealed container', tech: 'Image', text: 'App plus everything it needs' }, { icon: '🚢', who: 'Ship runs it anywhere', tech: 'Container', text: 'Same behaviour on every machine' }, { icon: '⚓', who: 'Port with many ships', tech: 'Orchestrator', text: 'Compose or Kubernetes runs many' }] },
         {
           type: 'table', head: ['Container', 'Virtual machine'],
           rows: [['shares the host kernel', 'has its own OS kernel'], ['starts in seconds, MBs', 'starts in minutes, GBs'], ['process-level isolation', 'hardware-level isolation']],

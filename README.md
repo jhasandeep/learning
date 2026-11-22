@@ -9,14 +9,15 @@ A personal space for tracking what I'm learning: notes, practice exercises, and 
 | [`notes/`](notes/) | Concept notes, one Markdown file per topic or session. Start from [`notes/_template.md`](notes/_template.md). |
 | [`exercises/`](exercises/) | Practice code and problem solutions, grouped by topic or language. |
 | [`resources/`](resources/) | Links to books, courses, articles and videos worth keeping. |
-| [`interview-prep/`](interview-prep/) | **PrepArena**: a Next.js interview-prep web app — an 18-language online compiler (Programiz-style), debug-the-code DSA levels, endless verified bugs, spaced-repetition flashcards, full-stack revision notes, most-asked interview questions for 16 technologies, a zoomable mind map of every topic, a typing trainer (home row to real code), and an Excalidraw whiteboard for learning and teaching. See its README. |
+| [`interview-prep/`](interview-prep/) | **PrepArena**: a Next.js interview-prep web app — an 18-language online compiler (Programiz-style) plus a MongoDB playground with guided lessons, debug-the-code DSA levels, endless verified bugs, spaced-repetition flashcards, full-stack revision notes, most-asked interview questions for 16 technologies, a multiple-choice quiz and a find-the-mistake bug hunt for every technology, a zoomable mind map of every topic (and a mind-map maker for your own), a typing trainer (home row to real code), and an Excalidraw whiteboard for learning and teaching. See its README. |
+| [`interview-prep/`](interview-prep/) | **PrepArena**: a Next.js interview-prep web app — step-by-step coding lessons for every technology (write code, get it checked instantly), an 18-language online compiler (Programiz-style), debug-the-code DSA levels, endless verified bugs, spaced-repetition flashcards, full-stack revision notes, most-asked interview questions for 16 technologies, a multiple-choice quiz and a find-the-mistake bug hunt for every technology, a zoomable mind map of every topic (and a mind-map maker for your own), a typing trainer (home row to real code), and an Excalidraw whiteboard for learning and teaching. See its README. |
 
 ## Notes so far
 
 - [System Design](notes/system-design/System-Design-Notes.pdf): handwritten-style revision notes covering the Gate Smashers System Design playlist (36 lectures). Source HTML: [`system-design-notes.html`](notes/system-design/system-design-notes.html).
 - [DSA in Python & JavaScript](notes/dsa/DSA-Notes-Python-JS.pdf): handwritten-style notes covering Technical Suneja's *DSA in JavaScript* playlist (#1–#21), with every solution in both languages. The code comes from the tested files in [`exercises/dsa/`](exercises/dsa/).
   - Notebook version: [`DSA-Handwritten-Notes.pdf`](notes/dsa/DSA-Handwritten-Notes.pdf) (ruled paper, handwriting fonts throughout, code in coloured pens).
-- Full-stack developer notes: 16 topics (HTML, CSS, JavaScript, TypeScript, React, Next.js, Node.js, Express & REST, auth & security, SQL, MongoDB, Git, Docker/CI-CD, testing, Gen AI & LLMs, AI in the SDLC). Read them in the app at `/notes` (switchable handwritten style, runnable code, flashcards). There is also a handwritten PDF per topic in [`interview-prep/public/notes/`](interview-prep/public/notes/).
+- Full-stack developer notes: 19 topics (HTML, CSS, JavaScript, TypeScript, React, Next.js, Node.js, Express & REST, Python, Django, FastAPI, auth & security, SQL, MongoDB, Git, Docker/CI-CD, testing, Gen AI & LLMs, AI in the SDLC). Read them in the app at `/notes` (switchable handwritten style, runnable code, flashcards). There is also a handwritten PDF per topic in [`interview-prep/public/notes/`](interview-prep/public/notes/).
 - Concept boards: every notes topic as a hand-drawn Excalidraw board at `/board`, which you can present and annotate. You can also import PDFs. Download them as PDFs from [`interview-prep/public/notes/boards/`](interview-prep/public/notes/boards/).
 
 ## Roadmap
@@ -37,9 +38,13 @@ Track current goals here. Tick items off as you finish them.
 | 2026-10-19 | PrepArena app | Next.js interview-prep site: bug-hunt campaign, endless mode, flashcards, progress |
 | 2026-10-19 | Online compiler | Programiz-style compiler for 18 languages, light theme by default |
 | 2026-10-19 | Full-stack notes | 14 topics in the app + handwritten PDFs + flashcard decks |
+| 2026-11-22 | Company prep | 3 new question sets: company coding rounds (Express + React fetch/axios, utilities), JS/event-loop and Python output guessing |
+| 2026-11-22 | Mistakes tab | `/mistakes`: 37 short programs (Express, React todo/fetch/axios, JavaScript, SQL, HTML, CSS), each with a Fix-it mode and a Write-it-from-scratch mode, instant checks and the server's response as output |
 | 2026-10-19 | Interview questions | ~400 most-asked questions for 16 technologies, with practice mode and PDFs |
 | 2026-11-22 | Gen AI & AI SDLC | Notes, 50 interview questions, LLM API typing set, boards, PDFs |
 | 2026-10-21 | Interview syntax | 137 snippets to type until memorised; 5/10 min and Auto typing tests |
 | 2026-10-19 | Typing | typing.com-style lessons, timed tests, finger guide, weak-key heatmap |
+| 2026-10-25 | Learn | 128 step-by-step coding lessons, 8 per technology, checked in the browser |
+| 2026-10-22 | Quiz, bug hunts, mind-map maker | MCQs and find-the-mistake for 16 technologies; create your own mind maps |
 | 2026-10-19 | Mind map | Zoomable visual map of all 16 technologies with recall mode |
 | 2026-10-19 | Whiteboard | Excalidraw concept boards for every topic, PDF import/annotate, present, export to PDF |

@@ -1,0 +1,136 @@
+import type { McqSet } from './types'
+
+export const nextjs: McqSet = {
+  id: 'nextjs',
+  questions: [
+    {
+      id: 'server-default',
+      q: 'In the App Router, components are … by default.',
+      choices: ['Server Components', 'Client Components', 'Static HTML only', 'Edge functions'],
+      explain: 'Everything in `app/` is a Server Component unless the file (or an importing parent) starts with `"use client"`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'use-client',
+      q: 'Which needs `"use client"`?',
+      choices: [
+        'One using `useState` or `onClick`',
+        'A component that reads data straight from the database',
+        'A layout that only renders static text and links',
+        'A component that is declared as an `async` function',
+      ],
+      explain: 'State, effects, event handlers and browser APIs only exist on the client. Server Components can be `async` and fetch data directly.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'dynamic-route',
+      q: 'Which file handles `/blog/my-first-post`?',
+      choices: ['`app/blog/[slug]/page.tsx`', '`app/blog/:slug/page.tsx`', '`app/blog/{slug}.tsx`', '`pages/blog/slug.tsx`'],
+      explain: 'Square brackets mark a dynamic segment; the value arrives in `params.slug`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'layout',
+      q: 'What is special about `layout.tsx`?',
+      choices: [
+        'It wraps pages and persists across navigation',
+        'It re-mounts and resets its state on every navigation',
+        'It can only be used once, at the root',
+        'It replaces `page.tsx`, so a segment can only have one of them',
+      ],
+      explain: 'Layouts are shared UI (nav, sidebars) that persist; `template.tsx` is the variant that re-mounts.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'server-action',
+      q: 'What is a Server Action?',
+      choices: [
+        'A `"use server"` function you call from forms or client code',
+        'An API route file placed in the `pages/api` folder',
+        'A middleware function that runs before every request',
+        'A React hook that fetches data on the client and caches it',
+      ],
+      explain: 'Server Actions handle mutations without writing an API route. Treat them like public endpoints: validate input and check auth inside.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'loading',
+      q: 'What does a `loading.tsx` file do?',
+      choices: [
+        'Instant fallback UI while the segment loads',
+        'It preloads images',
+        'It runs once before the server starts accepting requests',
+        'It is shown only when the page throws an error',
+      ],
+      explain: 'Next wraps the page in `<Suspense fallback={<Loading />}>` automatically. Errors go to `error.tsx`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'env-public',
+      q: 'Which environment variable can be read in browser code?',
+      choices: ['`NEXT_PUBLIC_API_URL`', '`API_SECRET`', '`DATABASE_URL`', 'All of them'],
+      explain: 'Only variables prefixed `NEXT_PUBLIC_` are inlined into the client bundle. Everything else stays on the server, which is what you want for secrets.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'link',
+      q: 'Why use `<Link>` instead of `<a>` for internal pages?',
+      choices: [
+        'Client-side navigation and prefetching',
+        'It is required for search engines',
+        '`<a>` tags are not allowed inside a Next.js app',
+        'It adds the default link styling from the Next.js theme',
+      ],
+      explain: '`<Link>` renders an `<a>` (so SEO and accessibility are fine) but swaps the page in place and prefetches routes in view.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'metadata',
+      q: 'How do you set the page title in the App Router?',
+      choices: [
+        'Export `metadata` (or `generateMetadata`)',
+        'Use the `<Head>` component from `next/head`',
+        'Set `document.title` inside a `useEffect`',
+        'Put a `<title>` element in the page component\'s JSX',
+      ],
+      explain: 'The Metadata API renders tags on the server. `next/head` is the old Pages Router way.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'generate-static',
+      q: 'What does `generateStaticParams` do for `app/blog/[slug]/page.tsx`?',
+      choices: [
+        'Lists the slugs to prerender at build',
+        'Validates the slug on each request and returns a 404',
+        'Generates the `sitemap.xml` file from the blog posts',
+        'Creates the route folders',
+      ],
+      explain: 'It returns `[{ slug: "a" }, { slug: "b" }]` and each one becomes a static page.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'middleware',
+      q: 'Where does Next.js middleware run?',
+      choices: [
+        'Before routing, for matching requests',
+        'Only in the browser, after hydration has finished',
+        'After the page has rendered',
+        'Only at build time, while pages are being prerendered',
+      ],
+      explain: 'Use it for redirects, rewrites, auth checks on cookies and headers. Keep it light: it runs on every matching request.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'image',
+      q: 'What does `next/image` give you over `<img>`?',
+      choices: [
+        'Resizing, modern formats, lazy loading and no layout shift',
+        'Only lazy loading, which `<img>` cannot do on its own',
+        'Images that keep working when the user goes offline',
+        'Nothing: `next/image` is an alias for the `<img>` element',
+      ],
+      explain: 'Width and height (or `fill`) let it reserve space, which prevents Cumulative Layout Shift.',
+      difficulty: 'Easy',
+    },
+  ],
+}

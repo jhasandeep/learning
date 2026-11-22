@@ -15,6 +15,8 @@ export interface Question {
   tags: string[]
   /** `run`: opens in the online compiler (javascript, typescript, sql, python only). */
   code?: { lang: string; code: string; run?: boolean }
+  /** Output-guessing questions: the exact stdout of `code` (verified by tests). The page shows it with the code. */
+  output?: string
   /** The follow-up an interviewer usually asks next. */
   followUp?: string
 }
