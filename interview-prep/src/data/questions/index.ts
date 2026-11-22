@@ -20,7 +20,7 @@ import type { Question, QuestionSet } from './types'
 
 export type { Difficulty, Question, QuestionSet } from './types'
 
-export type QuestionCategory = 'Frontend' | 'Backend' | 'Databases' | 'DevOps & Tools' | 'Fundamentals'
+export type QuestionCategory = 'Frontend' | 'Backend' | 'Databases' | 'DevOps & Tools' | 'AI & LLMs' | 'Fundamentals'
 
 export interface QuestionTech extends QuestionSet {
   category: QuestionCategory
@@ -56,7 +56,7 @@ export const QUESTION_SETS: QuestionTech[] = [
 
 export const QUESTION_SETS_BY_ID: Record<string, QuestionTech> = Object.fromEntries(QUESTION_SETS.map((s) => [s.id, s]))
 
-export const QUESTION_CATEGORIES: QuestionCategory[] = ['Frontend', 'Backend', 'Databases', 'DevOps & Tools', 'Fundamentals']
+export const QUESTION_CATEGORIES: QuestionCategory[] = ['Frontend', 'Backend', 'Databases', 'DevOps & Tools', 'AI & LLMs', 'Fundamentals']
 
 /** The id used in progress and URLs: "<set>/<question>". */
 export const questionKey = (set: string, q: Question) => `${set}/${q.id}`

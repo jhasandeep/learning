@@ -148,6 +148,7 @@ const CATEGORY_COLOR: Record<QuestionCategory, string> = {
   Backend: '#16a34a',
   Databases: '#2563eb',
   'DevOps & Tools': '#7c3aed',
+  'AI & LLMs': '#8b5cf6',
   Fundamentals: '#e11d48',
 }
 

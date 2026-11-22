@@ -1,7 +1,7 @@
 // Content model for the in-app revision notes. Text fields support a tiny
 // markup: `code`, **bold** and ==highlight==.
 
-export type NoteCategory = 'Frontend' | 'Backend' | 'Databases' | 'DevOps & Tools'
+export type NoteCategory = 'Frontend' | 'Backend' | 'Databases' | 'DevOps & Tools' | 'AI & LLMs'
 
 export type Block =
   | { type: 'p'; text: string }

@@ -1,6 +1,8 @@
+import { aiSdlc } from './ai-sdlc'
 import { css } from './css'
 import { docker } from './docker'
 import { express } from './express'
+import { genai } from './genai'
 import { git } from './git'
 import { html } from './html'
 import { javascript } from './javascript'
@@ -22,11 +24,12 @@ export const NOTE_TOPICS: NoteTopic[] = [
   nodejs, express, security,
   sql, mongodb,
   git, docker, testing,
+  genai, aiSdlc,
 ]
 
 export const NOTE_TOPICS_BY_ID = Object.fromEntries(NOTE_TOPICS.map((t) => [t.id, t]))
 
-export const NOTE_CATEGORIES: NoteCategory[] = ['Frontend', 'Backend', 'Databases', 'DevOps & Tools']
+export const NOTE_CATEGORIES: NoteCategory[] = ['Frontend', 'Backend', 'Databases', 'DevOps & Tools', 'AI & LLMs']
 
 /** Plain text of a topic, for search. */
 export function topicText(t: NoteTopic): string {
