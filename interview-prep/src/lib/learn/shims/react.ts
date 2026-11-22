@@ -156,11 +156,17 @@ export function render(component: Component | ReactEl, initialProps: Props = {})
       scheduled = true
       queueMicrotask(() => {
         scheduled = false
-        if (r.dirty) rerender()
+        // An error while re-rendering after an await (e.g. bad data from a fetch) is reported by the next flush().
+        try {
+          if (r.dirty) rerender()
+        } catch (e) {
+          asyncError ??= { error: e }
+        }
       })
     },
   }
   let batching = false
+  let asyncError: { error: unknown } | null = null
 
   const toHost = (node: unknown, path: string, parent: HostNode | null, seen: Set<string>, inArray = false): (HostNode | string)[] => {
     if (node === null || node === undefined || typeof node === 'boolean') return []
@@ -339,6 +345,11 @@ export function render(component: Component | ReactEl, initialProps: Props = {})
       for (let i = 0; i < 5; i++) {
         await new Promise((res) => setTimeout(res, 0))
         if (r.dirty) rerender()
+      }
+      if (asyncError) {
+        const { error } = asyncError
+        asyncError = null
+        throw error
       }
     },
     async findByText(want: string | RegExp) {

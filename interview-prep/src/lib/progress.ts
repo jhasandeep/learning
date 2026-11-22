@@ -38,6 +38,8 @@ export interface Progress {
   spot: Record<string, SpotResult>
   /** Learn: "<track>/<step>" → how the step was completed. */
   learn: Record<string, LearnResult>
+  /** Mistakes: "<set>/<item>:fix" or ":write" → ISO date it was first completed. */
+  mistakes: Record<string, string>
 }
 
 export interface LearnResult {
@@ -113,6 +115,7 @@ export const EMPTY: Progress = {
   quizzes: {},
   spot: {},
   learn: {},
+  mistakes: {},
 }
 
 let state: Progress = EMPTY
@@ -411,6 +414,23 @@ export function recordLearnStep(key: string, hints: number, solution: boolean): 
   if (p.learn[key]) return 0
   const gain = learnXp(hints, solution)
   commit(bump({ ...p, learn: { ...p.learn, [key]: { at: new Date().toISOString(), hints, solution } } }, gain))
+  return gain
+}
+
+export type MistakeMode = 'fix' | 'write'
+
+export function mistakeXp(mode: MistakeMode, hints: number, solution: boolean): number {
+  if (mode === 'write') return solution ? 5 : 15
+  return solution ? 3 : Math.max(5, 10 - 2 * hints)
+}
+
+/** Saves a completed mistake exercise (fixing it, or writing it from scratch). XP the first time only. */
+export function recordMistake(key: string, mode: MistakeMode, hints: number, solution: boolean): number {
+  const p = load()
+  const k = `${key}:${mode}`
+  if (p.mistakes[k]) return 0
+  const gain = mistakeXp(mode, hints, solution)
+  commit(bump({ ...p, mistakes: { ...p.mistakes, [k]: new Date().toISOString() } }, gain))
   return gain
 }
 

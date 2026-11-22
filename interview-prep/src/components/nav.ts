@@ -1,4 +1,4 @@
-import { Briefcase, BookOpen, ClipboardList, GraduationCap, Server, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Keyboard, Layers, ListTodo, ListChecks, MessageCircleQuestion, Network, PenTool, SquareTerminal } from 'lucide-react'
+import { Briefcase, Wrench, BookOpen, ClipboardList, GraduationCap, Server, Bug, ChartNoAxesColumn, House, Infinity as InfinityIcon, Keyboard, Layers, ListTodo, ListChecks, MessageCircleQuestion, Network, PenTool, SquareTerminal } from 'lucide-react'
 
 export const NAV = [
   { href: '/', label: 'Home', icon: House },
@@ -8,6 +8,7 @@ export const NAV = [
   { href: '/system-design', label: 'System design', icon: Server },
   { href: '/assess', label: 'Company prep', icon: Briefcase },
   { href: '/tasks', label: 'Tasks', icon: ListTodo },
+  { href: '/mistakes', label: 'Mistakes', icon: Wrench },
   { href: '/campaign', label: 'Bug Hunt', icon: Bug },
   { href: '/endless', label: 'Endless', icon: InfinityIcon },
   { href: '/flashcards', label: 'Flashcards', icon: Layers },
