@@ -1,22 +1,30 @@
 import { judge0Backend } from './judge0'
 import { localBackend } from './local'
 import { pistonBackend } from './piston'
+import { publicBackend } from './public'
 import type { Backend } from './types'
 
 export type BackendStatus = { ok: true; backend: Backend } | { ok: false; reason: string }
 
 /**
  * Chooses how server languages run, from environment variables:
+ *   RUNNER_BACKEND=online  — free public services (Wandbox, Compiler Explorer); no setup
  *   RUNNER_BACKEND=piston  + PISTON_URL=http://localhost:2000
  *   RUNNER_BACKEND=judge0  + JUDGE0_URL=…  (+ JUDGE0_KEY for RapidAPI / auth)
  *   RUNNER_BACKEND=local   — dev only; installed compilers, no sandbox
+ *   RUNNER_BACKEND=none    — compiled languages off
  * Without RUNNER_BACKEND it picks Piston or Judge0 if their URL is set, and
- * falls back to `local` only in development.
+ * otherwise the online services.
  */
+let online: ReturnType<typeof publicBackend> | undefined
+
 export function getBackend(env: NodeJS.ProcessEnv = process.env): BackendStatus {
-  const choice = env.RUNNER_BACKEND ?? (env.PISTON_URL ? 'piston' : env.JUDGE0_URL ? 'judge0' : env.NODE_ENV === 'production' ? '' : 'local')
+  const choice = env.RUNNER_BACKEND ?? (env.PISTON_URL ? 'piston' : env.JUDGE0_URL ? 'judge0' : 'online')
 
   switch (choice) {
+    case 'online':
+      online ??= publicBackend()
+      return { ok: true, backend: online }
     case 'piston':
       return env.PISTON_URL ? { ok: true, backend: pistonBackend(env.PISTON_URL) } : { ok: false, reason: 'RUNNER_BACKEND=piston needs PISTON_URL.' }
     case 'judge0':
@@ -26,8 +34,8 @@ export function getBackend(env: NodeJS.ProcessEnv = process.env): BackendStatus 
         return { ok: false, reason: 'The local runner has no sandbox and is disabled in production. Configure Piston or Judge0.' }
       }
       return { ok: true, backend: localBackend() }
-    case '':
-      return { ok: false, reason: 'No code runner is configured. Set PISTON_URL (self-hosted Piston) or JUDGE0_URL to run compiled languages.' }
+    case 'none':
+      return { ok: false, reason: 'Compiled languages are turned off on this server (RUNNER_BACKEND=none).' }
     default:
       return { ok: false, reason: `Unknown RUNNER_BACKEND "${choice}".` }
   }

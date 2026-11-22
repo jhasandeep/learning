@@ -1,6 +1,6 @@
 'use client'
 
-import { Flame, Keyboard, Search, Target } from 'lucide-react'
+import { Flame, Keyboard, Search } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -15,9 +15,8 @@ import { cx, Kbd, ProgressBar } from './ui'
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-2.5 font-semibold tracking-tight" aria-label="PrepArena home">
-      <span className="grid size-8 place-items-center rounded-lg bg-accent/15 text-accent shadow-[0_0_24px_-6px_var(--accent)]">
-        <Target size={18} />
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo-mark.png" alt="" width={32} height={32} className="size-8 object-contain" />
       {!compact && <span>Prep<span className="text-accent">Arena</span></span>}
     </Link>
   )

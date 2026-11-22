@@ -25,7 +25,40 @@ export interface Progress {
   notesRead: Record<string, string>
   /** "<set>/<question id>" → how well you know a most-asked interview question. */
   questions: Record<string, QuestionStatus>
+  /** MongoDB playground lesson id → ISO date its challenge was solved. */
+  mongoLessons: Record<string, string>
+  /** "<tech>/<task id>" → ISO date the task was completed. */
+  tasks: Record<string, string>
   typing: TypingProgress
+  /** Multiple-choice: "<set>/<question>" → ISO date it was first answered correctly. */
+  mcq: Record<string, string>
+  /** Multiple-choice: set id (or "mixed") → best finished quiz. */
+  quizzes: Record<string, QuizResult>
+  /** Find the mistake: "<set>/<bug>" → how it was found. */
+  spot: Record<string, SpotResult>
+  /** Learn: "<track>/<step>" → how the step was completed. */
+  learn: Record<string, LearnResult>
+}
+
+export interface LearnResult {
+  at: string
+  /** Hints opened before passing. */
+  hints: number
+  /** The solution was shown before passing. */
+  solution: boolean
+}
+
+export interface QuizResult {
+  score: number
+  total: number
+  at: string
+}
+
+export interface SpotResult {
+  at: string
+  /** Wrong lines clicked before the right one. */
+  misses: number
+  revealed: boolean
 }
 
 export interface TypingResult {
@@ -73,7 +106,13 @@ export const EMPTY: Progress = {
   dailyGoal: 3,
   notesRead: {},
   questions: {},
+  mongoLessons: {},
+  tasks: {},
   typing: { lessons: {}, tests: [], keys: {}, snippets: {} },
+  mcq: {},
+  quizzes: {},
+  spot: {},
+  learn: {},
 }
 
 let state: Progress = EMPTY
@@ -229,6 +268,27 @@ export function markNoteRead(id: string): number {
   return NOTE_READ_XP
 }
 
+export const TASK_XP = 20
+
+/** Marks a hands-on task complete (once). Returns the XP gained: 0 when it was already done. */
+export function markTaskDone(key: string, hintsUsed: number, revealed: boolean): number {
+  const p = load()
+  if (p.tasks[key]) return 0
+  const gain = revealed ? Math.round(TASK_XP / 4) : Math.max(5, TASK_XP - hintsUsed * 5)
+  commit(bump({ ...p, tasks: { ...p.tasks, [key]: new Date().toISOString() } }, gain))
+  return gain
+}
+
+export const MONGO_LESSON_XP = 30
+
+/** Records a solved MongoDB lesson challenge (one-way, so the XP can't be farmed). */
+export function markMongoLessonDone(id: string): number {
+  const p = load()
+  if (p.mongoLessons[id]) return 0
+  commit(bump({ ...p, mongoLessons: { ...p.mongoLessons, [id]: new Date().toISOString() } }, MONGO_LESSON_XP))
+  return MONGO_LESSON_XP
+}
+
 export const QUESTION_KNOWN_XP = 5
 
 /**
@@ -308,6 +368,52 @@ export function recordTypingTest(r: Omit<TypingResult, 'at'>, keys: Record<strin
   return gain
 }
 
+export const MCQ_CORRECT_XP = 2
+
+/** Saves one multiple-choice answer. XP only the first time a question is answered correctly. */
+export function recordMcqAnswer(key: string, correct: boolean): number {
+  const p = load()
+  if (!correct || p.mcq[key]) return 0
+  commit(bump({ ...p, mcq: { ...p.mcq, [key]: new Date().toISOString() } }, MCQ_CORRECT_XP))
+  return MCQ_CORRECT_XP
+}
+
+/** Saves a finished quiz if it beats the best score (by percentage). No XP: answers already paid. */
+export function recordQuiz(id: string, score: number, total: number): boolean {
+  const p = load()
+  const prev = p.quizzes[id]
+  if (prev && prev.score / prev.total >= score / total) return false
+  commit({ ...p, quizzes: { ...p.quizzes, [id]: { score, total, at: new Date().toISOString() } } })
+  return true
+}
+
+export function spotXp(misses: number, revealed: boolean): number {
+  if (revealed) return 0
+  return misses === 0 ? 15 : misses === 1 ? 10 : 5
+}
+
+/** Saves a found mistake. XP the first time only, so replays can't farm it. */
+export function recordSpot(key: string, misses: number, revealed: boolean): number {
+  const p = load()
+  if (p.spot[key]) return 0
+  const gain = spotXp(misses, revealed)
+  commit(bump({ ...p, spot: { ...p.spot, [key]: { at: new Date().toISOString(), misses, revealed } } }, gain))
+  return gain
+}
+
+export function learnXp(hints: number, solution: boolean): number {
+  return solution ? 5 : Math.max(10, 20 - 5 * hints)
+}
+
+/** Saves a completed Learn step. XP the first time only. */
+export function recordLearnStep(key: string, hints: number, solution: boolean): number {
+  const p = load()
+  if (p.learn[key]) return 0
+  const gain = learnXp(hints, solution)
+  commit(bump({ ...p, learn: { ...p.learn, [key]: { at: new Date().toISOString(), hints, solution } } }, gain))
+  return gain
+}
+
 export function setDailyGoal(goal: number) {
   commit({ ...load(), dailyGoal: Math.min(20, Math.max(1, Math.round(goal))) })
 }
@@ -345,6 +451,9 @@ export const BADGES: Badge[] = [
   { id: 'week', title: 'Week Warrior', description: 'Practise 7 days in a row.', earned: (p, { today }) => dayStreak(p.activity, today) >= 7 },
   { id: 'syntax-memory', title: 'Syntax by Heart', description: 'Write 25 interview snippets from memory.', earned: (p) => Object.values(p.typing.snippets).filter((s) => s.memorised).length >= 25 },
   { id: 'touch-typist', title: 'Touch Typist', description: 'Type 40 WPM at 95% accuracy in a timed test.', earned: (p) => p.typing.tests.some((t) => t.wpm >= 40 && t.accuracy >= 95) },
+  { id: 'step-by-step', title: 'Step by Step', description: 'Complete 25 Learn steps.', earned: (p) => Object.keys(p.learn).length >= 25 },
+  { id: 'quiz-whiz', title: 'Quiz Whiz', description: 'Answer 100 multiple-choice questions correctly.', earned: (p) => Object.keys(p.mcq).length >= 100 },
+  { id: 'eagle-eye', title: 'Eagle Eye', description: 'Find 25 mistakes in the technology bug hunts without revealing them.', earned: (p) => Object.values(p.spot).filter((s) => !s.revealed).length >= 25 },
   { id: 'interview-ready', title: 'Interview Ready', description: 'Know 100 most-asked interview questions.', earned: (p) => Object.values(p.questions).filter((s) => s === 'known').length >= 100 },
   { id: 'reader', title: 'Full-Stack Reader', description: 'Mark 10 notes topics as read.', earned: (p) => Object.keys(p.notesRead).length >= 10 },
   { id: 'level-5', title: 'Level 5', description: 'Earn 1,600 XP.', earned: (p) => p.xp >= 1600 },

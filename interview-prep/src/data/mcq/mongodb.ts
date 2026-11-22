@@ -1,0 +1,136 @@
+import type { McqSet } from './types'
+
+export const mongodb: McqSet = {
+  id: 'mongodb',
+  questions: [
+    {
+      id: 'document',
+      q: 'MongoDB stores data as…',
+      choices: ['BSON documents in collections', 'Rows in tables', 'Key-value pairs only', 'XML files'],
+      explain: 'BSON is binary JSON with extra types such as `ObjectId`, `Date` and `Decimal128`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'objectid',
+      q: 'Why does `find({ _id: "65f1c…" })` return nothing for an existing document?',
+      choices: [
+        '`_id` is an `ObjectId`, not a string',
+        'The shell only finds documents with `findById`',
+        '`_id` can\'t be queried',
+        'The collection needs an index on `_id` first',
+      ],
+      explain: 'Types must match. Mongoose casts strings for you; the native driver does not.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'set',
+      q: 'What does `updateOne({ _id }, { name: "Ann" })` do with the native driver?',
+      choices: [
+        'It throws: use an operator like `$set`',
+        'Sets `name` and keeps all the other fields',
+        'Replaces the whole document',
+        'Inserts a new document because nothing matched',
+      ],
+      explain: 'Use `{ $set: { name: "Ann" } }`. `replaceOne` is the method that replaces the whole document.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'embed-ref',
+      q: 'When should you embed rather than reference?',
+      choices: [
+        'Read together, and the list is bounded',
+        'Always: references are slow and should be avoided',
+        'When the embedded list can keep growing without limit',
+        'When many documents share sub-data that changes often',
+      ],
+      explain: 'Documents max out at 16 MB, and duplicated data must be updated everywhere. Unbounded or shared data belongs in its own collection.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'aggregate',
+      q: 'Which aggregation stage is like SQL\'s `GROUP BY`?',
+      choices: ['`$group`', '`$match`', '`$project`', '`$lookup`'],
+      explain: '`$match` filters (WHERE), `$project` shapes fields (SELECT), `$lookup` joins.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'match-first',
+      q: 'Why put `$match` as early as possible in a pipeline?',
+      choices: [
+        'It can use indexes and cuts later work',
+        'Every pipeline must start with a `$match` stage',
+        '`$match` sorts the documents',
+        '`$group` refuses to run unless `$match` comes before it',
+      ],
+      explain: 'A `$match` on an indexed field at the start avoids scanning the whole collection.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'index-esr',
+      q: 'For `find({ status: "open", age: { $gt: 30 } }).sort({ created: -1 })`, which compound index order follows the ESR rule?',
+      choices: ['`{ status: 1, created: -1, age: 1 }`', '`{ age: 1, status: 1, created: -1 }`', '`{ created: -1, age: 1, status: 1 }`', '`{ age: 1, created: -1, status: 1 }`'],
+      explain: 'Equality fields first, then Sort fields, then Range fields. That lets the index return rows already sorted.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'explain',
+      q: 'In `explain()` output, what does `COLLSCAN` mean?',
+      choices: [
+        'It scanned every document',
+        'The query was answered from an index',
+        'The collection is spread across several shards',
+        'The result came from the query cache',
+      ],
+      explain: 'You want `IXSCAN`, with `totalDocsExamined` close to `nReturned`.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'transactions',
+      q: 'Does MongoDB support multi-document ACID transactions?',
+      choices: [
+        'Yes, on replica sets and sharded clusters',
+        'No, MongoDB has never supported transactions',
+        'Only for writes that touch a single document',
+        'Only when you use Mongoose',
+      ],
+      explain: 'Single-document writes were always atomic; multi-document transactions arrived in 4.0. A good schema still needs them rarely.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'upsert',
+      q: 'What does `{ upsert: true }` do on an update?',
+      choices: [
+        'Inserts if nothing matches',
+        'Updates every matching document, not just the first',
+        'Returns the updated document instead of a result',
+        'Skips schema validation',
+      ],
+      explain: 'Update if found, insert if not. `returnDocument: "after"` is the option that returns the new version.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'injection',
+      q: '`User.findOne({ email: req.body.email, password: req.body.password })`: what can an attacker send?',
+      choices: [
+        '`{ "$ne": null }` as the password',
+        'Nothing: MongoDB queries cannot be injected',
+        'Only SQL, which MongoDB will reject',
+        'A very long string that overflows the query',
+      ],
+      explain: 'Operator injection. Validate that inputs are strings (or sanitise `$` keys), and compare hashed passwords in code rather than in the query.',
+      difficulty: 'Hard',
+    },
+    {
+      id: 'replica',
+      q: 'What is a replica set for?',
+      choices: [
+        'Failover: copies of the data with a new primary if one dies',
+        'Splitting data across servers to scale writes',
+        'Caching query results close to the application',
+        'Taking backups only; replicas never serve traffic',
+      ],
+      explain: 'Sharding is what splits data across servers. Replicas can also serve reads with a read preference.',
+      difficulty: 'Easy',
+    },
+  ],
+}

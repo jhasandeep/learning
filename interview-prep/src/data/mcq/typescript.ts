@@ -1,0 +1,127 @@
+import type { McqSet } from './types'
+
+export const typescript: McqSet = {
+  id: 'typescript',
+  questions: [
+    {
+      id: 'any-unknown',
+      q: 'What is the difference between `any` and `unknown`?',
+      choices: [
+        '`unknown` must be narrowed before use; `any` skips checks',
+        '`unknown` turns type checking off; `any` must be narrowed before use',
+        'They are aliases: the compiler treats both exactly the same way',
+        '`unknown` can only hold `null` or `undefined`',
+      ],
+      explain: '`unknown` is the type-safe top type: you can assign anything to it, but you cannot call or read properties until you check with `typeof`, `instanceof` or a type guard.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'interface-type',
+      q: 'Which can `interface` do that a `type` alias cannot?',
+      choices: [
+        'Declaration merging',
+        'Describe union types such as `\'a\' | \'b\'`',
+        'Describe tuple types such as `[string, number]`',
+        'Use mapped types such as `{ [K in Keys]: V }`',
+      ],
+      explain: 'Two `interface User` declarations merge, which is how libraries are augmented. Unions, tuples and mapped types need `type`.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'partial',
+      q: 'What does `Partial<User>` produce?',
+      choices: [
+        'Every property of `User` made optional',
+        'A copy of `User` with some properties removed at random',
+        'A copy of `User` with every property made `readonly`',
+        'A union of `User`\'s property names',
+      ],
+      explain: 'It maps over the keys and adds `?`. `Readonly<T>`, `Pick<T, K>`, `Omit<T, K>` and `keyof T` are the other options here.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'keyof',
+      q: 'Given `type P = { x: number; y: number }`, what is `keyof P`?',
+      choices: ['`"x" | "y"`', '`number`', '`["x", "y"]`', '`{ x: "x"; y: "y" }`'],
+      explain: '`keyof` gives a union of the property names as string literal types.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'narrowing',
+      q: 'Inside `if (typeof v === "string") { … }`, what is the type of `v` when `v: string | number`?',
+      choices: ['`string`', '`string | number`', '`unknown`', '`any`'],
+      explain: 'TypeScript ==narrows== the union through control flow. In the `else` branch `v` is `number`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'never-exhaustive',
+      q: 'Why assign to `never` in the `default` of a `switch` over a union?',
+      code: { lang: 'typescript', code: "function area(s: Shape) {\n  switch (s.kind) {\n    case 'circle': return Math.PI * s.r ** 2\n    case 'square': return s.side ** 2\n    default: {\n      const _x: never = s\n      return _x\n    }\n  }\n}" },
+      choices: [
+        'So unhandled union members fail to compile',
+        'To make the whole function\'s return type `never`',
+        'To stop the code from running past the `switch`',
+        '`switch` requires it',
+      ],
+      explain: 'If someone adds `{ kind: "triangle" }` to `Shape`, `s` is no longer `never` in the default branch and the assignment fails to compile: an exhaustiveness check.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'generic-constraint',
+      q: 'What does `<T extends { id: string }>` mean?',
+      choices: [
+        '`T` must have at least `id: string`',
+        '`T` must be exactly `{ id: string }` and nothing more',
+        '`T` inherits from a class that is called `id`',
+        '`T` defaults to `{ id: string }` when it is not given',
+      ],
+      explain: 'A constraint sets the minimum shape, so the function can safely read `item.id`. A default is written `<T = …>`.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'as-const',
+      q: "What is the type of `x` in `const x = ['a', 'b'] as const`?",
+      choices: ['`readonly ["a", "b"]`', '`string[]`', '`("a" | "b")[]`', '`["a", "b"]`'],
+      explain: '`as const` makes literals as narrow as possible and the array a readonly tuple. `typeof x[number]` then gives `"a" | "b"`.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'runtime-types',
+      q: 'Do TypeScript types exist at runtime?',
+      choices: [
+        'No: they are erased, so validate external data',
+        'Yes: the runtime checks every assignment against its type',
+        'Only for classes, because they compile to real constructors',
+        'Only when `strict` is on in `tsconfig.json`',
+      ],
+      explain: 'Types are removed when compiling to JavaScript. `await res.json() as User` is a promise to the compiler, not a check; use a schema library such as Zod for untrusted data.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'record',
+      q: 'What does `Record<"admin" | "user", number>` describe?',
+      choices: [
+        'An object with keys `admin` and `user`, both numbers',
+        'An array of numbers that is indexed by role names',
+        'A `Map` object whose keys are strings and values numbers',
+        'A number type that is labelled as either `admin` or `user`',
+      ],
+      explain: '`Record<K, V>` builds an object type with keys `K` and values `V`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'strict-null',
+      q: 'With `strictNullChecks` on, what does `document.getElementById("app")` return?',
+      choices: ['`HTMLElement | null`', '`HTMLElement`', '`Element`', '`any`'],
+      explain: 'The element might not exist, so the result includes `null` and you must check before using it (or use `!` when you are certain).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'returntype',
+      q: 'How do you get the return type of a function `getUser` as a type?',
+      choices: ['`ReturnType<typeof getUser>`', '`typeof getUser()`', '`ReturnType<getUser>`', '`keyof getUser`'],
+      explain: '`typeof getUser` turns the value into its function type; `ReturnType` then extracts the result. Wrap it in `Awaited<…>` for async functions.',
+      difficulty: 'Hard',
+    },
+  ],
+}

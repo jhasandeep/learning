@@ -1,3 +1,4 @@
+import { LEARN_TRACKS } from '@/data/learn'
 import { QUESTION_SETS, questionKey } from '@/data/questions'
 import { Dashboard, type TechSummary } from './dashboard'
 
@@ -15,5 +16,5 @@ export default function Page() {
     keys: s.questions.map((q) => questionKey(s.id, q)),
     notes: Boolean(s.notesId),
   }))
-  return <Dashboard techs={techs} />
+  return <Dashboard techs={techs} learn={{ tracks: LEARN_TRACKS.length, steps: LEARN_TRACKS.reduce((n, t) => n + t.steps.length, 0) }} />
 }

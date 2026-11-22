@@ -10,6 +10,7 @@ import { useToast } from '@/components/toast'
 import { Button, cx } from '@/components/ui'
 import { recordTypingTest, useProgress } from '@/lib/progress'
 import { backspace, createSession, extend, finish, rng, stats, testWords, typeChar, type Session } from '@/lib/typing'
+import { notesText, type NoteTypingSet } from '@/lib/typing-notes'
 
 /** Seconds, or 'auto': a passage sized to your recent speed (about a minute), no time limit. */
 type Duration = number | 'auto'
@@ -21,15 +22,17 @@ const MODES = [
   { id: 'words', label: 'Words' },
   { id: 'punctuation', label: 'Punctuation' },
   { id: 'numbers', label: 'Numbers' },
+  { id: 'notes', label: 'Notes' },
   { id: 'code', label: 'Code' },
 ] as const
 type Mode = (typeof MODES)[number]['id']
 
-export function TypingTest({ code }: { code: { id: string; title: string; snippets: string[] }[] }) {
+export function TypingTest({ code, notes }: { code: { id: string; title: string; snippets: string[] }[]; notes: NoteTypingSet[] }) {
   const p = useProgress()
   const toast = useToast()
   const [duration, setDuration] = useState<Duration>(30)
   const [codeSet, setCodeSet] = useState('all')
+  const [noteSet, setNoteSet] = useState('all')
   const [mode, setMode] = useState<Mode>('words')
   const [showKeyboard, setShowKeyboard] = useState(true)
   const gen = useRef(rng(1))
@@ -41,19 +44,23 @@ export function TypingTest({ code }: { code: { id: string; title: string; snippe
   const sampled = useRef(0) // seconds already sampled for the chart
 
   const pool = useCallback((set: string) => (set === 'all' ? code.flatMap((c) => c.snippets) : code.find((c) => c.id === set)?.snippets ?? []), [code])
-  const more = useCallback((m: Mode, count: number, set = codeSet) => {
+  /** The technology chosen for a mode that has one (code snippets or notes). */
+  const setOf = useCallback((m: Mode) => (m === 'notes' ? noteSet : codeSet), [noteSet, codeSet])
+  const more = useCallback((m: Mode, count: number, set = setOf(m)) => {
     const r = gen.current
     if (m === 'code') return r.shuffle(pool(set)).slice(0, 3).join('\n\n')
+    if (m === 'notes') return notesText(notes, set, r, count * 6)
     return testWords(m, r, count)
-  }, [pool, codeSet])
+  }, [pool, setOf, notes])
 
   // Auto: about a minute of text at your recent average speed (30 WPM until you have tests).
   const recentWpm = (() => {
     const last = p.typing.tests.slice(0, 5)
     return last.length ? last.reduce((sum, t) => sum + t.wpm, 0) / last.length : 30
   })()
-  const autoText = useCallback((m: Mode, set = codeSet) => {
+  const autoText = useCallback((m: Mode, set = setOf(m)) => {
     const chars = Math.round((recentWpm * 5 * AUTO_SECONDS) / 60)
+    if (m === 'notes') return notesText(notes, set, gen.current, Math.max(150, chars))
     if (m !== 'code') return testWords(m, gen.current, Math.min(150, Math.max(25, Math.round(chars / 5))))
     const snippets = gen.current.shuffle(pool(set))
     const picked: string[] = []
@@ -62,12 +69,13 @@ export function TypingTest({ code }: { code: { id: string; title: string; snippe
       if (picked.join('\n\n').length >= chars) break
     }
     return picked.join('\n\n')
-  }, [recentWpm, pool, codeSet])
+  }, [recentWpm, pool, setOf, notes])
 
-  const reset = useCallback((m: Mode = mode, d: Duration = duration, seed = Date.now(), set = codeSet) => {
+  const reset = useCallback((m: Mode = mode, d: Duration = duration, seed = Date.now(), set = setOf(m)) => {
     gen.current = rng(seed)
     setSession(createSession(d === 'auto' ? autoText(m, set) : more(m, 60, set), m === 'code'))
-    setCodeSet(set)
+    if (m === 'code') setCodeSet(set)
+    if (m === 'notes') setNoteSet(set)
     setSamples([])
     setNow(0)
     saved.current = false
@@ -75,7 +83,7 @@ export function TypingTest({ code }: { code: { id: string; title: string; snippe
     sampled.current = 0
     setDuration(d)
     setMode(m)
-  }, [mode, duration, more, autoText, codeSet])
+  }, [mode, duration, more, autoText, setOf])
 
   const started = session.startedAt !== null
   const done = session.endedAt !== null
@@ -166,6 +174,15 @@ export function TypingTest({ code }: { code: { id: string; title: string; snippe
             <option value="all">All technologies</option>
             {code.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
           </select>
+        )}
+        {mode === 'notes' && (
+          <>
+            <select aria-label="Notes from" value={noteSet} onChange={(e) => reset('notes', duration, Date.now(), e.target.value)} className="h-10 rounded-xl border border-line bg-surface px-2 text-xs text-text">
+              <option value="all">All technologies</option>
+              {notes.map((n) => <option key={n.id} value={n.id}>{n.title}</option>)}
+            </select>
+            {noteSet !== 'all' && <Link href={`/notes/${noteSet}`} className="text-xs text-accent hover:underline">Read the {notes.find((n) => n.id === noteSet)?.title} notes →</Link>}
+          </>
         )}
         <label className="flex items-center gap-1.5 text-xs text-muted"><input type="checkbox" checked={showKeyboard} onChange={(e) => setShowKeyboard(e.target.checked)} className="accent-[var(--accent)]" /> Keyboard</label>
       </div>

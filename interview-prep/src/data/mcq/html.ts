@@ -1,0 +1,122 @@
+import type { McqSet } from './types'
+
+export const html: McqSet = {
+  id: 'html',
+  questions: [
+    {
+      id: 'doctype',
+      q: 'What does `<!DOCTYPE html>` at the top of a page do?',
+      choices: [
+        'Makes the browser use standards mode, not quirks mode',
+        'Downloads the HTML5 parser before the page is read',
+        'Declares the character encoding used for the whole page',
+        'Is required before any JavaScript on the page can run',
+      ],
+      explain: 'Without a doctype the browser falls back to ==quirks mode==, emulating old rendering bugs (for example the box model). The encoding is set by `<meta charset="utf-8">`.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'semantic',
+      q: 'Which element is the best choice for the main site navigation links?',
+      choices: ['`<nav>`', '`<div class="nav">`', '`<menu>`', '`<section>`'],
+      explain: '`<nav>` is a landmark: screen readers can jump straight to it. A `<div>` carries no meaning, and `<section>` is for a themed group of content with a heading.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'defer-async',
+      q: 'How does `<script defer>` differ from `<script async>`?',
+      choices: [
+        '`defer` keeps document order and waits for parsing; `async` runs on arrival',
+        '`async` keeps document order and waits for parsing; `defer` runs on arrival',
+        'Both pause the HTML parser until the script has downloaded and run',
+        '`defer` only applies to inline scripts and `async` only to external ones',
+      ],
+      explain: 'Both download in parallel without blocking the parser. `defer` scripts run ==in document order== just before `DOMContentLoaded`; `async` scripts run whenever they arrive, so order is not guaranteed. Neither applies to inline scripts.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'alt',
+      q: 'What `alt` should a purely decorative image have?',
+      choices: ['An empty `alt=""`', 'No `alt` attribute at all', '`alt="image"`', 'The file name'],
+      explain: 'An empty `alt=""` tells screen readers to skip the image. Leaving `alt` out makes many readers announce the file name instead.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'label',
+      q: 'Which correctly links a label to its input?',
+      code: { lang: 'html', code: '<label ??? >Email</label>\n<input id="email" type="email">' },
+      choices: ['`for="email"`', '`name="email"`', '`href="#email"`', '`aria-label="email"`'],
+      explain: 'A label\'s `for` attribute must match the input\'s `id`. Clicking the label then focuses the input, and screen readers announce "Email".',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'button-type',
+      q: 'What is the default `type` of a `<button>` inside a `<form>`?',
+      choices: ['`submit`', '`button`', '`reset`', 'It has no default'],
+      explain: 'A button in a form submits it unless you write `type="button"`. This is a classic cause of "my page reloads when I click the button".',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'block-inline',
+      q: 'Which of these elements is inline by default?',
+      choices: ['`<span>`', '`<div>`', '`<p>`', '`<section>`'],
+      explain: '`<span>`, `<a>`, `<strong>` and `<img>` are inline; `<div>`, `<p>`, headings and sectioning elements are block-level.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'data-attr',
+      q: 'How do you read `<div data-user-id="7">` in JavaScript?',
+      choices: ['`el.dataset.userId`', '`el.dataset["user-id"]`', '`el.data.userId`', '`el.userId`'],
+      explain: '`dataset` converts kebab-case attribute names to camelCase, so `data-user-id` becomes `dataset.userId`. The value is always a string (`"7"`).',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'aria-first-rule',
+      q: 'What is the "first rule of ARIA"?',
+      choices: [
+        'Prefer a native element over adding ARIA',
+        'Every interactive element needs an explicit `role` attribute',
+        'Always add `aria-label`, even when there is visible text',
+        'ARIA attributes add keyboard support',
+      ],
+      explain: 'A real `<button>` gives you focus, Enter/Space handling and the role for free. `<div role="button">` needs all of that added by hand, and ARIA never adds behaviour.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'srcset',
+      q: 'What is `srcset` on an `<img>` for?',
+      choices: [
+        'Listing image candidates so the browser picks the best size',
+        'Providing a fallback image in case the main one fails to load',
+        'Lazy-loading the image until it scrolls near the viewport',
+        'Setting the rendered CSS width and height of the image',
+      ],
+      explain: '`srcset` (with `sizes`) lists candidates by width or pixel density; the browser picks the smallest suitable file. Lazy loading is `loading="lazy"`.',
+      difficulty: 'Medium',
+    },
+    {
+      id: 'viewport',
+      q: 'Why do mobile pages need `<meta name="viewport" content="width=device-width, initial-scale=1">`?',
+      choices: [
+        'Otherwise phones lay the page out at desktop width and zoom out',
+        'It enables touch events such as `touchstart` on mobile browsers',
+        'Without it, the browser ignores every media query in the stylesheet',
+        'It stops the page from scrolling horizontally on small screens',
+      ],
+      explain: 'Without it the browser assumes a desktop-width "virtual viewport", so your responsive breakpoints never match on a phone.',
+      difficulty: 'Easy',
+    },
+    {
+      id: 'heading-order',
+      q: 'Which heading structure is correct for accessibility?',
+      choices: [
+        'One `<h1>`, then nested levels without skipping',
+        'Choose heading levels by the font size you want them to have',
+        'Use `<h1>` for every section title',
+        'Headings do not matter for accessibility if the text is bold',
+      ],
+      explain: 'Screen-reader users navigate by headings, so levels should describe the outline. Use CSS for size, not the heading level.',
+      difficulty: 'Easy',
+    },
+  ],
+}

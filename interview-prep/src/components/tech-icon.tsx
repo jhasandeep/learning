@@ -9,7 +9,7 @@ type Spec = { logo: string } | { lucide: LucideIcon }
 
 /** Compiler language id → logo. */
 const LANGS: Record<string, string> = {
-  python: 'python', r: 'r', sql: 'sqlite', html: 'html5', java: 'java', kotlin: 'kotlin', c: 'c', cpp: 'cplusplus',
+  python: 'python', r: 'r', sql: 'sqlite', mongodb: 'mongodb', html: 'html5', java: 'java', kotlin: 'kotlin', c: 'c', cpp: 'cplusplus',
   csharp: 'csharp', javascript: 'javascript', typescript: 'typescript', go: 'go', rust: 'rust', scala: 'scala',
   dart: 'dart', ruby: 'ruby', php: 'php', swift: 'swift',
 }
@@ -20,12 +20,12 @@ const TOPICS: Record<string, Spec> = {
   react: { logo: 'react' }, nextjs: { logo: 'nextjs' }, nodejs: { logo: 'nodejs' }, express: { logo: 'express' },
   security: { lucide: ShieldCheck }, sql: { logo: 'postgresql' }, mongodb: { logo: 'mongodb' }, git: { logo: 'git' },
   docker: { logo: 'docker' }, testing: { logo: 'jest' }, 'system-design': { lucide: Network }, dsa: { lucide: Binary },
-  nestjs: { logo: 'nestjs' }, python: { logo: 'python' },
+  nestjs: { logo: 'nestjs' }, python: { logo: 'python' }, django: { logo: 'django' }, fastapi: { logo: 'fastapi' },
   'company-coding': { lucide: Briefcase }, 'output-event-loop': { logo: 'javascript' }, 'output-python': { logo: 'python' },
 }
 
 /** Logos drawn in black: inverted on dark backgrounds (globals.css .tech-ink). */
-const INK = new Set(['rust', 'nextjs', 'express'])
+const INK = new Set(['rust', 'nextjs', 'express', 'django'])
 
 export type TechKind = 'lang' | 'topic'
 
