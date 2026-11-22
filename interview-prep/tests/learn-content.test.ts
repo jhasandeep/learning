@@ -3,7 +3,7 @@ import { parseHTML } from 'linkedom'
 import initSqlJs from 'sql.js'
 import { describe, expect, it } from 'vitest'
 import { LEARN_TRACKS } from '@/data/learn'
-import { QUESTION_SETS } from '@/data/questions'
+import { TECH_SETS } from '@/data/questions'
 import { runStep, type HarnessEnv } from '@/lib/learn/harness'
 
 const env: HarnessEnv = { parseHTML: (h) => parseHTML(h) as unknown as { document: Document }, sql: () => initSqlJs() as never }
@@ -12,7 +12,7 @@ const prose = (t: string) => t.replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]+`
 
 describe('learn tracks', () => {
   it('has one track per technology, and registers every file', () => {
-    expect(LEARN_TRACKS.map((t) => t.id).sort()).toEqual(QUESTION_SETS.map((s) => s.id).sort())
+    expect(LEARN_TRACKS.map((t) => t.id).sort()).toEqual(TECH_SETS.map((s) => s.id).sort())
     expect(LEARN_TRACKS.map((t) => t.id).sort()).toEqual(files)
   })
 

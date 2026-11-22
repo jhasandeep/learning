@@ -4,7 +4,7 @@ import initSqlJs from 'sql.js'
 import { transform } from 'sucrase'
 import { describe, expect, it } from 'vitest'
 import { MCQ_SETS } from '@/data/mcq'
-import { QUESTION_SETS } from '@/data/questions'
+import { TECH_SETS } from '@/data/questions'
 import { fixedCode, SPOT_SETS, type SpotBug } from '@/data/spot'
 import { diffLines } from '@/lib/diff'
 import { readProgress, recordMcqAnswer, recordQuiz, recordSpot, spotXp } from '@/lib/progress'
@@ -27,7 +27,7 @@ const parse = (code: string, lang: string) => {
 
 describe('multiple-choice quizzes', () => {
   it('has one set per technology, and registers every file', () => {
-    expect(MCQ_SETS.map((s) => s.id).sort()).toEqual(QUESTION_SETS.map((s) => s.id).sort())
+    expect(MCQ_SETS.map((s) => s.id).sort()).toEqual(TECH_SETS.map((s) => s.id).sort())
     expect(MCQ_SETS.map((s) => s.id).sort()).toEqual(files('src/data/mcq'))
   })
 
@@ -82,7 +82,7 @@ function touchedLines(before: string, after: string): Set<number> {
 
 describe('find the mistake', () => {
   it('has one set per technology, and registers every file', () => {
-    expect(SPOT_SETS.map((s) => s.id).sort()).toEqual(QUESTION_SETS.map((s) => s.id).sort())
+    expect(SPOT_SETS.map((s) => s.id).sort()).toEqual(TECH_SETS.map((s) => s.id).sort())
     expect(SPOT_SETS.map((s) => s.id).sort()).toEqual(files('src/data/spot'))
   })
 

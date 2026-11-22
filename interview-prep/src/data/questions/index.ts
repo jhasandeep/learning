@@ -60,6 +60,9 @@ export const QUESTION_SETS: QuestionTech[] = [
   { ...outputPython, category: 'Company Prep', color: '#3776ab', badge: 'PY' },
 ]
 
+/** The full-stack technologies only (Learn, Quiz and Find-the-mistake have one entry per technology). */
+export const TECH_SETS = QUESTION_SETS.filter((s) => s.category !== 'Company Prep')
+
 export const QUESTION_SETS_BY_ID: Record<string, QuestionTech> = Object.fromEntries(QUESTION_SETS.map((s) => [s.id, s]))
 
 export const QUESTION_CATEGORIES: QuestionCategory[] = ['Frontend', 'Backend', 'Databases', 'DevOps & Tools', 'Fundamentals', 'Company Prep']
