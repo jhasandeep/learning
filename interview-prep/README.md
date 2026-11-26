@@ -61,7 +61,7 @@ Node 22.18 or newer is needed, because `build:bank` runs a TypeScript file direc
 
 The WebAssembly runtimes, the whiteboard's Excalidraw fonts and the pdf.js worker are copied from `node_modules` into `public/vendor/` by `scripts/vendor-runtimes.mjs` (on install, dev and build), so no third-party CDN is used. The first Python run downloads about 13 MB and the first R run about 45 MB; after that the browser cache serves them.
 
-Limits: 64 KB of code or input, 64 KB of output, a compile timeout of 20 s and a run timeout of 6 s on the server (5 s for JS, 15 s for Python and 20 s for R in the browser), and 30 runs per minute per IP.
+Limits: 64 KB of code or input, 64 KB of output, a compile timeout of 20 s and a run timeout of 6 s on the server (10 s for JavaScript and TypeScript, 15 s for Python and 20 s for R in the browser; JavaScript and Python keep running until pending `setTimeout` / `setInterval` timers, asyncio tasks and `threading.Timer` callbacks have fired, like Node and CPython), and 30 runs per minute per IP.
 
 ### Running compiled languages
 

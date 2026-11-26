@@ -15,10 +15,72 @@ function writer(stream) {
   return { write: (buf) => { out(stream, decoder.decode(buf, { stream: true })); return buf.length } }
 }
 
+// Runs once after Pyodide loads. Tracks callbacks scheduled on the event loop
+// so a run only ends once they have all fired (like CPython, which keeps
+// running until pending timers and threads finish). Without it, output from
+// fire-and-forget tasks, loop.call_later() and threading.Timer was lost.
+// threading.Timer is rebuilt on the event loop because there are no threads.
+const PRELUDE = `
+import asyncio, threading
+from pyodide.webloop import WebLoop
+
+_prep_pending = set()
+_orig_call_later = WebLoop.call_later
+
+def _prep_call_later(self, delay, callback, *args, context=None):
+    box = []
+    def run(*a):
+        _prep_pending.discard(box[0])
+        return callback(*a)
+    handle = _orig_call_later(self, delay, run, *args, context=context)
+    box.append(handle)
+    _prep_pending.add(handle)
+    return handle
+
+WebLoop.call_later = _prep_call_later
+
+class _PrepTimer(threading.Timer):
+    """threading.Timer on the event loop: the browser has no threads."""
+    def start(self):
+        self._prep_handle = asyncio.get_event_loop().call_later(max(0, self.interval), self.run)
+    def run(self):
+        if not self.finished.is_set():
+            self.function(*self.args, **self.kwargs)
+        self.finished.set()
+    def cancel(self):
+        self.finished.set()
+        handle = getattr(self, "_prep_handle", None)
+        if handle is not None:
+            handle.cancel()
+            _prep_pending.discard(handle)
+    def is_alive(self):
+        return hasattr(self, "_prep_handle") and not self.finished.is_set()
+    def join(self, timeout=None):
+        pass
+
+threading.Timer = _PrepTimer
+
+def _prep_reset():
+    for h in list(_prep_pending):
+        h.cancel()
+    _prep_pending.clear()
+
+async def _prep_drain():
+    """Wait until no scheduled callbacks or unfinished tasks are left."""
+    me = asyncio.current_task()
+    while True:
+        live = [h for h in _prep_pending if not h.cancelled()]
+        tasks = [t for t in asyncio.all_tasks() if t is not me and not t.done()]
+        if not live and not tasks:
+            return
+        await asyncio.sleep(0.005)
+`
+
 async function load() {
   const py = await loadPyodide({ indexURL: '/vendor/pyodide/' })
   py.setStdout(writer('stdout'))
   py.setStderr(writer('stderr'))
+  py.runPython(PRELUDE)
   return py
 }
 
@@ -71,7 +133,10 @@ self.onmessage = async (e) => {
   try {
     // Fresh globals for every run, like starting a new interpreter.
     const globals = py.pyimport('builtins').dict()
+    py.globals.get('_prep_reset')()
     await py.runPythonAsync(code, { globals, filename: 'main.py' })
+    // Keep running while timers, call_later() callbacks or tasks are pending.
+    await py.runPythonAsync('await _prep_drain()')
   } catch (err) {
     const message = err?.message ?? String(err)
     if (!/SystemExit: 0\b|SystemExit\s*$/.test(message)) {

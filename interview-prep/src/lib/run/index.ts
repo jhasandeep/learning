@@ -7,7 +7,7 @@ import { WorkerRunner } from './worker-runner'
 
 // One entry point for the compiler UI: picks the right engine per language.
 
-const js = new WorkerRunner(() => new Worker(new URL('./js.worker.ts', import.meta.url), { type: 'module' }), 5_000)
+const js = new WorkerRunner(() => new Worker(new URL('./js.worker.ts', import.meta.url), { type: 'module' }), 10_000)
 // Python's worker is a static file in public/runners (see the note there).
 const PYTHON_WORKER = '/runners/python-worker.mjs'
 const python = new WorkerRunner(() => new Worker(PYTHON_WORKER, { type: 'module' }), 15_000)
